@@ -1,0 +1,369 @@
+/* ===========================
+   Mineiro Barbershop — Styles
+   =========================== */
+
+/* ====== Tokens ====== */
+:root{
+  --bg:#0f0f10;
+  --panel:#141416; --panel-2:#101113;
+  --text:#f5f6f9;  --muted:#a7aab3; --line:#22242a;
+  --gold:#d3a85b;  --gold-2:#b88f49; --gold-rgb:211,168,91;
+  --danger:#ff4d4f;
+  --shadow:0 18px 50px rgba(0,0,0,.35);
+
+  /* motion */
+  --dur:360ms;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+/* ====== Base ====== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:#0b0c0e; color:var(--text);
+  font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+button{-webkit-tap-highlight-color:transparent}
+.hide-text{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ====== App canvas ====== */
+.app{
+  max-width:428px; min-height:100svh; margin:0 auto;
+  display:grid; grid-template-rows:auto 1fr auto;
+  background:var(--bg); box-shadow:0 40px 90px rgba(0,0,0,.45);
+}
+.app--padded{ padding:12px 12px 84px }
+.app:not(.app--padded){ padding:0 }
+
+/* ====== Header (Home) ====== */
+.header{
+  display:flex; align-items:center; gap:8px; padding:6px 0 10px;
+}
+.header .loc{
+  display:flex; align-items:center; gap:8px;
+  background:var(--panel-2); border:1px solid var(--line);
+  border-radius:12px; padding:8px 10px; color:#e6e7ea; flex:1; min-width:0;
+  font-size:13px;
+}
+.header .actions{display:flex; gap:10px}
+.icon-btn{
+  width:36px;height:36px;border-radius:12px;border:1px solid var(--line);
+  background:var(--panel-2); display:grid; place-items:center; color:#d8d9df;
+}
+
+/* ====== Topbar (Serviços/Outras) ====== */
+.topbar{
+  display:flex; align-items:center; gap:10px;
+  padding:14px; border-bottom:1px solid var(--line);
+}
+.back{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
+  background:var(--panel); display:grid; place-items:center; color:#d8d9df;
+}
+.topbar h1{margin:0; font:600 16px/1 Poppins; letter-spacing:.02em}
+
+/* ====== Hero (Home) ====== */
+.hero{
+  position:relative; margin:6px 0 14px; overflow:hidden;
+  border-radius:16px; border:1px solid var(--line); background:#000;
+  box-shadow:var(--shadow);
+}
+.hero::before{
+  content:""; position:absolute; inset:0; background:
+    linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.60) 78%),
+    url("../img/hero-barber.png") center/cover no-repeat;
+  filter:saturate(.9);
+}
+.hero .copy{
+  position:absolute; top:12px; left:12px; right:12px;
+  text-transform:uppercase; letter-spacing:.06em; will-change:transform,opacity;
+}
+.hero h2{margin:0 0 6px; font:700 22px/1.15 Poppins; letter-spacing:.01em}
+.hero p{margin:0; font-size:10px; color:#d3d4d9; line-height:1.4; opacity:.9}
+
+/* ====== Categories (Home) ====== */
+.cat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px}
+.cat{
+  background:var(--panel-2); border:1px solid var(--line); border-radius:14px;
+  padding:10px 6px; display:grid; justify-items:center; gap:8px;
+}
+.cat .ico{
+  width:52px;height:52px;border-radius:14px; display:grid; place-items:center;
+  background:#1a1b1f; border:1px solid #2a2c33;
+}
+.cat svg{width:22px;height:22px;color:#f1f2f6}
+.cat small{font-size:11px;color:#c7c9d0}
+
+/* ====== Section head (Home) ====== */
+.sec-head{
+  display:flex;justify-content:space-between;align-items:center;margin:16px 2px 10px
+}
+.sec-head h3{margin:0;font:600 14px/1 Poppins}
+.sec-head a{font:600 12px/1 Poppins;color:var(--gold);text-decoration:none}
+
+/* ====== Recommended card (Home) ====== */
+.card{
+  position:relative; height:180px; border-radius:16px; overflow:hidden;
+  background:#0c0d0f; border:1px solid var(--line); box-shadow:var(--shadow);
+}
+.card::before{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.65) 70%),
+    url("../img/reco1.png") center/cover no-repeat;
+}
+.rate{
+  position:absolute; top:8px; right:8px; z-index:2;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(20,20,22,.7); border:1px solid rgba(255,255,255,.12);
+  padding:5px 9px; border-radius:999px; font-weight:600;
+}
+.rate svg{color:#f7c948; width:16px; height:16px}
+.card .meta{ position:absolute; left:12px; right:12px; bottom:12px; z-index:2 }
+.card .name{margin:0 0 4px; font:600 15px/1 Poppins}
+.card .addr{margin:0; font-size:12px; color:#cdd0d8}
+
+/* ====== Bottom navbar (Home) ====== */
+.navbar{
+  position:fixed; left:50%; transform:translateX(-50%);
+  bottom:8px; width:min(428px,94vw);
+  display:grid; grid-template-columns:repeat(4,1fr);
+  background:var(--panel-2); border:1px solid var(--line); border-radius:16px;
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.navbar a{
+  color:#aeb2bb; text-decoration:none; text-align:center; padding:8px 2px;
+  display:grid; gap:6px; place-items:center; font-size:10px; position:relative;
+}
+.navbar a svg{width:22px;height:22px}
+.navbar a.active{ color:var(--gold) }
+.navbar a.active::before{
+  content:""; position:absolute; top:6px; left:50%; transform:translateX(-50%);
+  width:36px; height:36px; border-radius:12px; background:rgba(211,168,91,.12); z-index:-1;
+}
+
+/* ============================================================= */
+/* ======================= Services (lista) ==================== */
+/* chips */
+.filters{padding:10px 14px 0;display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.filters::after{content:"";flex:0 0 14px}
+.chip{
+  flex:0 0 auto;height:36px;padding:0 14px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#1b1c20;border:1px solid var(--line);color:#e6e7ea;
+  font:600 12px/1 Poppins;white-space:nowrap;
+  transition:transform .12s ease,background .2s,border-color .2s,color .2s;
+}
+.chip:hover{transform:translateY(-1px)}
+.chip.is-on{background:rgba(var(--gold-rgb),.14);border-color:rgba(var(--gold-rgb),.5);color:var(--gold)}
+
+/* list + card */
+.list{padding:12px 14px 14px;display:grid;gap:14px}
+.item{
+  display:grid; grid-template-columns:72px 1fr auto; align-items:center; gap:14px;
+  padding:14px;border-radius:16px;border:1px solid #1f2026;background:var(--panel);
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+/* thumb */
+.thumb{
+  width:72px;height:72px;border-radius:12px;overflow:hidden; right: 45px;
+  background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;position:relative;z-index:0;flex-shrink:0
+}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.no-img{background:#0d0e11 url("../img/placeholder-service.svg") center/28px no-repeat}
+
+/* textos */
+.meta{display:grid;align-content:center;gap:6px;min-width:0;position:relative;z-index:1}
+.meta .name{margin:0;font:600 14px/1.2 Poppins}
+.meta .desc{margin:0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* preço */
+.price-badge{
+  display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:10px;
+  background:rgba(var(--gold-rgb),.12);border:1px solid rgba(var(--gold-rgb),.45);
+  color:#f5f6f9;font:600 12px/1 Poppins;
+}
+
+/* botão escolher */
+.choose{
+  min-width:104px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.14); background:#1b1c20; color:#e6e7ea;
+  padding:0 12px; border-radius:999px; font:600 12px/1 Poppins; cursor:pointer;
+  transition:transform .12s ease, background .2s, border-color .2s, color .2s;
+}
+.choose:hover{ transform:translateY(-1px) }
+.choose.is-on{ background:rgba(211,168,91,.14); border-color:rgba(211,168,91,.5); color:var(--gold) }
+.choose svg{ width:14px; height:14px; margin-right:6px; display:none }
+.choose.is-on svg{ display:inline }
+
+/* barra de ações inferior (Serviços) */
+.cta-bar{
+  position:sticky; bottom:0; padding:12px 14px 16px;
+  background:linear-gradient(180deg,rgba(15,16,18,0),var(--bg) 26%,var(--bg) 100%);
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  border-top:1px solid var(--line);
+}
+.btn{
+  height:46px; border-radius:12px; border:1px solid var(--line);
+  background:var(--panel-2); color:#eaecef; font:600 14px/1 Poppins; cursor:pointer;
+}
+.btn-primary{
+  border-color:#7b6335; background:linear-gradient(180deg,var(--gold),var(--gold-2));
+  color:#111; text-shadow:0 1px 0 rgba(255,255,255,.25);
+}
+.btn-primary:disabled{ filter:grayscale(.6) brightness(.8); cursor:not-allowed; opacity:.7 }
+
+/* ============================================================= */
+/* ====================== Profissionais ======================== */
+.mode-grid{
+  padding:12px 14px 6px;
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+.mode-card{
+  appearance:none; -webkit-appearance:none;
+  min-height:150px; padding:16px 14px;
+  border-radius:14px; border:1px solid var(--line);
+  background:var(--panel) !important; color:var(--text);
+  display:grid; align-content:center; justify-items:center; row-gap:8px; text-align:center;
+}
+.mode-card.is-on{ border-color:rgba(var(--gold-rgb),.55); box-shadow:0 0 0 1px rgba(var(--gold-rgb),.25) inset }
+.mode-ico{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  background:#1b1c20;border:1px solid #2a2c33;margin-bottom:6px
+}
+.mode-title{ font:600 13px/1 Poppins } .mode-sub{ font-size:12px; color:var(--muted) }
+
+.pro-grid{
+  padding:6px 14px 90px;
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+.pro-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:14px; display:grid; justify-items:center; row-gap:10px; text-align:center;
+}
+.pro-card.is-on{ border-color:rgba(var(--gold-rgb),.55); box-shadow:0 0 0 1px rgba(var(--gold-rgb),.25) inset }
+.avatar{ width:68px;height:68px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.1) }
+.badge{ position:relative; top:-10px; background:#1b1c20; border:1px solid rgba(255,255,255,.12); color:#f7c948; font-weight:700; font-size:12px; padding:4px 8px; border-radius:999px }
+.pro-name{ margin:0; font:600 13px/1 Poppins } .pro-role{ margin:0; color:var(--muted); font-size:12px }
+
+/* rodapé com dois botões (profissionais) */
+.pro-bar{
+  position:sticky; bottom:0; padding:12px 14px 16px;
+  background:linear-gradient(180deg,rgba(15,16,18,0),var(--bg) 26%,var(--bg) 100%);
+  display:grid; grid-template-columns:1fr auto auto; gap:10px; border-top:1px solid var(--line);
+}
+.summary{ align-self:center; color:#cfd0d4; font-size:14px }
+
+/* ============================================================= */
+/* ====================== Minhas reservas ====================== */
+/* Use <main class="app app--padded reservas-page"> nesta tela */
+.reservas-page .res-list{ display:grid; gap:14px }
+
+/* Card: thumb | conteúdo | ações (sem sobreposição) */
+.reservas-page .res-card{
+  display:grid;
+  grid-template-columns:72px 1fr auto;
+  align-items:start;
+  gap:12px;
+  padding:14px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
+/* Thumb fixa */
+.reservas-page .res-card .thumb{
+  width:72px;height:72px;border-radius:12px;overflow:hidden;
+  background:#0c0d0f;border:1px solid var(--line);
+}
+.reservas-page .res-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+/* Qualquer overlay dentro da thumb vira estático */
+.reservas-page .res-card .thumb > *[style*="position"]{ position:static !important; margin-top:8px !important }
+
+/* Conteúdo */
+.reservas-page .res-card .main{ min-width:0 }
+.reservas-page .res-card .title{ margin:0 0 4px; font:600 14px/1 Poppins }
+.reservas-page .res-card .meta{
+  margin:0; color:var(--muted); font-size:12px; line-height:1.5;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Pílulas em linha própria */
+.reservas-page .res-card .pills{
+  grid-column:2 / -1; display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
+}
+.reservas-page .res-card .pill{
+  padding:6px 10px; border-radius:999px;
+  border:1px solid var(--line); background:#1b1c20; color:#e6e7ea;
+  font:600 11px/1 Poppins;
+}
+
+/* Ações à direita */
+.reservas-page .res-card .actions{ display:flex; flex-direction:column; gap:8px; align-items:flex-end }
+.reservas-page .res-card .btn{
+  height:36px; padding:0 12px; border-radius:10px;
+  border:1px solid var(--line); background:#1b1c20; color:#e6e7ea;
+  font:600 12px/1 Poppins; white-space:nowrap;
+}
+.reservas-page .res-card .btn--warn{ border-color:#7b3b3c; background:#2a1718; color:#ffb3b4 }
+.reservas-page .res-card .btn--gold{
+  border-color:#7b6335; background:linear-gradient(180deg,var(--gold),var(--gold-2)); color:#111;
+}
+
+/* Status */
+.reservas-page .status{
+  display:inline-grid; place-items:center; height:24px; padding:0 10px;
+  border-radius:999px; font:700 11px/1 Poppins; letter-spacing:.04em;
+  border:1px solid rgba(255,255,255,.12); color:#cfd0d4; background:#111214;
+}
+
+/* Mobile: ações viram linha */
+@media (max-width:380px){
+  .reservas-page .res-card{ grid-template-columns:56px 1fr }
+  .reservas-page .res-card .actions{
+    grid-column:2 / -1; flex-direction:row; justify-content:flex-start;
+  }
+}
+
+/* ============================================================= */
+/* ==================== Motion & microinterações =============== */
+.reveal{
+  opacity:0; transform:translateY(14px) scale(.985);
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  will-change:transform,opacity;
+}
+.reveal.is-in{ opacity:1; transform:none }
+.reveal[data-stagger]{ transition-delay:calc(var(--i,0) * 50ms) }
+
+.ripple{ position:relative; overflow:hidden; contain:paint }
+.ripple > .r{
+  position:absolute; border-radius:50%;
+  transform:translate(-50%,-50%) scale(0);
+  background:rgba(var(--gold-rgb), .25);
+  width:24px; height:24px; pointer-events:none; opacity:.9;
+  animation:ripple-kf 600ms ease-out forwards;
+}
+@keyframes ripple-kf{ to{ transform:translate(-50%,-50%) scale(3.2); opacity:0 } }
+
+.page-transition{
+  position:fixed; inset:0; background:#0b0c0e;
+  pointer-events:none; opacity:0; transition:opacity 260ms var(--ease);
+  z-index:9999;
+}
+.page-transition.is-on{ opacity:1 }
+
+/* ====== Responsivo geral ====== */
+@media (max-width:420px){
+  .meta .desc{ display:none } /* compacta a lista de serviços */
+}
+
+/* Acessibilidade: reduz animações */
+@media (prefers-reduced-motion: reduce){
+  .reveal{ transition:none !important; transform:none !important; opacity:1 !important }
+  .ripple > .r{ display:none !important }
+  .page-transition{ transition:none !important }
+}

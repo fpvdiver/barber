@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendar horário — Mineiro Barbershop</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* ====== Específicos da página de agendamento ====== */
+    .wrap{padding:14px; padding-bottom:96px; max-width:428px; margin:0 0}
+    .panel{
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:14px; padding:14px; margin-bottom:14px;
+    }
+    .panel h2{margin:0 0 10px; font:600 14px/1 Poppins,system-ui; letter-spacing:.02em}
+
+    /* Cabeçalho do calendário */
+    .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+    .cal-month{font:600 14px/1 Poppins}
+    .cal-nav{display:flex; gap:8px}
+    .cal-btn{
+      width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
+      background:var(--panel-2); color:#e9eaef; display:grid; place-items:center; cursor:pointer;
+    }
+
+    /* grade do calendário */
+    .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+    .dow{font-size:11px; color:var(--muted); text-align:center; padding:4px 0}
+    .day{
+      height:38px; display:grid; place-items:center;
+      border:1px solid var(--line); border-radius:10px; background:#111214; color:#e9eaef;
+      cursor:pointer; font:600 13px/1 Poppins;
+      transition:transform .12s ease, border-color .2s, background .2s, color .2s;
+    }
+    .day:hover{ transform:translateY(-1px) }
+    .day.out{ opacity:.35 }
+    .day.past{ opacity:.25; pointer-events:none }
+    .day.today{ border-color:rgba(var(--gold-rgb),.35) }
+    .day.sel{ background:rgba(var(--gold-rgb),.15); border-color:rgba(var(--gold-rgb),.55); color:var(--gold) }
+
+    /* horários */
+    .slots{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px }
+    @media (max-width:380px){ .slots{ grid-template-columns:repeat(2,1fr) } }
+    .slot{
+      height:42px; display:grid; place-items:center; border-radius:12px;
+      border:1px solid var(--line); background:#1b1c20; color:#e6e7ea; cursor:pointer;
+      font:600 13px/1 Poppins; transition:transform .12s ease, border-color .2s, background .2s, color .2s;
+    }
+    .slot:hover{ transform:translateY(-1px) }
+    .slot.sel{ background:linear-gradient(180deg,var(--gold),var(--gold-2)); color:#111; border-color:#7b6335 }
+    .slot.dis{ opacity:.35; pointer-events:none }
+
+    /* barra inferior */
+    .book-bar{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:10px; width:min(428px,94vw);
+      display:grid; grid-template-columns:1fr auto; gap:10px;
+      background:var(--panel-2); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
+      box-shadow:var(--shadow);
+    }
+    .sum{ align-self:center; color:#cfd0d4; font-size:14px }
+  </style>
+</head>
+<body>
+
+<main class="app" aria-labelledby="page-title">
+  <!-- Topbar -->
+  <header class="topbar">
+    <a class="back ripple" href="professionals.html" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    <h1 id="page-title">Agendar horário</h1>
+  </header>
+
+  <div class="wrap">
+    <!-- Calendário -->
+    <section class="panel" aria-label="Selecionar data">
+      <h2>Escolha a data</h2>
+      <div class="cal-head">
+        <button class="cal-btn ripple" type="button" data-cal="prev" aria-label="Mês anterior">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="cal-month" id="calLabel">—</div>
+        <button class="cal-btn ripple" type="button" data-cal="next" aria-label="Próximo mês">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <div class="cal-grid" id="calGrid" role="grid" aria-labelledby="calLabel">
+        <!-- DOW -->
+      </div>
+    </section>
+
+    <!-- Horários -->
+    <section class="panel" aria-label="Selecionar horário">
+      <h2>Escolha o horário</h2>
+      <div class="slots" id="slots">
+        <!-- preenchido via JS -->
+      </div>
+    </section>
+  </div>
+
+  <!-- Rodapé -->
+  <div class="book-bar">
+    <div class="sum" id="summary">R$ 0,00 • 0 serviço • 0 min</div>
+    <button class="btn btn-primary ripple" id="btnSubmit" disabled>Confirmar</button>
+  </div>
+</main>
+
+<script>
+/* ================== Utilidades / Estado prévio ================== */
+const BRL = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
+const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
+
+const required   = new Set(JSON.parse(getStore('svc.selected') || '[]'));   // serviços selecionados
+const prosChosen = new Set(JSON.parse(getStore('selectedPros') || '[]'));   // ids de profissionais
+const proMode    = getStore('proMode') || 'any';
+const total      = Number(getStore('svc.total') || 0);
+const minutes    = Number(getStore('svc.minutes') || 0);
+const count      = Number(getStore('svc.count') || 0);
+
+document.getElementById('summary').textContent =
+  `${BRL(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
+
+/* ================== Ripple (leve) ================== */
+document.addEventListener('click',(e)=>{
+  const btn=e.target.closest('.ripple'); if(!btn) return;
+  const r=document.createElement('span'); r.className='r';
+  const b=btn.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+  btn.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+},{passive:true});
+
+/* ================== Calendário ================== */
+const cal = (() => {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calLabel');
+  const state = {
+    view: new Date(),         // mês/ano em exibição
+    selected: null            // Date do dia escolhido
+  };
+
+  const DOW = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']; // semana começando segunda
+  function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
+
+  function render(){
+    grid.innerHTML = '';
+    // cabeçalho da semana
+    DOW.forEach(w => {
+      const el = document.createElement('div');
+      el.className = 'dow';
+      el.textContent = w;
+      grid.appendChild(el);
+    });
+
+    const y = state.view.getFullYear();
+    const m = state.view.getMonth();
+    label.textContent = new Intl.DateTimeFormat('pt-BR', {month:'long', year:'numeric'}).format(state.view);
+
+    const first = startOfMonth(state.view);
+    const last  = endOfMonth(state.view);
+
+    // deslocamento para começar na segunda
+    const offset = (first.getDay() + 6) % 7; // 0..6 onde 0 = seg
+    const start = new Date(y, m, 1 - offset);
+
+    // 6 linhas * 7 colunas = 42 células
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    for(let i=0;i<42;i++){
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'day ripple';
+      btn.textContent = d.getDate();
+
+      const inMonth = d.getMonth() === m;
+      const isPast  = d < today;
+      if(!inMonth) btn.classList.add('out');
+      if(isPast)   btn.classList.add('past');
+      if(+d === +today) btn.classList.add('today');
+      if(state.selected && +d === +state.selected) btn.classList.add('sel');
+
+      btn.addEventListener('click', ()=>{
+        if(isPast) return;
+        state.selected = new Date(d);
+        render();       // re-render para aplicar seleção
+        syncSubmit();
+      });
+
+      grid.appendChild(btn);
+    }
+  }
+
+  function next(){ state.view.setMonth(state.view.getMonth()+1); render(); }
+  function prev(){ state.view.setMonth(state.view.getMonth()-1); render(); }
+
+  document.querySelector('[data-cal="next"]').addEventListener('click', next);
+  document.querySelector('[data-cal="prev"]').addEventListener('click', prev);
+
+  render();
+  return { state, render };
+})();
+
+/* ================== Horários ================== */
+const slotUI = (() => {
+  const box = document.getElementById('slots');
+  const state = { selected: null };
+
+  // gera horários de 09:00 às 19:30 a cada 30min
+  function genTimes(){
+    const out=[]; let h=9, m=0;
+    while(h<20 || (h===19 && m===30)){
+      out.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      m+=30; if(m===60){ m=0; h++; if(h===20) break; }
+    }
+    return out;
+  }
+  const times = genTimes();
+
+  function render(){
+    box.innerHTML='';
+    times.forEach(t=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='slot ripple'; b.textContent=t;
+      if(state.selected===t) b.classList.add('sel');
+      b.addEventListener('click',()=>{ state.selected=t; render(); syncSubmit(); });
+      box.appendChild(b);
+    });
+  }
+  render();
+  return { state };
+})();
+
+/* ================== Submit / Persistência ================== */
+const btnSubmit = document.getElementById('btnSubmit');
+
+function syncSubmit(){
+  const ready = !!(cal.state.selected && slotUI.state.selected);
+  btnSubmit.disabled = !ready;
+  btnSubmit.textContent = 'Confirmar';
+}
+
+btnSubmit.addEventListener('click', ()=>{
+  if(!cal.state.selected || !slotUI.state.selected) return;
+
+  // compõe ISO local (sem timezone)
+  const d = new Date(cal.state.selected);
+  const [hh,mm] = slotUI.state.selected.split(':').map(Number);
+  d.setHours(hh, mm, 0, 0);
+
+  const yyyy = d.getFullYear();
+  const MM   = String(d.getMonth()+1).padStart(2,'0');
+  const DD   = String(d.getDate()).padStart(2,'0');
+  const HH   = String(d.getHours()).padStart(2,'0');
+  const Min  = String(d.getMinutes()).padStart(2,'0');
+  const iso  = `${yyyy}-${MM}-${DD}T${HH}:${Min}:00`;
+
+  // guarda o agendamento
+  const payload = {
+    services: [...required],       // tokens selecionados
+    professionals: [...prosChosen],
+    proMode,
+    total, minutes, count,
+    date: `${DD}/${MM}/${yyyy}`,
+    time: `${HH}:${Min}`,
+    iso
+  };
+  localStorage.setItem('booking', JSON.stringify(payload));
+
+  // segue para a confirmação (pré-pagamento de 30%)
+  window.location.href = 'confirmacao.html';
+});
+
+syncSubmit();
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Entrar — Mineiro Barbershop</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* ====== estilos específicos da tela de auth ====== */
+    .auth-wrap{max-width:428px;margin:0 auto;padding:18px}
+    .brand{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+    .brand .dot{width:36px;height:36px;border-radius:10px;background:#1b1b1f;border:1px solid var(--line);display:grid;place-items:center}
+    .brand h1{margin:0;font:700 18px/1 Poppins}
+    .muted{color:var(--muted);}
+
+    .auth-card{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:14px;padding:18px;box-shadow:var(--shadow)
+    }
+
+    .field{margin:0 0 12px}
+    .label{display:block;margin:0 0 6px;font:600 12px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#d9dade}
+    .input-wrap{position:relative}
+    .input{
+      width:100%;padding:12px 42px 12px 42px;border-radius:12px;
+      border:1px solid var(--line);background:#111214;color:var(--text);
+      font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s
+    }
+    .input:focus{border-color:rgba(211,168,91,.55);box-shadow:0 0 0 3px rgba(211,168,91,.14)}
+    .ico{
+      position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#b8bac1
+    }
+    .pass-toggle{
+      position:absolute;right:8px;top:50%;transform:translateY(-50%);
+      width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
+      background:#1b1c20;color:#e6e7ea;display:grid;place-items:center;cursor:pointer
+    }
+
+    .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px}
+    .check{display:flex;align-items:center;gap:8px;color:#cfd0d4;font-size:14px}
+    .check input{accent-color:var(--gold)}
+
+    .btn-full{width:100%}
+    .hr{height:1px;background:rgba(255,255,255,.08);margin:16px 0}
+
+    .helpers{display:flex;justify-content:space-between;gap:12px;margin-top:12px}
+    .link{color:var(--gold);text-decoration:none}
+    .link:hover{opacity:.9}
+
+    /* mensagens */
+    .msg{margin-top:10px;font-size:14px}
+    .msg.err{color:#ffb3b3}
+    .msg.ok{color:#b6f4c6}
+
+    /* ripple span base (usa animação global) */
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
+      animation:ripple-kf 600ms ease-out forwards}
+    @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+  </style>
+</head>
+<body>
+
+<main class="app">
+  <header class="topbar">
+    <a class="back ripple" href="index.html" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <h1>Entrar</h1>
+  </header>
+
+  <div class="auth-wrap">
+    <div class="brand">
+      <div class="dot">✂️</div>
+      <div>
+        <h1>Mineiro Barbershop</h1>
+        <div class="muted">Bem-vindo de volta</div>
+      </div>
+    </div>
+
+    <form class="auth-card" id="loginForm" novalidate>
+      <div class="field">
+        <label class="label" for="email">E-mail</label>
+        <div class="input-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+          <input class="input" id="email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="password">Senha</label>
+        <div class="input-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input class="input" id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <button class="pass-toggle ripple" type="button" aria-label="Mostrar senha" data-toggle="#password">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="check"><input type="checkbox" id="remember"> Lembrar de mim</label>
+        <a class="link" href="#" onclick="alert('Fluxo de recuperação aqui 😉');return false;">Esqueci a senha</a>
+      </div>
+
+      <button class="btn btn-primary btn-full ripple" type="submit">Entrar</button>
+      <div class="msg" id="msg"></div>
+
+      <div class="hr"></div>
+      <div class="helpers">
+        <span class="muted">Novo por aqui?</span>
+        <a class="link" href="cadastro.html">Criar conta</a>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  // ripple leve
+  document.addEventListener('click',(e)=>{
+    const t=e.target.closest('.ripple'); if(!t) return;
+    const r=document.createElement('span'); r.className='r';
+    const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+    t.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  }, {passive:true});
+
+  // mostrar/ocultar senha
+  document.querySelectorAll('.pass-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input=document.querySelector(btn.dataset.toggle);
+      input.type = input.type==='password' ? 'text' : 'password';
+    });
+  });
+
+  // preencher e lembrar email
+  const emailInput = document.getElementById('email');
+  const remember   = document.getElementById('remember');
+  const savedEmail = localStorage.getItem('auth.remember.email');
+  if(savedEmail){ emailInput.value = savedEmail; remember.checked = true; }
+
+  // login fake (demo) contra o usuário salvo no cadastro.html
+  const form = document.getElementById('loginForm');
+  const msg  = document.getElementById('msg');
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    msg.textContent='';
+
+    const email = emailInput.value.trim().toLowerCase();
+    const pass  = document.getElementById('password').value;
+
+    const raw = localStorage.getItem('auth.user');
+    const user = raw ? JSON.parse(raw) : null;
+
+    if(!user || user.email.toLowerCase()!==email || user.password!==pass){
+      msg.className='msg err';
+      msg.textContent='Credenciais inválidas. Tente novamente.';
+      return;
+    }
+
+    // lembrar
+    if(remember.checked) localStorage.setItem('auth.remember.email', email);
+    else localStorage.removeItem('auth.remember.email');
+
+    localStorage.setItem('auth.logged','1');
+    msg.className='msg ok';
+    msg.textContent='Login realizado! Redirecionando…';
+    setTimeout(()=>{ window.location.href='index.html'; }, 700);
+  });
+</script>
+</body>
+</html>

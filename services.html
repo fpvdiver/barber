@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Serviços — Mineiro Barbershop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<main class="app" aria-labelledby="page-title">
+  <!-- Topbar -->
+  <header class="topbar">
+    <a class="back ripple" href="index.html" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <h1 id="page-title">Serviços</h1>
+  </header>
+
+  <!-- Filtros -->
+  <nav class="filters" aria-label="Filtrar categorias">
+    <button class="chip ripple is-on" type="button" data-filter="all">Todos</button>
+    <button class="chip ripple" type="button" data-filter="cabelo">Cabelo</button>
+    <button class="chip ripple" type="button" data-filter="barba">Barba</button>
+    <button class="chip ripple" type="button" data-filter="coloracao">Coloração</button>
+    <button class="chip ripple" type="button" data-filter="tratamento">Tratamento</button>
+    <button class="chip ripple" type="button" data-filter="sobrancelha">Sobrancelha</button>
+  </nav>
+
+  <!-- Lista -->
+  <section class="list" aria-label="Lista de serviços">
+    <!-- Corte -->
+    <article class="item reveal" data-id="corte" data-price="50" data-min="30" data-tags="cabelo">
+      <figure class="thumb"><img src="img/svc-corte.jpg" alt="Corte masculino"></figure>
+      <div class="meta">
+        <h3 class="name">Corte</h3>
+        <span class="price-badge" data-p></span>
+        <p class="desc">Máquina e tesoura — aprox. 30min</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Barba -->
+    <article class="item reveal" data-id="barba" data-price="40" data-min="25" data-tags="barba">
+      <figure class="thumb"><img src="img/svc-barba.jpg" alt="Barba"></figure>
+      <div class="meta">
+        <h3 class="name">Barba</h3>
+        <span class="price-badge" data-p></span>
+        <p class="desc">Navalha e toalha quente — 25min</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Coloração -->
+    <article class="item reveal" data-id="coloracao" data-price="90" data-min="45" data-tags="coloracao cabelo">
+      <figure class="thumb"><img src="img/svc-color.jpg" alt="Coloração"></figure>
+      <div class="meta">
+        <h3 class="name">Coloração</h3>
+        <span class="price-badge" data-p></span>
+        <p class="desc">Cobertura ou tonalizante — 45min</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Tratamento -->
+    <article class="item reveal" data-id="tratamento" data-price="70" data-min="35" data-tags="tratamento cabelo">
+      <figure class="thumb"><img src="img/svc-trat.jpg" alt="Tratamento capilar"></figure>
+      <div class="meta">
+        <h3 class="name">Tratamento</h3>
+        <span class="price-badge" data-p></span>
+        <p class="desc">Hidratação/antiqueda — 35min</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Sobrancelha -->
+    <article class="item reveal" data-id="sobrancelha" data-price="30" data-min="15" data-tags="sobrancelha">
+      <figure class="thumb"><img src="img/svc-sobr.jpg" alt="Sobrancelha"></figure>
+      <div class="meta">
+        <h3 class="name">Sobrancelha</h3>
+        <span class="price-badge" data-p></span>
+        <p class="desc">Design masculino — 15min</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+  </section>
+
+  <!-- CTA inferior -->
+  <div class="cta-bar">
+    <button class="btn" data-del disabled>Deletar</button>
+    <button class="btn btn-primary" data-next disabled>Avançar</button>
+  </div>
+
+  <p class="hide-text" aria-live="polite" id="sr-status"></p>
+</main>
+
+<!-- ===== JS ===== -->
+<script>
+/* Reveal on scroll */
+(() => {
+  const obs = new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+})();
+
+/* Ripple */
+(() => {
+  const add = (e)=>{
+    const el = e.currentTarget, r=document.createElement('span');
+    r.className='r'; const b=el.getBoundingClientRect();
+    r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+    el.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  };
+  document.addEventListener('click',(e)=>{const btn=e.target.closest('.ripple'); if(btn) add(e);},{passive:true});
+})();
+
+/* Preenche badges de preço */
+(() => {
+  const money = v => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  document.querySelectorAll('.item').forEach(card=>{
+    const price = card.dataset.price;
+    const badge = card.querySelector('[data-p]');
+    if(badge){ badge.textContent = money(price); }
+  });
+})();
+
+/* Filtro por chips */
+(() => {
+  const chips = document.querySelectorAll('.chip');
+  const items = document.querySelectorAll('.item');
+  function apply(val){
+    chips.forEach(c=>c.classList.toggle('is-on', c.dataset.filter===val));
+    items.forEach(it=>{
+      const tags=(it.dataset.tags||'').split(/\s+/);
+      const show=(val==='all')||tags.includes(val);
+      it.toggleAttribute('hidden', !show);
+    });
+  }
+  chips.forEach(chip=>chip.addEventListener('click', ()=>apply(chip.dataset.filter)));
+})();
+</script>
+
+<script>
+/* Seleção com LIFO + persistência e navegação */
+(() => {
+  const cards = [...document.querySelectorAll('.list .item')].map(el => ({
+    id: el.dataset.id,
+    price: Number(el.dataset.price || 0),
+    min: Number(el.dataset.min || 0),
+    el,
+    btn: el.querySelector('.choose')
+  }));
+  const btnDel  = document.querySelector('[data-del]');
+  const btnNext = document.querySelector('[data-next]');
+  const moneyBR = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+
+  const stack = []; // [{id, price, min}]
+
+  cards.forEach(({ id, price, min, btn }) => {
+    btn.addEventListener('click', () => {
+      const on = btn.classList.toggle('is-on');
+      const ix = stack.findIndex(s => s.id === id);
+      if (on && ix === -1) stack.push({ id, price, min });
+      if (!on && ix !== -1) stack.splice(ix, 1);
+      updateFooter();
+    });
+  });
+
+  btnDel.addEventListener('click', () => {
+    if (!stack.length) return;
+    const last = stack.pop();
+    const card = cards.find(c => c.id === last.id);
+    if (card) card.btn.classList.remove('is-on');
+    updateFooter();
+  });
+
+  function updateFooter(){
+    const count = stack.length;
+    const total = stack.reduce((a,s)=>a+s.price,0);
+    btnDel.disabled  = count === 0;
+    btnNext.disabled = count === 0;
+    btnNext.textContent = count ? `Avançar (${count}) — ${moneyBR(total)}` : 'Avançar';
+  }
+  updateFooter();
+
+  btnNext.addEventListener('click', () => {
+    const ids     = stack.map(s => s.id);
+    const total   = stack.reduce((a,s)=>a+s.price, 0);
+    const minutes = stack.reduce((a,s)=>a+s.min,   0);
+
+    localStorage.setItem('svc.selected', JSON.stringify(ids));
+    localStorage.setItem('svc.total', String(total));
+    localStorage.setItem('svc.minutes', String(minutes));
+    localStorage.setItem('svc.count', String(ids.length));
+
+    window.location.href = 'professionals.html';
+  });
+
+  // tratamento de falha de imagem
+  document.querySelectorAll('.thumb img').forEach(img=>{
+    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+  });
+})();
+</script>
+</body>
+</html>

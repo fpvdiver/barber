@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Criar conta — Mineiro Barbershop</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .auth-wrap{max-width:428px;margin:0 auto;padding:18px}
+    .auth-card{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:14px;padding:18px;box-shadow:var(--shadow)
+    }
+    .title{margin:6px 0 14px;font:700 18px/1 Poppins}
+    .muted{color:var(--muted)}
+    .field{margin:0 0 12px}
+    .label{display:block;margin:0 0 6px;font:600 12px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#d9dade}
+    .input-wrap{position:relative}
+    .input{
+      width:100%;padding:12px 42px 12px 42px;border-radius:12px;
+      border:1px solid var(--line);background:#111214;color:var(--text);
+      font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s
+    }
+    .input:focus{border-color:rgba(211,168,91,.55);box-shadow:0 0 0 3px rgba(211,168,91,.14)}
+    .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#b8bac1}
+    .pass-toggle{
+      position:absolute;right:8px;top:50%;transform:translateY(-50%);
+      width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
+      background:#1b1c20;color:#e6e7ea;display:grid;place-items:center;cursor:pointer
+    }
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:380px){ .row{grid-template-columns:1fr} }
+
+    .check{display:flex;align-items:center;gap:8px;color:#cfd0d4;font-size:14px;margin:4px 0 12px}
+    .check input{accent-color:var(--gold)}
+
+    .btn-full{width:100%}
+    .msg{margin-top:10px;font-size:14px}
+    .msg.err{color:#ffb3b3}
+    .msg.ok{color:#b6f4c6}
+
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
+      animation:ripple-kf 600ms ease-out forwards}
+    @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+  </style>
+</head>
+<body>
+
+<main class="app">
+  <header class="topbar">
+    <a class="back ripple" href="login.html" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <h1>Criar conta</h1>
+  </header>
+
+  <div class="auth-wrap">
+    <h2 class="title">Bem-vindo! <span class="muted">Crie sua conta para agendar mais rápido.</span></h2>
+
+    <form class="auth-card" id="signupForm" novalidate>
+      <div class="field">
+        <label class="label" for="name">Nome completo</label>
+        <div class="input-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          <input class="input" id="name" name="name" type="text" placeholder="Seu nome" autocomplete="name" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="email">E-mail</label>
+        <div class="input-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+          <input class="input" id="email" name="email" type="email" placeholder="seu@email.com" autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="phone">Telefone </label>
+        <div class="input-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.09 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.6a2 2 0 0 1-.45 2.11L9 10a16 16 0 0 0 5 5l.57-.62a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.6.54A2 2 0 0 1 22 16.92z"/></svg>
+          <input class="input" id="phone" name="phone" type="tel" inputmode="tel" placeholder="(00) 90000-0000" autocomplete="tel" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="label" for="pass">Senha</label>
+          <div class="input-wrap">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input class="input" id="pass" name="pass" type="password" placeholder="mín. 6 caracteres" autocomplete="new-password" required>
+            <button class="pass-toggle ripple" type="button" aria-label="Mostrar senha" data-toggle="#pass">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="pass2">Confirmar</label>
+          <div class="input-wrap">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input class="input" id="pass2" name="pass2" type="password" placeholder="repita a senha" autocomplete="new-password" required>
+            <button class="pass-toggle ripple" type="button" aria-label="Mostrar senha" data-toggle="#pass2">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <label class="check"><input type="checkbox" id="terms"> Aceito os termos de uso</label>
+
+      <button class="btn btn-primary btn-full ripple" type="submit">Criar conta</button>
+      <div class="msg" id="msg"></div>
+
+      <div class="row" style="margin-top:12px;grid-template-columns:auto auto;justify-content:space-between">
+        <span class="muted">Já tem conta?</span>
+        <a class="link" href="login.html" style="color:var(--gold);text-decoration:none">Entrar</a>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  // ripple
+  document.addEventListener('click',(e)=>{
+    const t=e.target.closest('.ripple'); if(!t) return;
+    const r=document.createElement('span'); r.className='r';
+    const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+    t.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  }, {passive:true});
+
+  // mostrar/ocultar senhas
+  document.querySelectorAll('.pass-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input=document.querySelector(btn.dataset.toggle);
+      input.type = input.type==='password' ? 'text' : 'password';
+    });
+  });
+
+  const form = document.getElementById('signupForm');
+  const msg  = document.getElementById('msg');
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault(); msg.textContent='';
+
+    const name = document.getElementById('name').value.trim();
+    const email= document.getElementById('email').value.trim().toLowerCase();
+    const phone= document.getElementById('phone').value.trim();
+    const pass = document.getElementById('pass').value;
+    const pass2= document.getElementById('pass2').value;
+    const terms= document.getElementById('terms').checked;
+
+    // validações simples
+    if(!name || !email || !pass || !pass2){
+      msg.className='msg err'; msg.textContent='Preencha todos os campos obrigatórios.'; return;
+    }
+    if(!/^\S+@\S+\.\S+$/.test(email)){
+      msg.className='msg err'; msg.textContent='E-mail inválido.'; return;
+    }
+    if(pass.length < 6){
+      msg.className='msg err'; msg.textContent='A senha deve ter pelo menos 6 caracteres.'; return;
+    }
+    if(pass!==pass2){
+      msg.className='msg err'; msg.textContent='As senhas não conferem.'; return;
+    }
+    if(!terms){
+      msg.className='msg err'; msg.textContent='Você precisa aceitar os termos para continuar.'; return;
+    }
+
+    // salva usuário (DEMO — apenas front-end)
+    const user = { name, email, phone, password: pass, createdAt: Date.now() };
+    localStorage.setItem('auth.user', JSON.stringify(user));
+    localStorage.setItem('auth.logged','1');
+
+    msg.className='msg ok'; msg.textContent='Conta criada! Redirecionando…';
+    setTimeout(()=>{ window.location.href='index.html'; }, 800);
+  });
+</script>
+</body>
+</html>
