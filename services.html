@@ -7,15 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Salvaguardas: o ripple não bloqueia clique e nada "fura" o botão */
+    /* Ripple seguro e discreto */
     .r{position:absolute;pointer-events:none;width:8px;height:8px;border-radius:999px;transform:translate(-50%,-50%);background:currentColor;opacity:.25;animation:ripple .6s ease-out forwards}
     @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:280px;height:280px;opacity:0}}
     .chip{position:relative}
+
+    /* Faz a lista ancorar abaixo da topbar fixa ao usar scrollIntoView */
+    .list{scroll-margin-top:84px;} /* ajuste se sua topbar tiver outra altura */
   </style>
 </head>
 <body>
 
 <main class="app" aria-labelledby="page-title">
+  <!-- Topbar -->
   <header class="topbar">
     <a class="back ripple" href="index.html" aria-label="Voltar">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -23,6 +27,7 @@
     <h1 id="page-title">Serviços</h1>
   </header>
 
+  <!-- Filtros -->
   <nav class="filters" aria-label="Filtrar categorias">
     <button class="chip ripple is-on" type="button" data-filter="all" aria-pressed="true">Todos</button>
     <button class="chip ripple" type="button" data-filter="cabelo" aria-pressed="false">Cabelo</button>
@@ -32,7 +37,9 @@
     <button class="chip ripple" type="button" data-filter="sobrancelha" aria-pressed="false">Sobrancelha</button>
   </nav>
 
+  <!-- Lista -->
   <section class="list" aria-label="Lista de serviços">
+    <!-- Corte -->
     <article class="item reveal" data-id="corte" data-price="50" data-min="30" data-tags="cabelo">
       <figure class="thumb"><img src="img/svc-corte.jpg" alt="Corte masculino"></figure>
       <div class="meta">
@@ -46,6 +53,7 @@
       </button>
     </article>
 
+    <!-- Barba -->
     <article class="item reveal" data-id="barba" data-price="40" data-min="25" data-tags="barba">
       <figure class="thumb"><img src="img/svc-barba.jpg" alt="Barba"></figure>
       <div class="meta">
@@ -59,6 +67,7 @@
       </button>
     </article>
 
+    <!-- Coloração -->
     <article class="item reveal" data-id="coloracao" data-price="90" data-min="45" data-tags="coloracao cabelo">
       <figure class="thumb"><img src="img/svc-color.jpg" alt="Coloração"></figure>
       <div class="meta">
@@ -72,6 +81,7 @@
       </button>
     </article>
 
+    <!-- Tratamento -->
     <article class="item reveal" data-id="tratamento" data-price="70" data-min="35" data-tags="tratamento cabelo">
       <figure class="thumb"><img src="img/svc-trat.jpg" alt="Tratamento capilar"></figure>
       <div class="meta">
@@ -85,6 +95,7 @@
       </button>
     </article>
 
+    <!-- Sobrancelha -->
     <article class="item reveal" data-id="sobrancelha" data-price="30" data-min="15" data-tags="sobrancelha">
       <figure class="thumb"><img src="img/svc-sobr.jpg" alt="Sobrancelha"></figure>
       <div class="meta">
@@ -99,6 +110,7 @@
     </article>
   </section>
 
+  <!-- CTA inferior -->
   <div class="cta-bar">
     <button class="btn" data-del disabled>Deletar</button>
     <button class="btn btn-primary" data-next disabled>Avançar</button>
@@ -156,9 +168,10 @@
 </script>
 
 <script>
-/* Filtro por chips — forçando via style.display (ignora CSS externo) */
+/* Filtro por chips — força display + rola a página até os resultados */
 (() => {
   const bar   = document.querySelector('.filters');
+  const list  = document.querySelector('.list');
   const items = Array.from(document.querySelectorAll('.item'));
 
   function apply(val){
@@ -173,15 +186,22 @@
     items.forEach(it=>{
       const tags = (it.dataset.tags || '').trim().split(/\s+/);
       const show = (val === 'all') || tags.includes(val);
-      it.style.display = show ? '' : 'none';     // <- força visual
+      it.style.display = show ? '' : 'none';
       it.setAttribute('aria-hidden', show ? 'false' : 'true');
     });
   }
 
+  function scrollToList(){
+    // usa scrollIntoView com scroll-margin-top definido no CSS
+    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Delegação de clique
   bar.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     apply(chip.dataset.filter);
+    scrollToList();
   });
 
   // estado inicial
@@ -194,8 +214,11 @@
 /* Seleção com LIFO + persistência e navegação */
 (() => {
   const cards = [...document.querySelectorAll('.list .item')].map(el => ({
-    id: el.dataset.id, price: Number(el.dataset.price||0), min: Number(el.dataset.min||0),
-    el, btn: el.querySelector('.choose')
+    id: el.dataset.id,
+    price: Number(el.dataset.price || 0),
+    min: Number(el.dataset.min || 0),
+    el,
+    btn: el.querySelector('.choose')
   }));
   const btnDel  = document.querySelector('[data-del]');
   const btnNext = document.querySelector('[data-next]');
@@ -234,13 +257,16 @@
     const ids     = stack.map(s => s.id);
     const total   = stack.reduce((a,s)=>a+s.price, 0);
     const minutes = stack.reduce((a,s)=>a+s.min,   0);
+
     localStorage.setItem('svc.selected', JSON.stringify(ids));
     localStorage.setItem('svc.total', String(total));
     localStorage.setItem('svc.minutes', String(minutes));
     localStorage.setItem('svc.count', String(ids.length));
+
     window.location.href = 'professionals.html';
   });
 
+  // tratamento de falha de imagem
   document.querySelectorAll('.thumb img').forEach(img=>{
     img.addEventListener('error', ()=>{
       const box = img.parentElement;
