@@ -12,8 +12,33 @@
     @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:280px;height:280px;opacity:0}}
     .chip{position:relative}
 
-    /* Faz a lista ancorar abaixo da topbar fixa ao usar scrollIntoView */
-    .list{scroll-margin-top:84px;} /* ajuste se sua topbar tiver outra altura */
+    /* --- FIX: lista cola no topo, nunca no rodapé --- */
+    .list{
+      /* força layout previsível e colado nos filtros */
+      display:grid !important;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-content:start !important;    /* gruda no topo mesmo com altura livre */
+      justify-content:stretch !important;
+      min-height:auto !important;        /* neutraliza heights herdados */
+      margin-top:0 !important;           /* neutraliza margin-top:auto */
+      align-self:auto !important;        /* caso o parent seja grid/flex */
+    }
+    /* se quiser colunas em telas maiores, descomente:
+    @media (min-width: 720px){ .list{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (min-width: 1080px){ .list{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    */
+
+    /* cartões sem “empurrão” vertical extra */
+    .list .item{ margin-top:0 !important; }
+
+    /* Se seu container pai for flex em coluna com justify-content:end,
+       esses dois garantem que a lista não desça: */
+    .app{ justify-content:flex-start !important; }
+    .app > .list{ order:initial; }
+
+    /* opcional: âncora de rolagem quando usamos scrollIntoView */
+    .list{ scroll-margin-top:84px; } /* ajuste conforme altura da topbar */
   </style>
 </head>
 <body>
@@ -168,7 +193,7 @@
 </script>
 
 <script>
-/* Filtro por chips — força display + rola a página até os resultados */
+/* Filtro por chips — força display e mantém conteúdo no topo */
 (() => {
   const bar   = document.querySelector('.filters');
   const list  = document.querySelector('.list');
@@ -189,11 +214,9 @@
       it.style.display = show ? '' : 'none';
       it.setAttribute('aria-hidden', show ? 'false' : 'true');
     });
-  }
 
-  function scrollToList(){
-    // usa scrollIntoView com scroll-margin-top definido no CSS
-    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // garante que a lista fique visível logo abaixo dos filtros
+    list.scrollIntoView({ behavior: 'instant', block: 'start' });
   }
 
   // Delegação de clique
@@ -201,7 +224,6 @@
     const chip = e.target.closest('.chip');
     if (!chip) return;
     apply(chip.dataset.filter);
-    scrollToList();
   });
 
   // estado inicial
