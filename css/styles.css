@@ -28,19 +28,17 @@ button{-webkit-tap-highlight-color:transparent}
 .hide-text{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden}
 .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* ====== App canvas ====== */
+/* ====== App canvas (padrão: 3 linhas) ====== */
 .app{
   max-width:428px; min-height:100svh; margin:0 auto;
-  /* FIX: 4 linhas para topbar, filtros, lista (1fr) e CTA */
-  display:grid; grid-template-rows:auto auto 1fr auto;
+  display:grid; grid-template-rows:auto 1fr auto;
   background:var(--bg); box-shadow:0 40px 90px rgba(0,0,0,.45);
 }
 .app--padded{ padding:12px 12px 84px }
 .app:not(.app--padded){ padding:0 }
 
-/* ====== Topbar (Serviços/Outras) ====== */
+/* ====== Topbar ====== */
 .topbar{
-  grid-row:1; /* fixa na 1ª linha */
   display:flex; align-items:center; gap:10px;
   padding:14px; border-bottom:1px solid var(--line);
 }
@@ -149,11 +147,11 @@ button{-webkit-tap-highlight-color:transparent}
 /* ============================================================= */
 /* ======================= Services (lista) ==================== */
 
+/* Ativa grid 4 linhas só na página de Serviços */
+.services-page{ grid-template-rows:auto auto 1fr auto; }
+
 /* chips */
-.filters{
-  grid-row:2; /* fixa filtros na 2ª linha */
-  padding:10px 14px 0;display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch
-}
+.filters{padding:10px 14px 0;display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .filters::-webkit-scrollbar{display:none}
 .filters::after{content:"";flex:0 0 14px}
 .chip{
@@ -167,13 +165,9 @@ button{-webkit-tap-highlight-color:transparent}
 .chip.is-on{background:rgba(var(--gold-rgb),.14);border-color:rgba(var(--gold-rgb),.5);color:var(--gold)}
 
 /* list + card */
-.list{
-  grid-row:3; /* FIX: a lista fica no track 1fr */
-  padding:12px 14px 14px;
-  display:grid; gap:14px;
-  align-content:start;     /* cola os cards no topo do espaço disponível */
-  min-height:0;            /* permite contrair dentro da .app */
-  scroll-margin-top:84px;  /* ancora quando usamos scrollIntoView */
+.services-page .list{
+  padding:12px 14px 14px;display:grid;gap:14px;
+  align-content:start;min-height:0;scroll-margin-top:84px;
 }
 .item{
   display:grid; grid-template-columns:72px 1fr auto; align-items:center; gap:14px;
@@ -183,7 +177,7 @@ button{-webkit-tap-highlight-color:transparent}
 
 /* thumb */
 .thumb{
-  width:72px;height:72px;border-radius:12px;overflow:hidden;left: -40px;
+  width:72px;height:72px;border-radius:12px;overflow:hidden;
   background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;position:relative;z-index:0;flex-shrink:0
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -214,8 +208,7 @@ button{-webkit-tap-highlight-color:transparent}
 .choose.is-on svg{ display:inline }
 
 /* barra de ações inferior (Serviços) */
-.cta-bar{
-  grid-row:4; /* FIX: CTA sempre na última linha */
+.services-page .cta-bar{
   position:sticky; bottom:0; padding:12px 14px 16px;
   background:linear-gradient(180deg,rgba(15,16,18,0),var(--bg) 26%,var(--bg) 100%);
   display:grid; grid-template-columns:1fr 1fr; gap:10px;
@@ -274,7 +267,6 @@ button{-webkit-tap-highlight-color:transparent}
 
 /* ============================================================= */
 /* ====================== Minhas reservas ====================== */
-/* Use <main class="app app--padded reservas-page"> nesta tela */
 .reservas-page .res-list{ display:grid; gap:14px }
 
 /* Card: thumb | conteúdo | ações (sem sobreposição) */
@@ -295,7 +287,6 @@ button{-webkit-tap-highlight-color:transparent}
   background:#0c0d0f;border:1px solid var(--line);
 }
 .reservas-page .res-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-/* Qualquer overlay dentro da thumb vira estático */
 .reservas-page .res-card .thumb > *[style*="position"]{ position:static !important; margin-top:8px !important }
 
 /* Conteúdo */
@@ -306,7 +297,7 @@ button{-webkit-tap-highlight-color:transparent}
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
-/* Pílulas em linha própria */
+/* Pílulas */
 .reservas-page .res-card .pills{
   grid-column:2 / -1; display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
 }
@@ -381,4 +372,3 @@ button{-webkit-tap-highlight-color:transparent}
   .ripple > .r{ display:none !important }
   .page-transition{ transition:none !important }
 }
-
