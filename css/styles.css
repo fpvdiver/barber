@@ -183,7 +183,7 @@ button{-webkit-tap-highlight-color:transparent}
 
 /* thumb */
 .thumb{
-  width:72px;height:72px;border-radius:12px;overflow:hidden;
+  width:72px;height:72px;border-radius:12px;overflow:hidden;left: -40px;
   background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;position:relative;z-index:0;flex-shrink:0
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -381,3 +381,4 @@ button{-webkit-tap-highlight-color:transparent}
   .ripple > .r{ display:none !important }
   .page-transition{ transition:none !important }
 }
+
