@@ -487,3 +487,25 @@ button{-webkit-tap-highlight-color:transparent}
   background:#1a1b1f url("img/placeholder-service.svg") center/24px no-repeat;
 }
 
+/* categorias: remove o sublinhado e a cor azul do link */
+.cat-row .cat,
+.cat-row .cat:link,
+.cat-row .cat:visited,
+.cat-row .cat:hover,
+.cat-row .cat:active{
+  text-decoration: none;
+  color: inherit;               /* herda a cor do container */
+}
+
+.cat-row .cat small{
+  color:#c7c9d0;                /* cor do rótulo */
+  text-decoration:none;
+}
+
+/* acessibilidade: foco visível sem sublinhado */
+.cat-row .cat:focus-visible{
+  outline:2px solid rgba(var(--gold-rgb),.6);
+  outline-offset:3px;
+  border-radius:14px;
+}
+
