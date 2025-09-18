@@ -1,6 +1,5 @@
-
 (() => {
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- 1) REVEAL AO ROLAR ---------- */
   const toReveal = [
@@ -49,7 +48,9 @@
     });
   });
 
-  /* ---------- 3) BOTÃO “ESCOLHER” COM CHECK ---------- */
+  /* ---------- 3) BOTÃO “ESCOLHER” COM CHECK ----------
+     (opcional — use class="choose" em qualquer CTA e, se quiser,
+     um botão #next para destravar navegação quando houver escolha) */
   const chooseBtns = document.querySelectorAll('.choose');
   const nextBtn = document.getElementById('next');
   const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -65,19 +66,18 @@
       const on = btn.classList.toggle('is-on');
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.innerHTML = on ? (CHECK + 'Escolhido') : 'Escolher';
-      if (!reduced) {
-        btn.animate([
-          { transform:'scale(.96)' }, { transform:'scale(1)' }
-        ], { duration:160, easing:'cubic-bezier(.22,1,.36,1)' });
+      if (!reduced && btn.animate) {
+        btn.animate([{ transform:'scale(.96)' }, { transform:'scale(1)' }], { duration:160, easing:'cubic-bezier(.22,1,.36,1)' });
       }
       updateNext();
     });
   });
   updateNext();
 
-  /* ---------- 4) PARALLAX SUAVE NO HERO ---------- */
+  /* ---------- 4) PARALLAX SUAVE NO HERO ----------
+     (ajustado para .hero-copy do teu HTML) */
   const hero = document.querySelector('.hero');
-  const copy = hero?.querySelector('.copy');
+  const copy = hero?.querySelector('.hero-copy');
   if (!reduced && hero && copy) {
     const onScroll = () => {
       const rect = hero.getBoundingClientRect();
@@ -99,10 +99,8 @@
   document.body.appendChild(overlay);
 
   function isInternal(href){
-    try {
-      const u = new URL(href, location.href);
-      return u.origin === location.origin;
-    } catch { return false; }
+    try { const u = new URL(href, location.href); return u.origin === location.origin; }
+    catch { return false; }
   }
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a');
@@ -116,4 +114,3 @@
   });
 
 })();
-
