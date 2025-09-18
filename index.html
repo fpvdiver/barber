@@ -203,7 +203,19 @@
     }, {passive:true});
   }
 </script>
+<script>
+(() => {
+  // deixa o header com fundo sólido somente após um pouco de scroll
+  const h = document.querySelector('.header-elite');
+  if(!h) return;
+  const on = () => h.classList.toggle('is-scrolled', window.scrollY > 4);
+  on(); window.addEventListener('scroll', on, {passive:true});
+})();
+</script>
+
+
 
 </body>
 </html>
+
 
