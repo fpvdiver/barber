@@ -425,3 +425,50 @@ button{-webkit-tap-highlight-color:transparent}
   .searchbox kbd{ display:none }
 }
 
+/* ===== Header brand (logo ESQ, nome DIR) ===== */
+.header-brand{
+  padding:12px 14px 10px;
+  display:grid; row-gap:10px;
+  position:sticky; top:0; z-index:20;
+  background:linear-gradient(180deg, rgba(15,16,18,.94), rgba(15,16,18,.86));
+  backdrop-filter: blur(6px) saturate(115%);
+  border-bottom:1px solid var(--line);
+}
+.brandbar{
+  display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:center;
+}
+.brand-logo{
+  width:42px; height:42px; border-radius:12px;
+  display:grid; place-items:center; overflow:hidden;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:inset 0 -1px rgba(255,255,255,.04);
+}
+.brand-logo img{ width:28px; height:28px; object-fit:contain; display:block }
+.brand-logo .monogram{
+  font:800 12px/1 Poppins; letter-spacing:.08em; color:var(--gold);
+}
+
+.brand-name{ text-align:right; min-width:0 }
+.brand-name .title{
+  display:inline-block;
+  font:700 16px/1 Poppins; letter-spacing:.02em; color:var(--text);
+  position:relative; padding-right:2px;
+}
+.brand-name .title::after{
+  content:""; display:block; height:2px; width:28px; margin:6px 0 0 auto;
+  border-radius:2px; background:linear-gradient(90deg,var(--gold),var(--gold-2));
+  opacity:.6;
+}
+.brand-name .subtitle{ color:#c7cad2; font:500 11px/1 Poppins }
+
+/* barra de busca */
+.searchbox{
+  display:grid; grid-template-columns:18px 1fr; align-items:center; gap:10px;
+  height:44px; padding:0 12px; border-radius:12px;
+  background:#131418; border:1px solid #23252b; color:#cfd0d4;
+  box-shadow:inset 0 -1px rgba(255,255,255,.03), 0 10px 30px rgba(0,0,0,.25);
+  text-decoration:none; font:500 13px/1 Poppins;
+}
+.searchbox:hover{ border-color:rgba(var(--gold-rgb),.38) }
+.searchbox svg{ width:18px; height:18px; color:#aeb2bb }
+
