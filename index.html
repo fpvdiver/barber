@@ -11,41 +11,24 @@
 
 <main class="app app--padded">
   <!-- HEADER -->
-  <header class="header header-elite">
-  <div class="hbar">
-    <button class="chip-loc ripple" type="button" aria-label="Trocar unidade">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
-        <circle cx="12" cy="10" r="3"></circle>
-      </svg>
-      <span class="ellipsis">Mineiro Barbershop</span>
-      <svg class="caret" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </button>
+  <header class="header header-brand">
+  <!-- Linha 1: logo à esquerda / nome à direita -->
+  <div class="brandbar">
+    <a class="brand-logo" href="index.html" aria-label="Mineiro Barbershop">
+      <!-- use seu arquivo real (ex.: img/logo.svg). 
+           Se não tiver, deixe o <span class="monogram">MB</span> como fallback -->
+      <img src="img/logo.svg" alt="" onerror="this.remove()" />
+      <span class="monogram">MB</span>
+    </a>
 
-    <div class="h-actions">
-      <button class="icon-btn icon-btn--soft ripple" aria-label="Pesquisar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-      <button class="icon-btn icon-btn--soft ripple" aria-label="Notificações">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 5-3 7h18c0-2-3 0-3-7"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-        <span class="badge-dot" aria-hidden="true"></span>
-      </button>
+    <div class="brand-name">
+      <strong class="title">Mineiro Barbershop</strong>
+      <!-- opcional: subtítulo curto -->
+      <!-- <small class="subtitle">Barber • Grooming</small> -->
     </div>
   </div>
 
-  <!-- parece input, abre tela de busca -->
+  <!-- Linha 2: busca full-width -->
   <a class="searchbox ripple" href="search.html" role="button" aria-label="Buscar serviços ou profissionais">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -53,9 +36,9 @@
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
     <span>Buscar serviço ou profissional</span>
-    <kbd>/</kbd>
   </a>
 </header>
+
 
   <!-- HERO -->
   <section class="hero reveal" aria-label="Destaque">
@@ -217,5 +200,6 @@
 
 </body>
 </html>
+
 
 
