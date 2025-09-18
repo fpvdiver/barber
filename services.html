@@ -6,6 +6,26 @@
   <title>Serviços — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Salvaguardas mínimas (não conflitam com seu CSS) -->
+  <style>
+    /* Garante que elementos com [hidden] sumam mesmo se houver reset CSS */
+    [hidden] { display: none !important; }
+
+    /* Ripple minimal para não bloquear clique */
+    .r {
+      position: absolute; pointer-events: none;
+      width: 8px; height: 8px; border-radius: 999px;
+      transform: translate(-50%, -50%);
+      background: currentColor; opacity: .25;
+      animation: ripple .6s ease-out forwards;
+    }
+    @keyframes ripple {
+      from { width: 0; height: 0; opacity: .35; }
+      to   { width: 280px; height: 280px; opacity: 0; }
+    }
+    .chip { position: relative; } /* para posicionar o ripple dentro do botão */
+  </style>
 </head>
 <body>
 
@@ -21,12 +41,12 @@
 
   <!-- Filtros -->
   <nav class="filters" aria-label="Filtrar categorias">
-    <button class="chip ripple is-on" type="button" data-filter="all">Todos</button>
-    <button class="chip ripple" type="button" data-filter="cabelo">Cabelo</button>
-    <button class="chip ripple" type="button" data-filter="barba">Barba</button>
-    <button class="chip ripple" type="button" data-filter="coloracao">Coloração</button>
-    <button class="chip ripple" type="button" data-filter="tratamento">Tratamento</button>
-    <button class="chip ripple" type="button" data-filter="sobrancelha">Sobrancelha</button>
+    <button class="chip ripple is-on" type="button" data-filter="all" aria-pressed="true">Todos</button>
+    <button class="chip ripple" type="button" data-filter="cabelo" aria-pressed="false">Cabelo</button>
+    <button class="chip ripple" type="button" data-filter="barba" aria-pressed="false">Barba</button>
+    <button class="chip ripple" type="button" data-filter="coloracao" aria-pressed="false">Coloração</button>
+    <button class="chip ripple" type="button" data-filter="tratamento" aria-pressed="false">Tratamento</button>
+    <button class="chip ripple" type="button" data-filter="sobrancelha" aria-pressed="false">Sobrancelha</button>
   </nav>
 
   <!-- Lista -->
@@ -121,12 +141,19 @@
 /* Reveal on scroll */
 (() => {
   const obs = new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
+    ents.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('is-in');
+        obs.unobserve(e.target);
+      }
+    });
   }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 })();
+</script>
 
-/* Ripple */
+<script>
+/* Ripple seguro (usa o botão real e não interfere no clique) */
 (() => {
   const add = (btn, e) => {
     const r = document.createElement('span');
@@ -144,7 +171,9 @@
     add(btn, e);
   }, { passive: true });
 })();
+</script>
 
+<script>
 /* Preenche badges de preço */
 (() => {
   const money = v => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -154,20 +183,41 @@
     if(badge){ badge.textContent = money(price); }
   });
 })();
+</script>
 
-/* Filtro por chips */
+<script>
+/* Filtro por chips — com delegação (funciona mesmo clicando no ripple) */
 (() => {
-  const chips = document.querySelectorAll('.chip');
-  const items = document.querySelectorAll('.item');
+  const bar   = document.querySelector('.filters');
+  const items = Array.from(document.querySelectorAll('.item'));
+
   function apply(val){
-    chips.forEach(c=>c.classList.toggle('is-on', c.dataset.filter===val));
+    // Atualiza estado visual e ARIA
+    const chips = bar.querySelectorAll('.chip');
+    chips.forEach(c=>{
+      const on = c.dataset.filter === val;
+      c.classList.toggle('is-on', on);
+      c.setAttribute('aria-pressed', on);
+    });
+
+    // Mostra/oculta itens
     items.forEach(it=>{
-      const tags=(it.dataset.tags||'').split(/\s+/);
-      const show=(val==='all')||tags.includes(val);
+      const tags = (it.dataset.tags || '').split(/\s+/);
+      const show = (val === 'all') || tags.includes(val);
       it.toggleAttribute('hidden', !show);
     });
   }
-  chips.forEach(chip=>chip.addEventListener('click', ()=>apply(chip.dataset.filter)));
+
+  // Delegação de evento no contêiner
+  bar.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip || !bar.contains(chip)) return;
+    apply(chip.dataset.filter);
+  });
+
+  // Estado inicial consistente
+  const initial = bar.querySelector('.chip.is-on')?.dataset.filter || 'all';
+  apply(initial);
 })();
 </script>
 
@@ -229,10 +279,13 @@
 
   // tratamento de falha de imagem
   document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+    img.addEventListener('error', ()=>{
+      const box = img.parentElement;
+      img.remove();
+      box.classList.add('no-img');
+    });
   });
 })();
 </script>
 </body>
 </html>
-
