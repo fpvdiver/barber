@@ -128,13 +128,21 @@
 
 /* Ripple */
 (() => {
-  const add = (e)=>{
-    const el = e.currentTarget, r=document.createElement('span');
-    r.className='r'; const b=el.getBoundingClientRect();
-    r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
-    el.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  const add = (btn, e) => {
+    const r = document.createElement('span');
+    r.className = 'r';
+    const b = btn.getBoundingClientRect();
+    r.style.left = (e.clientX - b.left) + 'px';
+    r.style.top  = (e.clientY - b.top)  + 'px';
+    btn.appendChild(r);
+    r.addEventListener('animationend', () => r.remove(), { once: true });
   };
-  document.addEventListener('click',(e)=>{const btn=e.target.closest('.ripple'); if(btn) add(e);},{passive:true});
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ripple');
+    if (!btn) return;
+    add(btn, e);
+  }, { passive: true });
 })();
 
 /* Preenche badges de preço */
@@ -227,3 +235,4 @@
 </script>
 </body>
 </html>
+
