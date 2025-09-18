@@ -182,7 +182,7 @@ button{-webkit-tap-highlight-color:transparent}
   background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
   position:relative; z-index:0; flex-shrink:0;
   /* FIX: não deslocar a imagem */
-  left:auto; right:auto;
+  left:auto; right:40px;
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.no-img{background:#0d0e11 url("../img/placeholder-service.svg") center/28px no-repeat}
@@ -508,4 +508,5 @@ button{-webkit-tap-highlight-color:transparent}
   outline-offset:3px;
   border-radius:14px;
 }
+
 
