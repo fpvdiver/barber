@@ -582,7 +582,7 @@ button{-webkit-tap-highlight-color:transparent}
 
 /* imagem ocupa 100% da altura, mantendo proporção */
 .header-brand .brand-logo img{
-  height:100%;
+  height: 115px;
   width:auto;
   max-width:260px;       /* só pra não exagerar em telas pequenas */
   display:block;
@@ -667,5 +667,6 @@ button{-webkit-tap-highlight-color:transparent}
 @media (min-width:430px){
   .header-brand .brand-logo{ height:78px }
 }
+
 
 
