@@ -176,13 +176,11 @@ button{-webkit-tap-highlight-color:transparent}
   box-shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
-/* thumb */
+/* thumb (global – sem deslocar) */
 .thumb{
   width:72px;height:72px;border-radius:12px;overflow:hidden;
   background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
   position:relative; z-index:0; flex-shrink:0;
-  /* FIX: não deslocar a imagem */
-  left:auto; right:40px;
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.no-img{background:#0d0e11 url("../img/placeholder-service.svg") center/28px no-repeat}
@@ -248,6 +246,7 @@ button{-webkit-tap-highlight-color:transparent}
 }
 .mode-title{ font:600 13px/1 Poppins } .mode-sub{ font-size:12px; color:var(--muted) }
 
+/* (legado – não usado, mas mantido) */
 .pro-grid{
   padding:6px 14px 90px;
   display:grid; grid-template-columns:1fr 1fr; gap:12px;
@@ -269,10 +268,62 @@ button{-webkit-tap-highlight-color:transparent}
 }
 .summary{ align-self:center; color:#cfd0d4; font-size:14px }
 
+/* ====== Profissionais — igual ao mock ====== */
+.professionals-page .list{
+  padding:12px 14px 100px;
+  display:grid; gap:14px; align-content:start;
+}
+.professionals-page .item{
+  position:relative;
+  border-radius:16px;
+  background:var(--panel);
+  border:1px solid #1f2026;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  grid-template-columns:72px 1fr auto;
+  gap:14px;
+}
+.professionals-page .thumb{
+  width:72px;height:72px;border-radius:12px;overflow:hidden;
+  background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
+}
+@media (max-width:380px){
+  .professionals-page .item{ grid-template-columns:56px 1fr auto }
+  .professionals-page .thumb{ width:56px;height:56px }
+}
+.professionals-page .item .name{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  font:600 14px/1.2 Poppins; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.professionals-page .item .desc{
+  margin:0; color:var(--muted); font-size:12px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.professionals-page .item .rate{
+  display:inline-grid; place-items:center;
+  height:22px; padding:0 8px; border-radius:999px;
+  background:rgba(247,201,72,.12);
+  border:1px solid rgba(247,201,72,.35);
+  color:#f7c948; font:700 11px/1 Poppins; letter-spacing:.02em;
+  flex:0 0 auto;
+}
+.professionals-page .choose{ min-width:104px }
+@media (max-width:380px){ .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px } }
+@media (max-width:340px){ .professionals-page .choose{ min-width:84px; font-size:11px } .professionals-page .item .desc{ display:none } }
+.professionals-page .item.is-disabled{ opacity:.5; filter:grayscale(.1) }
+.professionals-page .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed }
+.professionals-page .item::before,
+.professionals-page .item::after{
+  content:""; position:absolute; right:20px; height:4px; border-radius:4px;
+  background:#1f2026;
+}
+.professionals-page .item::before{ width:92px; bottom:18px; }
+.professionals-page .item::after { width:50px; bottom:10px; opacity:.85; }
+.professionals-page .item.is-disabled::before,
+.professionals-page .item.is-disabled::after{ opacity:.18 }
+
 /* ============================================================= */
 /* ====================== Minhas reservas ====================== */
 .reservas-page .res-list{ display:grid; gap:14px }
-
 .reservas-page .res-card{
   display:grid;
   grid-template-columns:72px 1fr auto;
@@ -283,24 +334,18 @@ button{-webkit-tap-highlight-color:transparent}
   border:1px solid var(--line);
   border-radius:14px;
 }
-
-/* Thumb fixa */
 .reservas-page .res-card .thumb{
   width:72px;height:72px;border-radius:12px;overflow:hidden;
   background:#0c0d0f;border:1px solid var(--line);
 }
 .reservas-page .res-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .reservas-page .res-card .thumb > *[style*="position"]{ position:static !important; margin-top:8px !important }
-
-/* Conteúdo */
 .reservas-page .res-card .main{ min-width:0 }
 .reservas-page .res-card .title{ margin:0 0 4px; font:600 14px/1 Poppins }
 .reservas-page .res-card .meta{
   margin:0; color:var(--muted); font-size:12px; line-height:1.5;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
-/* Pílulas */
 .reservas-page .res-card .pills{
   grid-column:2 / -1; display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
 }
@@ -309,8 +354,6 @@ button{-webkit-tap-highlight-color:transparent}
   border:1px solid var(--line); background:#1b1c20; color:#e6e7ea;
   font:600 11px/1 Poppins;
 }
-
-/* Ações à direita */
 .reservas-page .res-card .actions{ display:flex; flex-direction:column; gap:8px; align-items:flex-end }
 .reservas-page .res-card .btn{
   height:36px; padding:0 12px; border-radius:10px;
@@ -321,15 +364,11 @@ button{-webkit-tap-highlight-color:transparent}
 .reservas-page .res-card .btn--gold{
   border-color:#7b6335; background:linear-gradient(180deg,var(--gold),var(--gold-2)); color:#111;
 }
-
-/* Status */
 .reservas-page .status{
   display:inline-grid; place-items:center; height:24px; padding:0 10px;
   border-radius:999px; font:700 11px/1 Poppins; letter-spacing:.04em;
   border:1px solid rgba(255,255,255,.12); color:#cfd0d4; background:#111214;
 }
-
-/* Mobile: ações viram linha */
 @media (max-width:380px){
   .reservas-page .res-card{ grid-template-columns:56px 1fr }
   .reservas-page .res-card .actions{
@@ -386,7 +425,6 @@ button{-webkit-tap-highlight-color:transparent}
   border-bottom:1px solid var(--line);
 }
 .header-elite .hbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-
 .chip-loc{
   flex:1; min-width:0;
   height:36px; padding:0 12px; border-radius:999px;
@@ -395,12 +433,8 @@ button{-webkit-tap-highlight-color:transparent}
   font:600 12px/1 Poppins;
 }
 .chip-loc .caret{ opacity:.7; margin-left:auto }
-
-.icon-btn--soft{
-  background:#15161a; border-color:#262830; position:relative;
-}
+.icon-btn--soft{ background:#15161a; border-color:#262830; position:relative; }
 .icon-btn--soft:hover{ border-color:rgba(var(--gold-rgb),.35) }
-
 .badge-dot{
   position:absolute; top:6px; right:6px;
   width:7px; height:7px; border-radius:50%;
@@ -421,9 +455,7 @@ button{-webkit-tap-highlight-color:transparent}
   padding:3px 6px; border-radius:6px; border:1px solid #2b2d34;
   background:#181a1f; color:#aeb2bb; font:700 10px/1 Poppins;
 }
-@media (max-width:360px){
-  .searchbox kbd{ display:none }
-}
+@media (max-width:360px){ .searchbox kbd{ display:none } }
 
 /* ===== Header brand (logo ESQ, nome DIR) ===== */
 .header-brand{
@@ -434,9 +466,7 @@ button{-webkit-tap-highlight-color:transparent}
   backdrop-filter: blur(6px) saturate(115%);
   border-bottom:1px solid var(--line);
 }
-.brandbar{
-  display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:center;
-}
+.brandbar{ display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:center; }
 .brand-logo{
   width:42px; height:42px; border-radius:12px;
   display:grid; place-items:center; overflow:hidden;
@@ -444,24 +474,19 @@ button{-webkit-tap-highlight-color:transparent}
   box-shadow:inset 0 -1px rgba(255,255,255,.04);
 }
 .brand-logo img{ width:28px; height:28px; object-fit:contain; display:block }
-.brand-logo .monogram{
-  font:800 12px/1 Poppins; letter-spacing:.08em; color:var(--gold);
-}
-
+.brand-logo .monogram{ font:800 12px/1 Poppins; letter-spacing:.08em; color:var(--gold); }
 .brand-name{ text-align:right; min-width:0 }
 .brand-name .title{
-  display:inline-block;
-  font:700 16px/1 Poppins; letter-spacing:.02em; color:var(--text);
+  display:inline-block; font:700 16px/1 Poppins; letter-spacing:.02em; color:var(--text);
   position:relative; padding-right:2px;
 }
 .brand-name .title::after{
   content:""; display:block; height:2px; width:28px; margin:6px 0 0 auto;
-  border-radius:2px; background:linear-gradient(90deg,var(--gold),var(--gold-2));
-  opacity:.6;
+  border-radius:2px; background:linear-gradient(90deg,var(--gold),var(--gold-2)); opacity:.6;
 }
 .brand-name .subtitle{ color:#c7cad2; font:500 11px/1 Poppins }
 
-/* barra de busca */
+/* barra de busca (index brand) */
 .searchbox{
   display:grid; grid-template-columns:18px 1fr; align-items:center; gap:10px;
   height:44px; padding:0 12px; border-radius:12px;
@@ -472,112 +497,20 @@ button{-webkit-tap-highlight-color:transparent}
 .searchbox:hover{ border-color:rgba(var(--gold-rgb),.38) }
 .searchbox svg{ width:18px; height:18px; color:#aeb2bb }
 
-/* Categoria: mesma caixa, agora com foto */
+/* Categoria com foto */
 .cat .ico{
   width:52px; height:52px; border-radius:14px;
   overflow:hidden; background:#1a1b1f; border:1px solid #2a2c33;
   display:grid; place-items:center;
 }
-.cat .ico img{
-  width:100%; height:100%; object-fit:cover; display:block;
-  border-radius:inherit;
-}
-/* Fallback bonitinho se a imagem faltar */
-.cat .ico.no-img{
-  background:#1a1b1f url("img/placeholder-service.svg") center/24px no-repeat;
-}
+.cat .ico img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:inherit }
+.cat .ico.no-img{ background:#1a1b1f url("img/placeholder-service.svg") center/24px no-repeat }
 
-/* categorias: remove o sublinhado e a cor azul do link */
+/* links das categorias sem sublinhado/azul */
 .cat-row .cat,
 .cat-row .cat:link,
 .cat-row .cat:visited,
 .cat-row .cat:hover,
-.cat-row .cat:active{
-  text-decoration: none;
-  color: inherit;               /* herda a cor do container */
-}
-
-.cat-row .cat small{
-  color:#c7c9d0;                /* cor do rótulo */
-  text-decoration:none;
-}
-
-/* acessibilidade: foco visível sem sublinhado */
-.cat-row .cat:focus-visible{
-  outline:2px solid rgba(var(--gold-rgb),.6);
-  outline-offset:3px;
-  border-radius:14px;
-}
-
-/* ====== Profissionais — igual ao mock ====== */
-
-/* lista com espaço extra para não ficar embaixo da barra fixa */
-.professionals-page .list{
-  padding:12px 14px 100px;        /* bottom grande por causa do footer fixo */
-  display:grid; gap:14px; align-content:start;
-}
-
-/* card (mesma base de services, mas com pequenos ajustes) */
-.professionals-page .item{
-  position:relative;               /* p/ desenhar os risquinhos */
-  border-radius:16px;
-  background:var(--panel);
-  border:1px solid #1f2026;
-  box-shadow:0 8px 24px rgba(0,0,0,.25);
-  grid-template-columns:72px 1fr auto;
-  gap:14px;
-}
-
-/* avatar/Thumb */
-.professionals-page .thumb{
-  width:72px;height:72px;border-radius:12px;overflow:hidden;
-  background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
-}
-@media (max-width:380px){
-  .professionals-page .item{ grid-template-columns:56px 1fr auto }
-  .professionals-page .thumb{ width:56px;height:56px }
-}
-
-/* título + nota em pílula (estreita, não “empurra” o texto) */
-.professionals-page .item .name{
-  display:flex; align-items:center; gap:8px; min-width:0;
-  font:600 14px/1.2 Poppins; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.professionals-page .item .desc{
-  margin:0; color:var(--muted); font-size:12px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.professionals-page .item .rate{
-  display:inline-grid; place-items:center;
-  height:22px; padding:0 8px; border-radius:999px;
-  background:rgba(247,201,72,.12);
-  border:1px solid rgba(247,201,72,.35);
-  color:#f7c948; font:700 11px/1 Poppins; letter-spacing:.02em;
-  flex:0 0 auto;
-}
-
-/* botão Escolher com tamanhos responsivos */
-.professionals-page .choose{ min-width:104px }
-@media (max-width:380px){ .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px } }
-@media (max-width:340px){ .professionals-page .choose{ min-width:84px; font-size:11px } .professionals-page .item .desc{ display:none } }
-
-/* desativado (quem não faz o procedimento) */
-.professionals-page .item.is-disabled{ opacity:.5; filter:grayscale(.1) }
-.professionals-page .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed }
-
-/* “riscadinhos” decorativos à direita (como no print) */
-.professionals-page .item::before,
-.professionals-page .item::after{
-  content:""; position:absolute; right:20px; height:4px; border-radius:4px;
-  background:#1f2026;
-}
-.professionals-page .item::before{ width:92px; bottom:18px; }
-.professionals-page .item::after { width:50px; bottom:10px; opacity:.85; }
-/* ainda aparecem nos desativados, mas bem discretos */
-.professionals-page .item.is-disabled::before,
-.professionals-page .item.is-disabled::after{ opacity:.18 }
-
-
-
-
-
+.cat-row .cat:active{ text-decoration:none; color:inherit }
+.cat-row .cat small{ color:#c7c9d0; text-decoration:none }
+.cat-row .cat:focus-visible{ outline:2px solid rgba(var(--gold-rgb),.6); outline-offset:3px; border-radius:14px }
