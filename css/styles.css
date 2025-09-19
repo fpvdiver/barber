@@ -700,6 +700,18 @@ top: -2px;
 }
 
 
+/* Ícone do Whats (GIF) dentro do botão */
+.card .wa-fab img{
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none; /* não intercepta o clique do botão */
+}
+
+/* se antes você tinha esta linha, pode remover/ignorar: */
+/* .card .wa-fab svg{ width:24px; height:24px } */
+
 
 
 
