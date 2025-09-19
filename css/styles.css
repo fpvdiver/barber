@@ -307,6 +307,7 @@ button{-webkit-tap-highlight-color:transparent}
   border:1px solid rgba(247,201,72,.35);
   color:#f7c948; font:700 11px/1 Poppins; letter-spacing:.02em;
   flex:0 0 auto;
+top: -2px;
 }
 .professionals-page .choose{ min-width:104px }
 @media (max-width:380px){ .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px } }
@@ -667,6 +668,7 @@ button{-webkit-tap-highlight-color:transparent}
 @media (min-width:430px){
   .header-brand .brand-logo{ height:78px }
 }
+
 
 
 
