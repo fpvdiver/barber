@@ -181,7 +181,7 @@ button{-webkit-tap-highlight-color:transparent}
   width:72px;height:72px;border-radius:12px;overflow:hidden;
   background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
   position:relative; z-index:0; flex-shrink:0;
-  left:auto; right:auto; /* <- remove o offset que quebrava o alinhamento */
+  left: -40px; right:auto; /* <- remove o offset que quebrava o alinhamento */
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.no-img{background:#0d0e11 url("../img/placeholder-service.svg") center/28px no-repeat}
@@ -667,6 +667,7 @@ button{-webkit-tap-highlight-color:transparent}
 @media (min-width:430px){
   .header-brand .brand-logo{ height:78px }
 }
+
 
 
 
