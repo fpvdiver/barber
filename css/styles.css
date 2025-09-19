@@ -202,7 +202,7 @@ button{-webkit-tap-highlight-color:transparent}
 /* botão escolher */
 .choose{
   min-width:104px;height:36px;display:inline-flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,.14); background:#1b1c20; color:#e6e7ea; top:12px;
+  border:1px solid rgba(255,255,255,.14); background:#1b1c20; color:#e6e7ea;
   padding:0 12px; border-radius:999px; font:600 12px/1 Poppins; cursor:pointer;
   transition:transform .12s ease, background .2s, border-color .2s, color .2s;
 }
@@ -508,6 +508,7 @@ button{-webkit-tap-highlight-color:transparent}
   outline-offset:3px;
   border-radius:14px;
 }
+
 
 
 
