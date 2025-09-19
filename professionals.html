@@ -1,198 +1,163 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Profissionais — Mineiro Barbershop</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-
-<main class="app professionals-page" aria-labelledby="title">
-  <!-- Topbar -->
-  <header class="topbar">
-    <a class="back ripple" href="services.html" aria-label="Voltar">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </a>
-    <h1 id="title">Profissionais</h1>
-  </header>
-
-  <!-- Lista de profissionais (grid igual ao Services) -->
-  <section class="list" id="proList" aria-label="Lista de profissionais">
-    <!-- Fernando -->
-    <article class="item reveal" data-id="fernando" data-skills="corte barba">
-      <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando"></figure>
-      <div class="meta">
-        <h3 class="name">Fernando <span class="rate">★ 4,8</span></h3>
-        <p class="desc">Barbeiro • Corte e Barba</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Profissionais — Mineiro Barbershop</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-labelledby="title">
+      <header class="topbar">
+        <a class="back ripple" href="services.html" aria-label="Voltar">
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </a>
+        <h1 id="title">Serviços • Profissionais</h1>
+      </header>
+      <!-- Modo de seleção -->
+      <section class="mode-grid">
+        <button class="mode-card ripple is-on" type="button" data-mode="any">
+          <span class="mode-ico">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="9" cy="7" r="3" />
+              <circle cx="17" cy="7" r="3" />
+              <path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2" />
+            </svg>
+          </span>
+          <div class="mode-title">Qualquer profissional</div>
+          <div class="mode-sub">Maior disponibilidade</div>
+        </button>
+        <button class="mode-card ripple" type="button" data-mode="per">
+          <span class="mode-ico">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="7" r="4" />
+              <path d="M5.5 22a6.5 6.5 0 0 1 13 0" />
+              <path d="M3 8l8 8M7 12l4 4" />
+            </svg>
+          </span>
+          <div class="mode-title">Por serviço</div>
+          <div class="mode-sub">Seleção individual</div>
+        </button>
+      </section>
+      <!-- Grade de profissionais -->
+      <section class="pro-grid" id="grid">
+        <article
+          class="pro-card ripple reveal"
+          data-id="fernando"
+          data-rate="4.8"
+          data-skills="corte barba"
+        >
+          <img
+            class="avatar"
+            src="img/pro-fernando.jpg"
+            alt="Fernando"
+            loading="lazy"
+          />
+          <span class="badge">★ 4,8</span>
+          <h3 class="pro-name">Fernando</h3>
+          <p class="pro-role">Barbeiro</p>
+        </article>
+        <article
+          class="pro-card ripple reveal"
+          data-id="jonnier"
+          data-rate="4.7"
+          data-skills="coloracao corte"
+        >
+          <img
+            class="avatar"
+            src="img/pro-jonnier.jpg"
+            alt="Jonnier"
+            loading="lazy"
+          />
+          <span class="badge">★ 4,7</span>
+          <h3 class="pro-name">Jonnier</h3>
+          <p class="pro-role">Stylist</p>
+        </article>
+        <article
+          class="pro-card ripple reveal"
+          data-id="marcos"
+          data-rate="4.6"
+          data-skills="corte"
+        >
+          <img
+            class="avatar"
+            src="img/pro-marcos.jpg"
+            alt="Marcos"
+            loading="lazy"
+          />
+          <span class="badge">★ 4,6</span>
+          <h3 class="pro-name">Marcos</h3>
+          <p class="pro-role">Barbeiro</p>
+        </article>
+        <article
+          class="pro-card ripple reveal"
+          data-id="aline"
+          data-rate="4.9"
+          data-skills="coloracao tratamento sobrancelha"
+        >
+          <img
+            class="avatar"
+            src="img/pro-aline.jpg"
+            alt="Aline"
+            loading="lazy"
+          />
+          <span class="badge">★ 4,9</span>
+          <h3 class="pro-name">Aline</h3>
+          <p class="pro-role">Colorista</p>
+        </article>
+      </section>
+      <!-- Rodapé -->
+      <div class="pro-bar">
+        <div class="summary" id="sum">R$ 0,00 • 0 serviço • 0 min</div>
+        <button class="btn ripple" id="btnBack">Voltar</button>
+        <button class="btn btn-primary ripple" id="btnNext" disabled>
+          Continuar
+        </button>
       </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Jonnier -->
-    <article class="item reveal" data-id="jonnier" data-skills="corte coloracao">
-      <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier"></figure>
-      <div class="meta">
-        <h3 class="name">Jonnier <span class="rate">★ 4,7</span></h3>
-        <p class="desc">Stylist • Corte e Coloração</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Marcos -->
-    <article class="item reveal" data-id="marcos" data-skills="corte">
-      <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos"></figure>
-      <div class="meta">
-        <h3 class="name">Marcos <span class="rate">★ 4,6</span></h3>
-        <p class="desc">Barbeiro • Corte masculino</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Aline -->
-    <article class="item reveal" data-id="aline" data-skills="coloracao tratamento sobrancelha">
-      <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline"></figure>
-      <div class="meta">
-        <h3 class="name">Aline <span class="rate">★ 4,9</span></h3>
-        <p class="desc">Colorista • Coloração, Tratamentos</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-  </section>
-
-  <!-- Rodapé com resumo e ações -->
-  <div class="pro-bar">
-    <div class="summary" id="sum">R$ 0,00 • 0 serviço • 0 min</div>
-    <button class="btn ripple" id="btnBack" type="button">Voltar</button>
-    <button class="btn btn-primary ripple" id="btnNext" type="button" disabled>Continuar</button>
-  </div>
-</main>
-
-<!-- ===== JS ===== -->
-<script>
-/* Helpers base */
-const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
-const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
-
-/* Estado vindo de Serviços */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ex.: ["corte","coloracao"]
-const total   = Number(getStore('svc.total')   || 0);
-const minutes = Number(getStore('svc.minutes') || 0);
-const count   = Number(getStore('svc.count')   || 0);
-document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
-
-/* Reveal suave */
-(() => {
-  const obs = new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
-  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-})();
-
-/* Ripple */
-(() => {
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('.ripple'); if(!el) return;
-    const r  = document.createElement('span'); r.className = 'r';
-    const b  = el.getBoundingClientRect();
-    r.style.left = (e.clientX - b.left) + 'px';
-    r.style.top  = (e.clientY - b.top)  + 'px';
-    el.appendChild(r);
-    r.addEventListener('animationend', () => r.remove(), { once:true });
-  }, { passive:true });
-})();
-
-/* Profissionais: ativação/desativação + seleção */
-(() => {
-  const cards = [...document.querySelectorAll('.professionals-page .item')].map(el => ({
-    id: el.dataset.id,
-    skills: (el.dataset.skills||'').split(/\s+/).filter(Boolean),
-    el,
-    btn: el.querySelector('.choose')
-  }));
-
-  // Desativar quem NÃO faz nenhum dos serviços requeridos
-  const hasRequirements = REQUIRED.size > 0;
-  if (hasRequirements) {
-    cards.forEach(c => {
-      const ok = c.skills.some(s => REQUIRED.has(s));
-      if (!ok) {
-        c.el.classList.add('is-disabled');
-        c.btn.setAttribute('disabled','');
-      }
-    });
-  }
-
-  // Seleção (multi) + CTA
-  const selected = new Set();
-  const btnNext  = document.getElementById('btnNext');
-  const btnBack  = document.getElementById('btnBack');
-
-  function syncUI(){
-    cards.forEach(c => c.btn.classList.toggle('is-on', selected.has(c.id)));
-    btnNext.disabled = selected.size === 0;
-    btnNext.textContent = selected.size ? `Continuar (${selected.size})` : 'Continuar';
-  }
-
-  cards.forEach(c => {
-    c.btn.addEventListener('click', () => {
-      if (c.el.classList.contains('is-disabled')) return;
-      selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
-      syncUI();
-    });
-  });
-
-  function unionSkills(ids){
-    const set = new Set();
-    ids.forEach(id => {
-      const c = cards.find(x => x.id === id);
-      (c?.skills || []).forEach(s => set.add(s));
-    });
-    return set;
-  }
-  const label = s => ({corte:'corte', barba:'barba', coloracao:'coloração', tratamento:'tratamento', sobrancelha:'sobrancelha'}[s] || s);
-
-  btnNext.addEventListener('click', () => {
-    if (selected.size === 0) return;
-
-    // Validação: seleção cobre todos os serviços?
-    const covered = unionSkills([...selected]);
-    const missing = [...REQUIRED].filter(s => !covered.has(s));
-    if (missing.length){
-      alert('Você selecionou profissionais que não cobrem: ' + missing.map(label).join(', ') + '.');
-      return;
-    }
-
-    localStorage.setItem('selectedPros', JSON.stringify([...selected]));
-    localStorage.setItem('proMode', 'per'); // multi por serviço
-    window.location.href = 'agendamentos.html';
-  });
-
-  btnBack.addEventListener('click', () => window.location.href = 'services.html');
-
-  syncUI();
-
-  // Fallback de imagem
-  document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{
-      const box = img.parentElement; img.remove(); box.classList.add('no-img');
-    });
-  });
-})();
-</script>
-</body>
+    </main>
+    <script>
+      /* ========= Helpers ========= */ const BRL = (v) =>
+        "R$ " +
+        Number(v || 0)
+          .toFixed(2)
+          .replace(".", ",");
+      const getStore = (key) =>
+        localStorage.getItem(key) ?? sessionStorage.getItem(key);
+      /* ========= Estado vindo dos serviços ========= */ const REQUIRED =
+        new Set(JSON.parse(getStore("svc.selected") || "[]")); // tokens: corte, barba, ... const total = Number(getStore('svc.total')||0); const mins = Number(getStore('svc.minutes')||0); const count = Number(getStore('svc.count')||0); document.getElementById('sum').textContent = ${BRL(total)} • ${count} serviço${count>1?'s':''} • ${mins} min; /* ========= Reveal (suave) ========= */ (() => { const obs=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-in');obs.unobserve(e.target);}}), {threshold:.12,rootMargin:"0px 0px -40px 0px"}); document.querySelectorAll('.reveal').forEach(el=>obs.observe(el)); })(); /* ========= Ripple ========= */ (() => { const add=(e)=>{const el=e.currentTarget,r=document.createElement('span');r.className='r'; const b=el.getBoundingClientRect();r.style.left=(e.clientX-b.left)+'px';r.style.top=(e.clientY-b.top)+'px'; el.appendChild(r);r.addEventListener('animationend',()=>r.remove());}; document.addEventListener('click',(e)=>{const b=e.target.closest('.ripple'); if(b) add(e);},{passive:true}); })(); /* ========= Filtro inicial (só quem cobre o(s) serviço(s) escolhido(s)) ========= */ (() => { const pros=[...document.querySelectorAll('.pro-card')]; if(REQUIRED.size){ pros.forEach(c=>{ const skills=(c.dataset.skills||'').split(/\s+/); const intersects = skills.some(s => REQUIRED.has(s)); // cobre pelo menos um requerido c.hidden = !intersects; // se não cobre, some da lista }); } })(); /* ========= Seleção / Modos / Valid. ========= */ (() => { const pros=[...document.querySelectorAll('.pro-card')]; const modeBtns=[...document.querySelectorAll('.mode-card')]; const btnNext=document.getElementById('btnNext'); const btnBack=document.getElementById('btnBack'); let mode = modeBtns.find(b=>b.classList.contains('is-on'))?.dataset.mode || 'any'; const selected=new Set(); function syncMode(){ modeBtns.forEach(b=>b.classList.toggle('is-on', b.dataset.mode===mode)); if(mode==='any'){selected.clear(); syncCards(); updateNext();} } function syncCards(){ pros.forEach(c=>c.classList.toggle('is-on', selected.has(c.dataset.id))); } function updateNext(){ btnNext.disabled = selected.size===0; btnNext.textContent = selected.size?Continuar (${selected.size}):'Continuar'; } modeBtns.forEach(b=>b.addEventListener('click',()=>{ mode=b.dataset.mode; syncMode(); })); pros.forEach(c=>{ if (c.hidden) return; // ignorar os que foram filtrados c.addEventListener('click',()=>{ const id=c.dataset.id; if(mode==='any'){ selected.clear(); selected.add(id); } else { selected.has(id)?selected.delete(id):selected.add(id); } syncCards(); updateNext(); }); }); function unionSkills(ids){ const s=new Set(); ids.forEach(id=>{ const card=pros.find(p=>p.dataset.id===id); (card?.dataset.skills||'').split(/\s+/).forEach(x=>x&&s.add(x)); }); return s; } const human = s => ({corte:'corte',barba:'barba',coloracao:'coloração',tratamento:'tratamento',sobrancelha:'sobrancelha'}[s]||s); btnNext.addEventListener('click',()=>{ if(selected.size===0) return; const covered=unionSkills([...selected]); const missing=[...REQUIRED].filter(s=>!covered.has(s)); if(mode==='any' && missing.length){ mode='per'; syncMode(); alert('O profissional escolhido não cobre: '+missing.map(human).join(', ')+'. Selecione também quem realiza esses serviços.'); return; } if(mode==='per' && missing.length){ alert('Faltam profissionais para: '+missing.map(human).join(', ')+'.'); return; } localStorage.setItem('selectedPros', JSON.stringify([...selected])); localStorage.setItem('proMode', mode); // redireciona para a próxima etapa window.location.href = 'agendamentos.html'; }); btnBack.addEventListener('click', () => { // volta para serviços mantendo seleção window.location.href = 'services.html'; // ou: history.back(); }); syncMode(); updateNext(); })();
+    </script>
+  </body>
 </html>
-
