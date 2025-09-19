@@ -6,6 +6,14 @@
   <title>Profissionais — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Usa o mesmo visual da lista de serviços */
+    .pro-list{ padding:12px 14px 14px; display:grid; gap:14px; }
+    /* Estado desativado para quem não faz o(s) procedimento(s) */
+    .item.is-disabled{ opacity:.5; filter:grayscale(.15); }
+    .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed; }
+    .item .name .rate{ font-weight:700; color:#f7c948; margin-left:8px; font-size:12px }
+  </style>
 </head>
 <body>
 
@@ -14,60 +22,65 @@
     <a class="back ripple" href="services.html" aria-label="Voltar">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
-    <h1 id="title">Serviços • Profissionais</h1>
+    <h1 id="title">Profissionais</h1>
   </header>
 
-  <!-- Modo de seleção -->
-  <section class="mode-grid">
-    <button class="mode-card ripple is-on" type="button" data-mode="any">
-      <span class="mode-ico">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/>
-        </svg>
-      </span>
-      <div class="mode-title">Qualquer profissional</div>
-      <div class="mode-sub">Maior disponibilidade</div>
-    </button>
+  <!-- Lista de profissionais no mesmo padrão da services -->
+  <section class="list pro-list" aria-label="Profissionais">
+    <!-- Fernando -->
+    <article class="item reveal" data-id="fernando" data-skills="corte barba">
+      <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando" loading="lazy"></figure>
+      <div class="meta">
+        <h3 class="name">Fernando <span class="rate">★ 4,8</span></h3>
+        <p class="desc">Barbeiro • Corte e Barba</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
 
-    <button class="mode-card ripple" type="button" data-mode="per">
-      <span class="mode-ico">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="7" r="4"/><path d="M5.5 22a6.5 6.5 0 0 1 13 0"/><path d="M3 8l8 8M7 12l4 4"/>
-        </svg>
-      </span>
-      <div class="mode-title">Por serviço</div>
-      <div class="mode-sub">Seleção individual</div>
-    </button>
+    <!-- Jonnier -->
+    <article class="item reveal" data-id="jonnier" data-skills="coloracao corte">
+      <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier" loading="lazy"></figure>
+      <div class="meta">
+        <h3 class="name">Jonnier <span class="rate">★ 4,7</span></h3>
+        <p class="desc">Stylist • Corte e Coloração</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Marcos -->
+    <article class="item reveal" data-id="marcos" data-skills="corte">
+      <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos" loading="lazy"></figure>
+      <div class="meta">
+        <h3 class="name">Marcos <span class="rate">★ 4,6</span></h3>
+        <p class="desc">Barbeiro • Corte masculino</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
+
+    <!-- Aline -->
+    <article class="item reveal" data-id="aline" data-skills="coloracao tratamento sobrancelha">
+      <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline" loading="lazy"></figure>
+      <div class="meta">
+        <h3 class="name">Aline <span class="rate">★ 4,9</span></h3>
+        <p class="desc">Colorista • Coloração, Tratamento e Sobrancelha</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>
   </section>
 
-  <!-- Grade de profissionais -->
-  <section class="pro-grid" id="grid">
-    <article class="pro-card ripple reveal" data-id="fernando" data-rate="4.8" data-skills="corte barba">
-      <img class="avatar" src="img/pro-fernando.jpg" alt="Fernando" loading="lazy">
-      <span class="badge">★ 4,8</span>
-      <h3 class="pro-name">Fernando</h3><p class="pro-role">Barbeiro</p>
-    </article>
-
-    <article class="pro-card ripple reveal" data-id="jonnier" data-rate="4.7" data-skills="coloracao corte">
-      <img class="avatar" src="img/pro-jonnier.jpg" alt="Jonnier" loading="lazy">
-      <span class="badge">★ 4,7</span>
-      <h3 class="pro-name">Jonnier</h3><p class="pro-role">Stylist</p>
-    </article>
-
-    <article class="pro-card ripple reveal" data-id="marcos" data-rate="4.6" data-skills="corte">
-      <img class="avatar" src="img/pro-marcos.jpg" alt="Marcos" loading="lazy">
-      <span class="badge">★ 4,6</span>
-      <h3 class="pro-name">Marcos</h3><p class="pro-role">Barbeiro</p>
-    </article>
-
-    <article class="pro-card ripple reveal" data-id="aline" data-rate="4.9" data-skills="coloracao tratamento sobrancelha">
-      <img class="avatar" src="img/pro-aline.jpg" alt="Aline" loading="lazy">
-      <span class="badge">★ 4,9</span>
-      <h3 class="pro-name">Aline</h3><p class="pro-role">Colorista</p>
-    </article>
-  </section>
-
-  <!-- Rodapé -->
+  <!-- Rodapé (resumo + ações) -->
   <div class="pro-bar">
     <div class="summary" id="sum">R$ 0,00 • 0 serviço • 0 min</div>
     <button class="btn ripple" id="btnBack">Voltar</button>
@@ -76,112 +89,87 @@
 </main>
 
 <script>
-/* ========= Helpers ========= */
+/* ===== Helpers & estado dos serviços selecionados ===== */
 const BRL = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = key => localStorage.getItem(key) ?? sessionStorage.getItem(key);
 
-/* ========= Estado vindo dos serviços ========= */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // tokens: corte, barba, ...
+// tokens dos serviços escolhidos na etapa anterior (ex.: corte, barba, coloracao...)
+const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]'));
 const total = Number(getStore('svc.total')||0);
 const mins  = Number(getStore('svc.minutes')||0);
 const count = Number(getStore('svc.count')||0);
-document.getElementById('sum').textContent =
-  `${BRL(total)} • ${count} serviço${count>1?'s':''} • ${mins} min`;
+document.getElementById('sum').textContent = `${BRL(total)} • ${count} serviço${count>1?'s':''} • ${mins} min`;
 
-/* ========= Reveal (suave) ========= */
+/* ===== Reveal suave ===== */
 (() => {
-  const obs=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-in');obs.unobserve(e.target);}}),
-    {threshold:.12,rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  const io=new IntersectionObserver((ents)=>ents.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}}), {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 })();
 
-/* ========= Ripple ========= */
+/* ===== Ripple ===== */
 (() => {
-  const add=(e)=>{const el=e.currentTarget,r=document.createElement('span');r.className='r';
-    const b=el.getBoundingClientRect();r.style.left=(e.clientX-b.left)+'px';r.style.top=(e.clientY-b.top)+'px';
-    el.appendChild(r);r.addEventListener('animationend',()=>r.remove());};
-  document.addEventListener('click',(e)=>{const b=e.target.closest('.ripple'); if(b) add(e);},{passive:true});
+  const add=(btn,e)=>{const r=document.createElement('span');r.className='r';const b=btn.getBoundingClientRect();r.style.left=(e.clientX-b.left)+'px';r.style.top=(e.clientY-b.top)+'px';btn.appendChild(r);r.addEventListener('animationend',()=>r.remove(),{once:true});};
+  document.addEventListener('click',(e)=>{const btn=e.target.closest('.ripple'); if(btn) add(btn,e);},{passive:true});
 })();
 
-/* ========= Filtro inicial (só quem cobre o(s) serviço(s) escolhido(s)) ========= */
+/* ===== Habilita/Desabilita conforme procedimentos ===== */
 (() => {
-  const pros=[...document.querySelectorAll('.pro-card')];
-  if(REQUIRED.size){
-    pros.forEach(c=>{
-      const skills=(c.dataset.skills||'').split(/\s+/);
-      const intersects = skills.some(s => REQUIRED.has(s)); // cobre pelo menos um requerido
-      c.hidden = !intersects;                                // se não cobre, some da lista
-    });
+  const cards = [...document.querySelectorAll('.pro-list .item')];
+  cards.forEach(card=>{
+    const skills=(card.dataset.skills||'').trim().split(/\s+/);
+    const enabled = (REQUIRED.size===0) ? true : skills.some(s=>REQUIRED.has(s)); // precisa fazer pelo menos 1 dos selecionados
+    const btn = card.querySelector('.choose');
+    card.classList.toggle('is-disabled', !enabled);
+    btn.disabled = !enabled;
+    btn.setAttribute('aria-disabled', String(!enabled));
+    if(!enabled){ btn.setAttribute('title','Não realiza o(s) procedimento(s) selecionado(s)'); }
+  });
+})();
+
+/* ===== Seleção (igual services: botão Escolher) ===== */
+(() => {
+  const btnNext = document.getElementById('btnNext');
+  const btnBack = document.getElementById('btnBack');
+  const cards = [...document.querySelectorAll('.pro-list .item')].map(el => ({
+    id: el.dataset.id,
+    skills: (el.dataset.skills||'').trim().split(/\s+/),
+    btn: el.querySelector('.choose'),
+    el
+  }));
+
+  const selected = new Set(); // ids
+
+  function updateNext(){
+    const n = selected.size;
+    btnNext.disabled = n===0;
+    btnNext.textContent = n ? `Continuar (${n})` : 'Continuar';
   }
-})();
 
-/* ========= Seleção / Modos / Valid. ========= */
-(() => {
-  const pros=[...document.querySelectorAll('.pro-card')];
-  const modeBtns=[...document.querySelectorAll('.mode-card')];
-  const btnNext=document.getElementById('btnNext');
-  const btnBack=document.getElementById('btnBack');
-
-  let mode = modeBtns.find(b=>b.classList.contains('is-on'))?.dataset.mode || 'any';
-  const selected=new Set();
-
-  function syncMode(){ modeBtns.forEach(b=>b.classList.toggle('is-on', b.dataset.mode===mode)); if(mode==='any'){selected.clear(); syncCards(); updateNext();} }
-  function syncCards(){ pros.forEach(c=>c.classList.toggle('is-on', selected.has(c.dataset.id))); }
-  function updateNext(){ btnNext.disabled = selected.size===0; btnNext.textContent = selected.size?`Continuar (${selected.size})`:'Continuar'; }
-
-  modeBtns.forEach(b=>b.addEventListener('click',()=>{ mode=b.dataset.mode; syncMode(); }));
-
-  pros.forEach(c=>{
-    if (c.hidden) return; // ignorar os que foram filtrados
-    c.addEventListener('click',()=>{
-      const id=c.dataset.id;
-      if(mode==='any'){ selected.clear(); selected.add(id); }
-      else { selected.has(id)?selected.delete(id):selected.add(id); }
-      syncCards(); updateNext();
+  cards.forEach(({id,btn,el})=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      const on = btn.classList.toggle('is-on');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if(on) selected.add(id); else selected.delete(id);
+      updateNext();
     });
   });
 
-  function unionSkills(ids){
-    const s=new Set();
-    ids.forEach(id=>{
-      const card=pros.find(p=>p.dataset.id===id);
-      (card?.dataset.skills||'').split(/\s+/).forEach(x=>x&&s.add(x));
-    });
-    return s;
-  }
-  const human = s => ({corte:'corte',barba:'barba',coloracao:'coloração',tratamento:'tratamento',sobrancelha:'sobrancelha'}[s]||s);
+  btnBack.addEventListener('click', ()=>{ window.location.href='services.html'; });
 
-  btnNext.addEventListener('click',()=>{
+  btnNext.addEventListener('click', ()=>{
     if(selected.size===0) return;
-
-    const covered=unionSkills([...selected]);
-    const missing=[...REQUIRED].filter(s=>!covered.has(s));
-
-    if(mode==='any' && missing.length){
-      mode='per'; syncMode();
-      alert('O profissional escolhido não cobre: '+missing.map(human).join(', ')+'. Selecione também quem realiza esses serviços.');
-      return;
-    }
-    if(mode==='per' && missing.length){
-      alert('Faltam profissionais para: '+missing.map(human).join(', ')+'.');
-      return;
-    }
-
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
-    localStorage.setItem('proMode', mode);
-
-    // redireciona para a próxima etapa
     window.location.href = 'agendamentos.html';
   });
 
-  btnBack.addEventListener('click', () => {
-    // volta para serviços mantendo seleção
-    window.location.href = 'services.html';
-    // ou: history.back();
-  });
-
-  syncMode(); updateNext();
+  updateNext();
 })();
+
+/* ===== fallback para imagens quebradas ===== */
+document.querySelectorAll('.thumb img').forEach(img=>{
+  img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+});
 </script>
 </body>
 </html>
