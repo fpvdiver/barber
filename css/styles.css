@@ -559,3 +559,59 @@ button{-webkit-tap-highlight-color:transparent}
   outline-offset:3px;
   border-radius:14px;
 }
+
+/* ===== Header brand — logo grande à esquerda ===== */
+.header-brand .brandbar{
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  column-gap:14px;
+}
+
+/* tira a “caixa” e deixa o logo ocupar altura */
+.header-brand .brand-logo{
+  height:72px;           /* altura base do logo */
+  width:auto;
+  border:0;
+  background:transparent;
+  border-radius:0;
+  box-shadow:none;
+  overflow:visible;
+  display:flex; align-items:center;
+  padding:0;
+}
+
+/* imagem ocupa 100% da altura, mantendo proporção */
+.header-brand .brand-logo img{
+  height:100%;
+  width:auto;
+  max-width:260px;       /* só pra não exagerar em telas pequenas */
+  display:block;
+  object-fit:contain;
+}
+
+/* título alinhado à esquerda e sem quebra */
+.header-brand .brand-name{ text-align:left; min-width:0 }
+.header-brand .brand-name .title{
+  white-space:nowrap;
+  font:700 clamp(18px,4.8vw,22px)/1 Poppins;  /* responsivo */
+  letter-spacing:.02em;
+}
+.header-brand .brand-name .title::after{
+  margin:6px 0 0 0;      /* a barrinha começa à esquerda */
+  width:48px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2));
+  opacity:.7;
+}
+
+/* ajustes finos por largura */
+@media (max-width:360px){
+  .header-brand .brand-logo{ height:56px }
+}
+@media (min-width:361px) and (max-width:410px){
+  .header-brand .brand-logo{ height:64px }
+}
+@media (min-width:430px){
+  .header-brand .brand-logo{ height:78px }
+}
+
+
