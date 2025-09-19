@@ -509,6 +509,75 @@ button{-webkit-tap-highlight-color:transparent}
   border-radius:14px;
 }
 
+/* ====== Profissionais — igual ao mock ====== */
+
+/* lista com espaço extra para não ficar embaixo da barra fixa */
+.professionals-page .list{
+  padding:12px 14px 100px;        /* bottom grande por causa do footer fixo */
+  display:grid; gap:14px; align-content:start;
+}
+
+/* card (mesma base de services, mas com pequenos ajustes) */
+.professionals-page .item{
+  position:relative;               /* p/ desenhar os risquinhos */
+  border-radius:16px;
+  background:var(--panel);
+  border:1px solid #1f2026;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  grid-template-columns:72px 1fr auto;
+  gap:14px;
+}
+
+/* avatar/Thumb */
+.professionals-page .thumb{
+  width:72px;height:72px;border-radius:12px;overflow:hidden;
+  background:#0d0e11;border:1px solid #262830;display:grid;place-items:center;
+}
+@media (max-width:380px){
+  .professionals-page .item{ grid-template-columns:56px 1fr auto }
+  .professionals-page .thumb{ width:56px;height:56px }
+}
+
+/* título + nota em pílula (estreita, não “empurra” o texto) */
+.professionals-page .item .name{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  font:600 14px/1.2 Poppins; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.professionals-page .item .desc{
+  margin:0; color:var(--muted); font-size:12px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.professionals-page .item .rate{
+  display:inline-grid; place-items:center;
+  height:22px; padding:0 8px; border-radius:999px;
+  background:rgba(247,201,72,.12);
+  border:1px solid rgba(247,201,72,.35);
+  color:#f7c948; font:700 11px/1 Poppins; letter-spacing:.02em;
+  flex:0 0 auto;
+}
+
+/* botão Escolher com tamanhos responsivos */
+.professionals-page .choose{ min-width:104px }
+@media (max-width:380px){ .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px } }
+@media (max-width:340px){ .professionals-page .choose{ min-width:84px; font-size:11px } .professionals-page .item .desc{ display:none } }
+
+/* desativado (quem não faz o procedimento) */
+.professionals-page .item.is-disabled{ opacity:.5; filter:grayscale(.1) }
+.professionals-page .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed }
+
+/* “riscadinhos” decorativos à direita (como no print) */
+.professionals-page .item::before,
+.professionals-page .item::after{
+  content:""; position:absolute; right:20px; height:4px; border-radius:4px;
+  background:#1f2026;
+}
+.professionals-page .item::before{ width:92px; bottom:18px; }
+.professionals-page .item::after { width:50px; bottom:10px; opacity:.85; }
+/* ainda aparecem nos desativados, mas bem discretos */
+.professionals-page .item.is-disabled::before,
+.professionals-page .item.is-disabled::after{ opacity:.18 }
+
+
 
 
 
