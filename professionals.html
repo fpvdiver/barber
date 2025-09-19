@@ -7,17 +7,51 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Usa o mesmo visual da lista de serviços */
-    .pro-list{ padding:12px 14px 14px; display:grid; gap:14px; }
-    /* Estado desativado para quem não faz o(s) procedimento(s) */
-    .item.is-disabled{ opacity:.5; filter:grayscale(.15); }
-    .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed; }
-    .item .name .rate{ font-weight:700; color:#f7c948; margin-left:8px; font-size:12px }
+    /* ====== Ajustes responsivos para esta página ====== */
+
+    /* usa o mesmo visual da lista de serviços + espaço extra no fim p/ a barra fixa */
+    .professionals-page .list{ padding:12px 14px 100px; display:grid; gap:14px; align-content:start; }
+
+    /* card padrão herdado de .item: refinamos a linha do título */
+    .professionals-page .item .meta{ min-width:0 } /* evita sobreposição do botão */
+    .professionals-page .item .name{
+      display:flex; align-items:center; gap:8px; min-width:0;
+      font:600 14px/1.2 Poppins;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .professionals-page .item .desc{
+      margin:0; color:var(--muted); font-size:12px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    /* pílula da nota (estreita, não quebra) */
+    .professionals-page .item .rate{
+      display:inline-grid; place-items:center; padding:0 8px; height:22px;
+      border-radius:999px; font:700 11px/1 Poppins; letter-spacing:.02em;
+      color:#f7c948; background:rgba(247,201,72,.12); border:1px solid rgba(247,201,72,.35);
+      flex:0 0 auto;
+    }
+
+    /* desativado (não faz o procedimento selecionado) */
+    .professionals-page .item.is-disabled{ opacity:.5; filter:grayscale(.1) }
+    .professionals-page .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed }
+
+    /* breakpoints pequenos: reduzimos avatar + botão para caber sem quebrar */
+    @media (max-width: 380px){
+      .professionals-page .item{ grid-template-columns:56px 1fr auto }
+      .professionals-page .thumb{ width:56px; height:56px }
+      .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px }
+      .professionals-page .item .name{ font-size:13px }
+    }
+    @media (max-width: 340px){
+      .professionals-page .choose{ min-width:84px; font-size:11px }
+      .professionals-page .item .desc{ display:none } /* ultra compacto */
+    }
   </style>
 </head>
 <body>
 
-<main class="app" aria-labelledby="title">
+<main class="app professionals-page" aria-labelledby="title">
   <header class="topbar">
     <a class="back ripple" href="services.html" aria-label="Voltar">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -25,9 +59,8 @@
     <h1 id="title">Profissionais</h1>
   </header>
 
-  <!-- Lista de profissionais no mesmo padrão da services -->
-  <section class="list pro-list" aria-label="Profissionais">
-    <!-- Fernando -->
+  <!-- Lista no padrão de serviços -->
+  <section class="list" aria-label="Profissionais">
     <article class="item reveal" data-id="fernando" data-skills="corte barba">
       <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando" loading="lazy"></figure>
       <div class="meta">
@@ -40,7 +73,6 @@
       </button>
     </article>
 
-    <!-- Jonnier -->
     <article class="item reveal" data-id="jonnier" data-skills="coloracao corte">
       <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier" loading="lazy"></figure>
       <div class="meta">
@@ -53,7 +85,6 @@
       </button>
     </article>
 
-    <!-- Marcos -->
     <article class="item reveal" data-id="marcos" data-skills="corte">
       <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos" loading="lazy"></figure>
       <div class="meta">
@@ -66,7 +97,6 @@
       </button>
     </article>
 
-    <!-- Aline -->
     <article class="item reveal" data-id="aline" data-skills="coloracao tratamento sobrancelha">
       <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline" loading="lazy"></figure>
       <div class="meta">
@@ -80,7 +110,7 @@
     </article>
   </section>
 
-  <!-- Rodapé (resumo + ações) -->
+  <!-- Rodapé (fixo) -->
   <div class="pro-bar">
     <div class="summary" id="sum">R$ 0,00 • 0 serviço • 0 min</div>
     <button class="btn ripple" id="btnBack">Voltar</button>
@@ -93,51 +123,53 @@
 const BRL = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = key => localStorage.getItem(key) ?? sessionStorage.getItem(key);
 
-// tokens dos serviços escolhidos na etapa anterior (ex.: corte, barba, coloracao...)
+// tokens dos serviços (ex.: corte, barba, coloracao...)
 const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]'));
 const total = Number(getStore('svc.total')||0);
 const mins  = Number(getStore('svc.minutes')||0);
 const count = Number(getStore('svc.count')||0);
 document.getElementById('sum').textContent = `${BRL(total)} • ${count} serviço${count>1?'s':''} • ${mins} min`;
 
-/* ===== Reveal suave ===== */
+/* ===== Reveal ===== */
 (() => {
-  const io=new IntersectionObserver((ents)=>ents.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}}), {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); } }), {threshold:.12, rootMargin:"0px 0px -40px 0px"});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 })();
 
 /* ===== Ripple ===== */
 (() => {
-  const add=(btn,e)=>{const r=document.createElement('span');r.className='r';const b=btn.getBoundingClientRect();r.style.left=(e.clientX-b.left)+'px';r.style.top=(e.clientY-b.top)+'px';btn.appendChild(r);r.addEventListener('animationend',()=>r.remove(),{once:true});};
-  document.addEventListener('click',(e)=>{const btn=e.target.closest('.ripple'); if(btn) add(btn,e);},{passive:true});
+  const add=(btn,e)=>{ const r=document.createElement('span'); r.className='r';
+    const b=btn.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+    btn.appendChild(r); r.addEventListener('animationend',()=>r.remove(),{once:true}); };
+  document.addEventListener('click',(e)=>{ const btn=e.target.closest('.ripple'); if(btn) add(btn,e); },{passive:true});
 })();
 
-/* ===== Habilita/Desabilita conforme procedimentos ===== */
+/* ===== Habilita/Desabilita conforme serviços ===== */
 (() => {
-  const cards = [...document.querySelectorAll('.pro-list .item')];
+  const cards = [...document.querySelectorAll('.list .item')];
   cards.forEach(card=>{
-    const skills=(card.dataset.skills||'').trim().split(/\s+/);
-    const enabled = (REQUIRED.size===0) ? true : skills.some(s=>REQUIRED.has(s)); // precisa fazer pelo menos 1 dos selecionados
-    const btn = card.querySelector('.choose');
+    const skills=(card.dataset.skills||'').trim().split(/\s+/).filter(Boolean);
+    const enabled = (REQUIRED.size===0) ? true : skills.some(s=>REQUIRED.has(s));
     card.classList.toggle('is-disabled', !enabled);
+    const btn = card.querySelector('.choose');
     btn.disabled = !enabled;
     btn.setAttribute('aria-disabled', String(!enabled));
-    if(!enabled){ btn.setAttribute('title','Não realiza o(s) procedimento(s) selecionado(s)'); }
+    if(!enabled) btn.setAttribute('title', 'Não realiza o(s) procedimento(s) selecionado(s)');
   });
 })();
 
-/* ===== Seleção (igual services: botão Escolher) ===== */
+/* ===== Seleção (igual services) ===== */
 (() => {
   const btnNext = document.getElementById('btnNext');
   const btnBack = document.getElementById('btnBack');
-  const cards = [...document.querySelectorAll('.pro-list .item')].map(el => ({
+  const cards = [...document.querySelectorAll('.list .item')].map(el => ({
     id: el.dataset.id,
     skills: (el.dataset.skills||'').trim().split(/\s+/),
     btn: el.querySelector('.choose'),
     el
   }));
 
-  const selected = new Set(); // ids
+  const selected = new Set();
 
   function updateNext(){
     const n = selected.size;
@@ -145,7 +177,7 @@ document.getElementById('sum').textContent = `${BRL(total)} • ${count} serviç
     btnNext.textContent = n ? `Continuar (${n})` : 'Continuar';
   }
 
-  cards.forEach(({id,btn,el})=>{
+  cards.forEach(({id,btn})=>{
     btn.addEventListener('click', ()=>{
       if(btn.disabled) return;
       const on = btn.classList.toggle('is-on');
