@@ -1,57 +1,16 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Profissionais — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* ====== Ajustes responsivos para esta página ====== */
-
-    /* usa o mesmo visual da lista de serviços + espaço extra no fim p/ a barra fixa */
-    .professionals-page .list{ padding:12px 14px 100px; display:grid; gap:14px; align-content:start; }
-
-    /* card padrão herdado de .item: refinamos a linha do título */
-    .professionals-page .item .meta{ min-width:0 } /* evita sobreposição do botão */
-    .professionals-page .item .name{
-      display:flex; align-items:center; gap:8px; min-width:0;
-      font:600 14px/1.2 Poppins;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .professionals-page .item .desc{
-      margin:0; color:var(--muted); font-size:12px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-
-    /* pílula da nota (estreita, não quebra) */
-    .professionals-page .item .rate{
-      display:inline-grid; place-items:center; padding:0 8px; height:22px;
-      border-radius:999px; font:700 11px/1 Poppins; letter-spacing:.02em;
-      color:#f7c948; background:rgba(247,201,72,.12); border:1px solid rgba(247,201,72,.35);
-      flex:0 0 auto;
-    }
-
-    /* desativado (não faz o procedimento selecionado) */
-    .professionals-page .item.is-disabled{ opacity:.5; filter:grayscale(.1) }
-    .professionals-page .item.is-disabled .choose{ pointer-events:none; opacity:.65; border-style:dashed }
-
-    /* breakpoints pequenos: reduzimos avatar + botão para caber sem quebrar */
-    @media (max-width: 380px){
-      .professionals-page .item{ grid-template-columns:56px 1fr auto }
-      .professionals-page .thumb{ width:56px; height:56px }
-      .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px }
-      .professionals-page .item .name{ font-size:13px }
-    }
-    @media (max-width: 340px){
-      .professionals-page .choose{ min-width:84px; font-size:11px }
-      .professionals-page .item .desc{ display:none } /* ultra compacto */
-    }
-  </style>
 </head>
 <body>
 
 <main class="app professionals-page" aria-labelledby="title">
+  <!-- Topbar -->
   <header class="topbar">
     <a class="back ripple" href="services.html" aria-label="Voltar">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -59,149 +18,180 @@
     <h1 id="title">Profissionais</h1>
   </header>
 
-  <!-- Lista no padrão de serviços -->
-  <section class="list" aria-label="Profissionais">
+  <!-- Lista de profissionais (grid igual ao Services) -->
+  <section class="list" id="proList" aria-label="Lista de profissionais">
+    <!-- Fernando -->
     <article class="item reveal" data-id="fernando" data-skills="corte barba">
-      <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando" loading="lazy"></figure>
+      <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando"></figure>
       <div class="meta">
         <h3 class="name">Fernando <span class="rate">★ 4,8</span></h3>
         <p class="desc">Barbeiro • Corte e Barba</p>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
+      <button class="choose ripple" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span>Escolher</span>
       </button>
     </article>
 
-    <article class="item reveal" data-id="jonnier" data-skills="coloracao corte">
-      <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier" loading="lazy"></figure>
+    <!-- Jonnier -->
+    <article class="item reveal" data-id="jonnier" data-skills="corte coloracao">
+      <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier"></figure>
       <div class="meta">
         <h3 class="name">Jonnier <span class="rate">★ 4,7</span></h3>
         <p class="desc">Stylist • Corte e Coloração</p>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
+      <button class="choose ripple" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span>Escolher</span>
       </button>
     </article>
 
+    <!-- Marcos -->
     <article class="item reveal" data-id="marcos" data-skills="corte">
-      <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos" loading="lazy"></figure>
+      <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos"></figure>
       <div class="meta">
         <h3 class="name">Marcos <span class="rate">★ 4,6</span></h3>
         <p class="desc">Barbeiro • Corte masculino</p>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
+      <button class="choose ripple" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span>Escolher</span>
       </button>
     </article>
 
+    <!-- Aline -->
     <article class="item reveal" data-id="aline" data-skills="coloracao tratamento sobrancelha">
-      <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline" loading="lazy"></figure>
+      <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline"></figure>
       <div class="meta">
         <h3 class="name">Aline <span class="rate">★ 4,9</span></h3>
-        <p class="desc">Colorista • Coloração, Tratamento e Sobrancelha</p>
+        <p class="desc">Colorista • Coloração, Tratamentos</p>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
+      <button class="choose ripple" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span>Escolher</span>
       </button>
     </article>
   </section>
 
-  <!-- Rodapé (fixo) -->
+  <!-- Rodapé com resumo e ações -->
   <div class="pro-bar">
     <div class="summary" id="sum">R$ 0,00 • 0 serviço • 0 min</div>
-    <button class="btn ripple" id="btnBack">Voltar</button>
-    <button class="btn btn-primary ripple" id="btnNext" disabled>Continuar</button>
+    <button class="btn ripple" id="btnBack" type="button">Voltar</button>
+    <button class="btn btn-primary ripple" id="btnNext" type="button" disabled>Continuar</button>
   </div>
 </main>
 
+<!-- ===== JS ===== -->
 <script>
-/* ===== Helpers & estado dos serviços selecionados ===== */
-const BRL = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
-const getStore = key => localStorage.getItem(key) ?? sessionStorage.getItem(key);
+/* Helpers base */
+const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
+const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
 
-// tokens dos serviços (ex.: corte, barba, coloracao...)
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]'));
-const total = Number(getStore('svc.total')||0);
-const mins  = Number(getStore('svc.minutes')||0);
-const count = Number(getStore('svc.count')||0);
-document.getElementById('sum').textContent = `${BRL(total)} • ${count} serviço${count>1?'s':''} • ${mins} min`;
+/* Estado vindo de Serviços */
+const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ex.: ["corte","coloracao"]
+const total   = Number(getStore('svc.total')   || 0);
+const minutes = Number(getStore('svc.minutes') || 0);
+const count   = Number(getStore('svc.count')   || 0);
+document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
 
-/* ===== Reveal ===== */
+/* Reveal suave */
 (() => {
-  const io=new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); } }), {threshold:.12, rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  const obs = new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 })();
 
-/* ===== Ripple ===== */
+/* Ripple */
 (() => {
-  const add=(btn,e)=>{ const r=document.createElement('span'); r.className='r';
-    const b=btn.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
-    btn.appendChild(r); r.addEventListener('animationend',()=>r.remove(),{once:true}); };
-  document.addEventListener('click',(e)=>{ const btn=e.target.closest('.ripple'); if(btn) add(btn,e); },{passive:true});
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('.ripple'); if(!el) return;
+    const r  = document.createElement('span'); r.className = 'r';
+    const b  = el.getBoundingClientRect();
+    r.style.left = (e.clientX - b.left) + 'px';
+    r.style.top  = (e.clientY - b.top)  + 'px';
+    el.appendChild(r);
+    r.addEventListener('animationend', () => r.remove(), { once:true });
+  }, { passive:true });
 })();
 
-/* ===== Habilita/Desabilita conforme serviços ===== */
+/* Profissionais: ativação/desativação + seleção */
 (() => {
-  const cards = [...document.querySelectorAll('.list .item')];
-  cards.forEach(card=>{
-    const skills=(card.dataset.skills||'').trim().split(/\s+/).filter(Boolean);
-    const enabled = (REQUIRED.size===0) ? true : skills.some(s=>REQUIRED.has(s));
-    card.classList.toggle('is-disabled', !enabled);
-    const btn = card.querySelector('.choose');
-    btn.disabled = !enabled;
-    btn.setAttribute('aria-disabled', String(!enabled));
-    if(!enabled) btn.setAttribute('title', 'Não realiza o(s) procedimento(s) selecionado(s)');
-  });
-})();
-
-/* ===== Seleção (igual services) ===== */
-(() => {
-  const btnNext = document.getElementById('btnNext');
-  const btnBack = document.getElementById('btnBack');
-  const cards = [...document.querySelectorAll('.list .item')].map(el => ({
+  const cards = [...document.querySelectorAll('.professionals-page .item')].map(el => ({
     id: el.dataset.id,
-    skills: (el.dataset.skills||'').trim().split(/\s+/),
-    btn: el.querySelector('.choose'),
-    el
+    skills: (el.dataset.skills||'').split(/\s+/).filter(Boolean),
+    el,
+    btn: el.querySelector('.choose')
   }));
 
-  const selected = new Set();
-
-  function updateNext(){
-    const n = selected.size;
-    btnNext.disabled = n===0;
-    btnNext.textContent = n ? `Continuar (${n})` : 'Continuar';
+  // Desativar quem NÃO faz nenhum dos serviços requeridos
+  const hasRequirements = REQUIRED.size > 0;
+  if (hasRequirements) {
+    cards.forEach(c => {
+      const ok = c.skills.some(s => REQUIRED.has(s));
+      if (!ok) {
+        c.el.classList.add('is-disabled');
+        c.btn.setAttribute('disabled','');
+      }
+    });
   }
 
-  cards.forEach(({id,btn})=>{
-    btn.addEventListener('click', ()=>{
-      if(btn.disabled) return;
-      const on = btn.classList.toggle('is-on');
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      if(on) selected.add(id); else selected.delete(id);
-      updateNext();
+  // Seleção (multi) + CTA
+  const selected = new Set();
+  const btnNext  = document.getElementById('btnNext');
+  const btnBack  = document.getElementById('btnBack');
+
+  function syncUI(){
+    cards.forEach(c => c.btn.classList.toggle('is-on', selected.has(c.id)));
+    btnNext.disabled = selected.size === 0;
+    btnNext.textContent = selected.size ? `Continuar (${selected.size})` : 'Continuar';
+  }
+
+  cards.forEach(c => {
+    c.btn.addEventListener('click', () => {
+      if (c.el.classList.contains('is-disabled')) return;
+      selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
+      syncUI();
     });
   });
 
-  btnBack.addEventListener('click', ()=>{ window.location.href='services.html'; });
+  function unionSkills(ids){
+    const set = new Set();
+    ids.forEach(id => {
+      const c = cards.find(x => x.id === id);
+      (c?.skills || []).forEach(s => set.add(s));
+    });
+    return set;
+  }
+  const label = s => ({corte:'corte', barba:'barba', coloracao:'coloração', tratamento:'tratamento', sobrancelha:'sobrancelha'}[s] || s);
 
-  btnNext.addEventListener('click', ()=>{
-    if(selected.size===0) return;
+  btnNext.addEventListener('click', () => {
+    if (selected.size === 0) return;
+
+    // Validação: seleção cobre todos os serviços?
+    const covered = unionSkills([...selected]);
+    const missing = [...REQUIRED].filter(s => !covered.has(s));
+    if (missing.length){
+      alert('Você selecionou profissionais que não cobrem: ' + missing.map(label).join(', ') + '.');
+      return;
+    }
+
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
+    localStorage.setItem('proMode', 'per'); // multi por serviço
     window.location.href = 'agendamentos.html';
   });
 
-  updateNext();
-})();
+  btnBack.addEventListener('click', () => window.location.href = 'services.html');
 
-/* ===== fallback para imagens quebradas ===== */
-document.querySelectorAll('.thumb img').forEach(img=>{
-  img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
-});
+  syncUI();
+
+  // Fallback de imagem
+  document.querySelectorAll('.thumb img').forEach(img=>{
+    img.addEventListener('error', ()=>{
+      const box = img.parentElement; img.remove(); box.classList.add('no-img');
+    });
+  });
+})();
 </script>
 </body>
 </html>
