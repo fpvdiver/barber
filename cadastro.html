@@ -203,7 +203,6 @@
       setLoading(true);
    const resp = await fetch('https://primary-jow9-barber.up.railway.app/webhook/user/create', {
   method: 'POST',
-  // 'text/plain' é "simple" e não dispara preflight
   headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
   body: JSON.stringify({
     full_name: name,
@@ -236,4 +235,5 @@
 </script>
 </body>
 </html>
+
 
