@@ -201,10 +201,12 @@
     // envia para o n8n (Webhook)
     try{
       setLoading(true);
-   const resp = await fetch('https://primary-jow9-barber.up.railway.app/webhook/user/create', {
-  method: 'POST',
-  headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-  body: JSON.stringify({
+   const resp = await fetch('/api/n8n-proxy', {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({...})
+})
+
     full_name: name,
     email,
     phone,
@@ -235,5 +237,6 @@
 </script>
 </body>
 </html>
+
 
 
