@@ -43,6 +43,9 @@
     .msg.err{color:#ffb3b3}
     .msg.ok{color:#b6f4c6}
 
+    .btn[disabled]{opacity:.7;cursor:not-allowed;filter:grayscale(.3)}
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
     .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
       background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
       animation:ripple-kf 600ms ease-out forwards}
@@ -113,8 +116,11 @@
 
       <label class="check"><input type="checkbox" id="terms"> Aceito os termos de uso</label>
 
-      <button class="btn btn-primary btn-full ripple" type="submit">Criar conta</button>
-      <div class="msg" id="msg"></div>
+      <button class="btn btn-primary btn-full ripple" type="submit" id="submitBtn">
+        <span class="btn-text">Criar conta</span>
+        <span class="visually-hidden" aria-live="polite" id="loadingText"></span>
+      </button>
+      <div class="msg" id="msg" aria-live="polite"></div>
 
       <div class="row" style="margin-top:12px;grid-template-columns:auto auto;justify-content:space-between">
         <span class="muted">Já tem conta?</span>
@@ -141,43 +147,83 @@
     });
   });
 
+  // máscara simples p/ telefone brasileiro
+  (function maskPhone(){
+    const el = document.getElementById('phone');
+    el.addEventListener('input', () => {
+      let d = el.value.replace(/\D+/g,'').slice(0,11);
+      if (d.length > 6) el.value = `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+      else if (d.length > 2) el.value = `(${d.slice(0,2)}) ${d.slice(2)}`;
+      else el.value = d;
+    });
+  })();
+
   const form = document.getElementById('signupForm');
   const msg  = document.getElementById('msg');
+  const btn  = document.getElementById('submitBtn');
+  const loadingText = document.getElementById('loadingText');
 
-  form.addEventListener('submit', (e)=>{
+  function setLoading(on){
+    btn.disabled = on;
+    loadingText.textContent = on ? 'Enviando…' : '';
+    const span = btn.querySelector('.btn-text');
+    if(on) span.textContent = 'Enviando…';
+    else span.textContent = 'Criar conta';
+  }
+
+  form.addEventListener('submit', async (e)=>{
     e.preventDefault(); msg.textContent='';
 
-    const name = document.getElementById('name').value.trim();
-    const email= document.getElementById('email').value.trim().toLowerCase();
-    const phone= document.getElementById('phone').value.trim();
-    const pass = document.getElementById('pass').value;
-    const pass2= document.getElementById('pass2').value;
-    const terms= document.getElementById('terms').checked;
+    const full_name = document.getElementById('name').value.trim();
+    const email     = document.getElementById('email').value.trim().toLowerCase();
+    const phone     = document.getElementById('phone').value.trim();
+    const password  = document.getElementById('pass').value;
+    const pass2     = document.getElementById('pass2').value;
+    const terms     = document.getElementById('terms').checked;
 
     // validações simples
-    if(!name || !email || !pass || !pass2){
+    if(!full_name || !email || !password || !pass2){
       msg.className='msg err'; msg.textContent='Preencha todos os campos obrigatórios.'; return;
     }
     if(!/^\S+@\S+\.\S+$/.test(email)){
       msg.className='msg err'; msg.textContent='E-mail inválido.'; return;
     }
-    if(pass.length < 6){
+    if(password.length < 6){
       msg.className='msg err'; msg.textContent='A senha deve ter pelo menos 6 caracteres.'; return;
     }
-    if(pass!==pass2){
+    if(password!==pass2){
       msg.className='msg err'; msg.textContent='As senhas não conferem.'; return;
     }
     if(!terms){
       msg.className='msg err'; msg.textContent='Você precisa aceitar os termos para continuar.'; return;
     }
 
-    // salva usuário (DEMO — apenas front-end)
-    const user = { name, email, phone, password: pass, createdAt: Date.now() };
-    localStorage.setItem('auth.user', JSON.stringify(user));
-    localStorage.setItem('auth.logged','1');
+    // envia para o n8n (Webhook)
+    try{
+      setLoading(true);
+      const res = await fetch('https://primary-jow9-barber.up.railway.app/webhook/user/create', { // <- TROCAR pela sua URL do Webhook
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ full_name, email, phone, password })
+      });
 
-    msg.className='msg ok'; msg.textContent='Conta criada! Redirecionando…';
-    setTimeout(()=>{ window.location.href='index.html'; }, 800);
+      let data = {};
+      try { data = await res.json(); } catch(_) {}
+
+      if (!res.ok) {
+        const serverMsg = data?.message || data?.error || 'Falha no cadastro.';
+        throw new Error(serverMsg);
+      }
+
+      msg.className='msg ok';
+      msg.textContent = data?.message || 'Conta criada! Faça login para continuar.';
+      setTimeout(()=>{ window.location.href='login.html'; }, 1000);
+    }catch(err){
+      msg.className='msg err';
+      msg.textContent = String(err.message || err || 'Erro inesperado.');
+    }finally{
+      setLoading(false);
+    }
   });
 </script>
 </body>
