@@ -201,17 +201,18 @@
     // envia para o n8n (Webhook)
     try{
       setLoading(true);
-   const resp = await fetch('/api/n8n-proxy', {
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body: JSON.stringify({...})
+  const resp = await fetch('/api/n8n-proxy', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
     full_name: name,
     email,
     phone,
-    password: pass
+    password: pass,
   }),
   mode: 'cors',
 });
+
 
 
       let data = {};
@@ -235,6 +236,7 @@
 </script>
 </body>
 </html>
+
 
 
 
