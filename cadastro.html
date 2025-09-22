@@ -201,11 +201,19 @@
     // envia para o n8n (Webhook)
     try{
       setLoading(true);
-      const res = await fetch('https://primary-jow9-barber.up.railway.app/webhook/user/create', { // <- TROCAR pela sua URL do Webhook
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ full_name, email, phone, password })
-      });
+   const resp = await fetch('https://primary-jow9-barber.up.railway.app/webhook/user/create', {
+  method: 'POST',
+  // 'text/plain' é "simple" e não dispara preflight
+  headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+  body: JSON.stringify({
+    full_name: name,
+    email,
+    phone,
+    password: pass
+  }),
+  mode: 'cors',
+});
+
 
       let data = {};
       try { data = await res.json(); } catch(_) {}
@@ -228,3 +236,4 @@
 </script>
 </body>
 </html>
+
