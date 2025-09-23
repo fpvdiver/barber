@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Serviços — CRUD (Supabase + n8n)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#131720; --line:#1f2430;
+    --text:#f5f7fb; --muted:#a7b0c0;
+    --brand:#0a6ebd; --brand-2:#094f8a; --ok:#16a34a; --warn:#f59e0b; --danger:#ef4444;
+    --radius:14px; --chip:#1a2030; --shadow:0 18px 50px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:14px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  .wrap{max-width:1040px;margin:28px auto;padding:18px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  h1{font-size:20px;margin:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input,select,textarea{background:#0d111a;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;width:100%}
+  label{font-size:12px;color:var(--muted)}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--brand);color:#fff;
+       padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+  .btn.secondary{background:#0d111a;color:#fff}
+  .btn.danger{background:var(--danger);border-color:#9f1239}
+  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;border-top:1px solid var(--line)}
+  thead th{background:#0c1220;color:#cbd5e1;text-align:left;border-top:none}
+  tbody tr:nth-child(odd) td{background:#0f1422}
+  .pill{padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid var(--line);background:var(--chip);color:#d1d8e6}
+  .right{display:flex;gap:8px;align-items:center}
+  .muted{color:var(--muted)}
+  .search{display:flex;gap:8px}
+  .w-120{width:120px}
+  .mt-8{margin-top:8px}
+  .mt-12{margin-top:12px}
+  .mb-8{margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>💈 Serviços</h1>
+    <div class="search">
+      <input id="q" placeholder="Buscar por nome…" />
+      <select id="filterActive" class="w-120">
+        <option value="">Todos</option>
+        <option value="true">Ativos</option>
+        <option value="false">Inativos</option>
+      </select>
+      <button class="btn" id="btnReload">Recarregar</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Lista -->
+    <section class="card">
+      <div class="row right mb-8">
+        <span class="muted">Listagem</span>
+        <span id="count" class="pill">0</span>
+      </div>
+      <div style="overflow:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Duração</th>
+              <th>Ativo</th>
+              <th class="right">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Form -->
+    <aside class="card">
+      <h3 class="mb-8" style="margin:0">Cadastrar / Editar</h3>
+      <form id="frm" class="row" onsubmit="return false">
+        <input type="hidden" id="id">
+        <div style="width:100%">
+          <label>Nome</label>
+          <input id="name" required placeholder="Ex.: Corte + Barba Deluxe">
+        </div>
+        <div style="width:100%">
+          <label>Descrição</label>
+          <textarea id="description" rows="3" placeholder="Detalhes do serviço, produtos, diferenciais…"></textarea>
+        </div>
+        <div style="width:50%">
+          <label>Preço (R$)</label>
+          <input id="price" type="number" min="0" step="0.01" required>
+        </div>
+        <div style="width:50%">
+          <label>Duração (min)</label>
+          <input id="duration" type="number" min="5" step="5" required>
+        </div>
+        <div style="width:60%">
+          <label>Categoria</label>
+          <input id="category" placeholder="Ex.: Cabelo, Barba, Combo">
+        </div>
+        <div style="width:40%">
+          <label>Ativo</label>
+          <select id="active">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+        </div>
+        <div class="row mt-12">
+          <button class="btn" id="btnSave">Salvar</button>
+          <button class="btn secondary" id="btnClear" type="button">Limpar</button>
+          <button class="btn danger" id="btnDelete" type="button" disabled>Excluir</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</div>
+
+<script>
+/** CONFIG **/
+const N8N_BASE_URL = 'https://SEU-N8N/webhook/services';
+const PUBLIC_API_KEY = 'troque-isto-por-um-segredo'; // mesmo de API_KEY_PUBLIC no n8n
+
+/** Helpers **/
+const $ = sel => document.querySelector(sel);
+const fmtBRL = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function formToPayload() {
+  const price = parseFloat($('#price').value || '0');
+  return {
+    id: $('#id').value || undefined,
+    name: $('#name').value.trim(),
+    description: $('#description').value.trim() || null,
+    price_cents: Math.round(price * 100),
+    duration_min: parseInt($('#duration').value,10),
+    category: $('#category').value.trim() || null,
+    active: $('#active').value === 'true'
+  };
+}
+
+function fillForm(s) {
+  $('#id').value = s.id || '';
+  $('#name').value = s.name || '';
+  $('#description').value = s.description || '';
+  $('#price').value = s.price_cents ? (s.price_cents/100).toFixed(2) : '';
+  $('#duration').value = s.duration_min || '';
+  $('#category').value = s.category || '';
+  $('#active').value = String(!!s.active);
+  $('#btnDelete').disabled = !s.id;
+}
+
+/** CRUD via n8n **/
+async function listServices() {
+  const q = encodeURIComponent($('#q').value.trim());
+  const active = $('#filterActive').value;
+  const url = new URL(N8N_BASE_URL);
+  url.searchParams.set('limit','500');
+  if(q) url.searchParams.set('search', q);
+  if(active) url.searchParams.set('active', active);
+
+  const res = await fetch(url, { method: 'GET' });
+  if(!res.ok) { alert('Erro ao listar'); return; }
+  const data = await res.json();
+  renderTable(Array.isArray(data) ? data : (data.data || []));
+}
+
+async function createService(payload) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ throw new Error('Falha ao criar'); }
+  return res.json();
+}
+
+async function updateService(payload) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'PATCH',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ throw new Error('Falha ao atualizar'); }
+  return res.json();
+}
+
+async function deleteService(id) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'DELETE',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify({ id })
+  });
+  if(!res.ok){ throw new Error('Falha ao excluir'); }
+  return res.json();
+}
+
+/** UI **/
+function renderTable(items) {
+  const tbody = $('#tbl tbody');
+  tbody.innerHTML = '';
+  $('#count').textContent = items.length;
+  for (const s of items) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.name ?? ''}</td>
+      <td>${s.category ?? '-'}</td>
+      <td>${fmtBRL(s.price_cents ?? 0)}</td>
+      <td>${s.duration_min ?? '-'} min</td>
+      <td><span class="pill" style="background:${s.active?'#0f2a18':'#2a0f10'};border-color:${s.active?'#195f3a':'#6b1b1b'}">${s.active?'Ativo':'Inativo'}</span></td>
+      <td class="right">
+        <button class="btn secondary" data-edit="${s.id}">Editar</button>
+        <button class="btn danger" data-del="${s.id}">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+
+  // actions
+  tbody.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-edit');
+      const s = items.find(x=>x.id===id);
+      if(s) fillForm(s);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+  tbody.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-del');
+      if(confirm('Excluir este serviço?')) {
+        try {
+          await deleteService(id);
+          await listServices();
+          if($('#id').value===id) fillForm({});
+        } catch(e){ alert(e.message); }
+      }
+    });
+  });
+}
+
+/** Eventos **/
+$('#btnReload').addEventListener('click', listServices);
+$('#q').addEventListener('input', ()=>{ clearTimeout(window._t); window._t=setTimeout(listServices, 300); });
+$('#filterActive').addEventListener('change', listServices);
+$('#btnClear').addEventListener('click', ()=> fillForm({}));
+
+$('#btnSave').addEventListener('click', async ()=>{
+  const payload = formToPayload();
+  try{
+    if(payload.id) await updateService(payload);
+    else await createService(payload);
+    fillForm({});
+    await listServices();
+    alert('Salvo com sucesso!');
+  }catch(e){ alert(e.message); }
+});
+
+$('#btnDelete').addEventListener('click', async ()=>{
+  const id = $('#id').value;
+  if(!id) return;
+  if(confirm('Excluir este serviço?')){
+    try{ await deleteService(id); fillForm({}); await listServices(); }
+    catch(e){ alert(e.message); }
+  }
+});
+
+listServices();
+</script>
+</body>
+</html>
