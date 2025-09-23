@@ -124,7 +124,6 @@
 <script>
 /** CONFIG **/
 const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/services';
-const PUBLIC_API_KEY = 'troque-isto-por-um-segredo'; // mesmo de API_KEY_PUBLIC no n8n
 
 /** Helpers **/
 const $ = sel => document.querySelector(sel);
@@ -156,18 +155,68 @@ function fillForm(s) {
 
 /** CRUD via n8n **/
 async function listServices() {
-  const q = encodeURIComponent($('#q').value.trim());
-  const active = $('#filterActive').value;
-  const url = new URL(N8N_BASE_URL);
-  url.searchParams.set('limit','500');
-  if(q) url.searchParams.set('search', q);
-  if(active) url.searchParams.set('active', active);
+  try {
+    const q = encodeURIComponent($('#q').value.trim());
+    const active = $('#filterActive').value;
 
-  const res = await fetch(url, { method: 'GET' });
-  if(!res.ok) { alert('Erro ao listar'); return; }
-  const data = await res.json();
-  renderTable(Array.isArray(data) ? data : (data.data || []));
+    const url = new URL(N8N_BASE_URL);
+    url.searchParams.set('limit', '500');
+    if (q) url.searchParams.set('search', q);
+    if (active) url.searchParams.set('active', active);
+    // buster para não pegar cache do CDN
+    url.searchParams.set('_', String(Date.now()));
+
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      mode: 'cors',
+      // NÃO envie headers custom aqui para evitar preflight.
+      // Se seu fluxo exigir x-api-key também no GET, descomente:
+      // headers: { 'x-api-key': PUBLIC_API_KEY }
+    });
+
+    // debug útil:
+    console.log('[services] status', res.status, res.headers.get('content-type'));
+
+    if (!res.ok) {
+      const t = await res.text().catch(()=> '');
+      throw new Error(`GET ${res.status}: ${t || 'Falha ao listar'}`);
+    }
+
+    // tente json
+    let body;
+    try { body = await res.json(); } catch { body = null; }
+
+    // normalização: o Respond pode vir como array direto,
+    // ou { data: [...] }, ou array de items no formato do n8n.
+    let items = [];
+
+    if (Array.isArray(body)) {
+      // pode ser array de objetos ou array de {json:{...}}
+      if (body.length && body[0] && body[0].json) {
+        items = body.map(x => x.json);
+      } else {
+        items = body;
+      }
+    } else if (body && Array.isArray(body.data)) {
+      items = body.data;
+    } else if (body && typeof body === 'object') {
+      // às vezes vem como {0:{...},1:{...}} (quando usaram {{$items()}})
+      const vals = Object.values(body);
+      if (vals.length && typeof vals[0] === 'object') {
+        // pode ser { json: {...} }
+        items = vals.map(v => v && v.json ? v.json : v);
+      }
+    }
+
+    console.log('[services] items', items);
+    renderTable(items);
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao carregar serviços: ' + (err.message || err));
+    renderTable([]); // zera a tabela para não confundir
+  }
 }
+
 
 async function createService(payload) {
   const res = await fetch(N8N_BASE_URL, {
@@ -272,4 +321,5 @@ listServices();
 </script>
 </body>
 </html>
+
 
