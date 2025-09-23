@@ -1,304 +1,274 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Serviços — Mineiro Barbershop</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* Ripple seguro e discreto */
-    .r{position:absolute;pointer-events:none;width:8px;height:8px;border-radius:999px;transform:translate(-50%,-50%);background:currentColor;opacity:.25;animation:ripple .6s ease-out forwards}
-    @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:280px;height:280px;opacity:0}}
-    .chip{position:relative}
-
-    /* --- FIX: lista cola no topo, nunca no rodapé --- */
-    .list{
-      /* força layout previsível e colado nos filtros */
-      display:grid !important;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      align-content:start !important;    /* gruda no topo mesmo com altura livre */
-      justify-content:stretch !important;
-      min-height:auto !important;        /* neutraliza heights herdados */
-      margin-top:0 !important;           /* neutraliza margin-top:auto */
-      align-self:auto !important;        /* caso o parent seja grid/flex */
-    }
-    /* se quiser colunas em telas maiores, descomente:
-    @media (min-width: 720px){ .list{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media (min-width: 1080px){ .list{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    */
-
-    /* cartões sem “empurrão” vertical extra */
-    .list .item{ margin-top:0 !important; }
-
-    /* Se seu container pai for flex em coluna com justify-content:end,
-       esses dois garantem que a lista não desça: */
-    .app{ justify-content:flex-start !important; }
-    .app > .list{ order:initial; }
-
-    /* opcional: âncora de rolagem quando usamos scrollIntoView */
-    .list{ scroll-margin-top:84px; } /* ajuste conforme altura da topbar */
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Serviços — CRUD (Supabase + n8n)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#131720; --line:#1f2430;
+    --text:#f5f7fb; --muted:#a7b0c0;
+    --brand:#0a6ebd; --brand-2:#094f8a; --ok:#16a34a; --warn:#f59e0b; --danger:#ef4444;
+    --radius:14px; --chip:#1a2030; --shadow:0 18px 50px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:14px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  .wrap{max-width:1040px;margin:28px auto;padding:18px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  h1{font-size:20px;margin:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input,select,textarea{background:#0d111a;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;width:100%}
+  label{font-size:12px;color:var(--muted)}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--brand);color:#fff;
+       padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+  .btn.secondary{background:#0d111a;color:#fff}
+  .btn.danger{background:var(--danger);border-color:#9f1239}
+  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;border-top:1px solid var(--line)}
+  thead th{background:#0c1220;color:#cbd5e1;text-align:left;border-top:none}
+  tbody tr:nth-child(odd) td{background:#0f1422}
+  .pill{padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid var(--line);background:var(--chip);color:#d1d8e6}
+  .right{display:flex;gap:8px;align-items:center}
+  .muted{color:var(--muted)}
+  .search{display:flex;gap:8px}
+  .w-120{width:120px}
+  .mt-8{margin-top:8px}
+  .mt-12{margin-top:12px}
+  .mb-8{margin-bottom:8px}
+</style>
 </head>
 <body>
-
-<main class="app services-page" aria-labelledby="page-title">
-
-  <!-- Topbar -->
-  <header class="topbar">
-    <a class="back ripple" href="index.html" aria-label="Voltar">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </a>
-    <h1 id="page-title">Serviços</h1>
+<div class="wrap">
+  <header>
+    <h1>💈 Serviços</h1>
+    <div class="search">
+      <input id="q" placeholder="Buscar por nome…" />
+      <select id="filterActive" class="w-120">
+        <option value="">Todos</option>
+        <option value="true">Ativos</option>
+        <option value="false">Inativos</option>
+      </select>
+      <button class="btn" id="btnReload">Recarregar</button>
+    </div>
   </header>
 
-  <!-- Filtros -->
-  <nav class="filters" aria-label="Filtrar categorias">
-    <button class="chip ripple is-on" type="button" data-filter="all" aria-pressed="true">Todos</button>
-    <button class="chip ripple" type="button" data-filter="cabelo" aria-pressed="false">Cabelo</button>
-    <button class="chip ripple" type="button" data-filter="barba" aria-pressed="false">Barba</button>
-    <button class="chip ripple" type="button" data-filter="coloracao" aria-pressed="false">Coloração</button>
-    <button class="chip ripple" type="button" data-filter="tratamento" aria-pressed="false">Tratamento</button>
-    <button class="chip ripple" type="button" data-filter="sobrancelha" aria-pressed="false">Sobrancelha</button>
-  </nav>
-
-  <!-- Lista -->
-  <section class="list" aria-label="Lista de serviços">
-    <!-- Corte -->
-    <article class="item reveal" data-id="corte" data-price="50" data-min="30" data-tags="cabelo">
-      <figure class="thumb"><img src="img/svc-corte.jpg" alt="Corte masculino"></figure>
-      <div class="meta">
-        <h3 class="name">Corte</h3>
-        <span class="price-badge" data-p></span>
-        <p class="desc">Máquina e tesoura — aprox. 30min</p>
+  <div class="grid">
+    <!-- Lista -->
+    <section class="card">
+      <div class="row right mb-8">
+        <span class="muted">Listagem</span>
+        <span id="count" class="pill">0</span>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Barba -->
-    <article class="item reveal" data-id="barba" data-price="40" data-min="25" data-tags="barba">
-      <figure class="thumb"><img src="img/svc-barba.jpg" alt="Barba"></figure>
-      <div class="meta">
-        <h3 class="name">Barba</h3>
-        <span class="price-badge" data-p></span>
-        <p class="desc">Navalha e toalha quente — 25min</p>
+      <div style="overflow:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Duração</th>
+              <th>Ativo</th>
+              <th class="right">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
+    </section>
 
-    <!-- Coloração -->
-    <article class="item reveal" data-id="coloracao" data-price="90" data-min="45" data-tags="coloracao cabelo">
-      <figure class="thumb"><img src="img/svc-color.jpg" alt="Coloração"></figure>
-      <div class="meta">
-        <h3 class="name">Coloração</h3>
-        <span class="price-badge" data-p></span>
-        <p class="desc">Cobertura ou tonalizante — 45min</p>
-      </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Tratamento -->
-    <article class="item reveal" data-id="tratamento" data-price="70" data-min="35" data-tags="tratamento cabelo">
-      <figure class="thumb"><img src="img/svc-trat.jpg" alt="Tratamento capilar"></figure>
-      <div class="meta">
-        <h3 class="name">Tratamento</h3>
-        <span class="price-badge" data-p></span>
-        <p class="desc">Hidratação/antiqueda — 35min</p>
-      </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Sobrancelha -->
-    <article class="item reveal" data-id="sobrancelha" data-price="30" data-min="15" data-tags="sobrancelha">
-      <figure class="thumb"><img src="img/svc-sobr.jpg" alt="Sobrancelha"></figure>
-      <div class="meta">
-        <h3 class="name">Sobrancelha</h3>
-        <span class="price-badge" data-p></span>
-        <p class="desc">Design masculino — 15min</p>
-      </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-  </section>
-
-  <!-- CTA inferior -->
-  <div class="cta-bar">
-    <button class="btn" data-del disabled>Deletar</button>
-    <button class="btn btn-primary" data-next disabled>Avançar</button>
+    <!-- Form -->
+    <aside class="card">
+      <h3 class="mb-8" style="margin:0">Cadastrar / Editar</h3>
+      <form id="frm" class="row" onsubmit="return false">
+        <input type="hidden" id="id">
+        <div style="width:100%">
+          <label>Nome</label>
+          <input id="name" required placeholder="Ex.: Corte + Barba Deluxe">
+        </div>
+        <div style="width:100%">
+          <label>Descrição</label>
+          <textarea id="description" rows="3" placeholder="Detalhes do serviço, produtos, diferenciais…"></textarea>
+        </div>
+        <div style="width:50%">
+          <label>Preço (R$)</label>
+          <input id="price" type="number" min="0" step="0.01" required>
+        </div>
+        <div style="width:50%">
+          <label>Duração (min)</label>
+          <input id="duration" type="number" min="5" step="5" required>
+        </div>
+        <div style="width:60%">
+          <label>Categoria</label>
+          <input id="category" placeholder="Ex.: Cabelo, Barba, Combo">
+        </div>
+        <div style="width:40%">
+          <label>Ativo</label>
+          <select id="active">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+        </div>
+        <div class="row mt-12">
+          <button class="btn" id="btnSave">Salvar</button>
+          <button class="btn secondary" id="btnClear" type="button">Limpar</button>
+          <button class="btn danger" id="btnDelete" type="button" disabled>Excluir</button>
+        </div>
+      </form>
+    </aside>
   </div>
+</div>
 
-  <p class="hide-text" aria-live="polite" id="sr-status"></p>
-</main>
-
-<!-- ===== JS ===== -->
 <script>
-/* Reveal on scroll */
-(() => {
-  const obs = new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('is-in');
-        obs.unobserve(e.target);
+/** CONFIG **/
+const N8N_BASE_URL = 'https://SEU-N8N/webhook/services';
+const PUBLIC_API_KEY = 'troque-isto-por-um-segredo'; // mesmo de API_KEY_PUBLIC no n8n
+
+/** Helpers **/
+const $ = sel => document.querySelector(sel);
+const fmtBRL = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function formToPayload() {
+  const price = parseFloat($('#price').value || '0');
+  return {
+    id: $('#id').value || undefined,
+    name: $('#name').value.trim(),
+    description: $('#description').value.trim() || null,
+    price_cents: Math.round(price * 100),
+    duration_min: parseInt($('#duration').value,10),
+    category: $('#category').value.trim() || null,
+    active: $('#active').value === 'true'
+  };
+}
+
+function fillForm(s) {
+  $('#id').value = s.id || '';
+  $('#name').value = s.name || '';
+  $('#description').value = s.description || '';
+  $('#price').value = s.price_cents ? (s.price_cents/100).toFixed(2) : '';
+  $('#duration').value = s.duration_min || '';
+  $('#category').value = s.category || '';
+  $('#active').value = String(!!s.active);
+  $('#btnDelete').disabled = !s.id;
+}
+
+/** CRUD via n8n **/
+async function listServices() {
+  const q = encodeURIComponent($('#q').value.trim());
+  const active = $('#filterActive').value;
+  const url = new URL(N8N_BASE_URL);
+  url.searchParams.set('limit','500');
+  if(q) url.searchParams.set('search', q);
+  if(active) url.searchParams.set('active', active);
+
+  const res = await fetch(url, { method: 'GET' });
+  if(!res.ok) { alert('Erro ao listar'); return; }
+  const data = await res.json();
+  renderTable(Array.isArray(data) ? data : (data.data || []));
+}
+
+async function createService(payload) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ throw new Error('Falha ao criar'); }
+  return res.json();
+}
+
+async function updateService(payload) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'PATCH',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ throw new Error('Falha ao atualizar'); }
+  return res.json();
+}
+
+async function deleteService(id) {
+  const res = await fetch(N8N_BASE_URL, {
+    method: 'DELETE',
+    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify({ id })
+  });
+  if(!res.ok){ throw new Error('Falha ao excluir'); }
+  return res.json();
+}
+
+/** UI **/
+function renderTable(items) {
+  const tbody = $('#tbl tbody');
+  tbody.innerHTML = '';
+  $('#count').textContent = items.length;
+  for (const s of items) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.name ?? ''}</td>
+      <td>${s.category ?? '-'}</td>
+      <td>${fmtBRL(s.price_cents ?? 0)}</td>
+      <td>${s.duration_min ?? '-'} min</td>
+      <td><span class="pill" style="background:${s.active?'#0f2a18':'#2a0f10'};border-color:${s.active?'#195f3a':'#6b1b1b'}">${s.active?'Ativo':'Inativo'}</span></td>
+      <td class="right">
+        <button class="btn secondary" data-edit="${s.id}">Editar</button>
+        <button class="btn danger" data-del="${s.id}">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  }
+
+  // actions
+  tbody.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-edit');
+      const s = items.find(x=>x.id===id);
+      if(s) fillForm(s);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+  tbody.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-del');
+      if(confirm('Excluir este serviço?')) {
+        try {
+          await deleteService(id);
+          await listServices();
+          if($('#id').value===id) fillForm({});
+        } catch(e){ alert(e.message); }
       }
     });
-  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-})();
-</script>
-
-<script>
-/* Ripple seguro */
-(() => {
-  const add = (btn, e) => {
-    const r = document.createElement('span');
-    r.className = 'r';
-    const b = btn.getBoundingClientRect();
-    r.style.left = (e.clientX - b.left) + 'px';
-    r.style.top  = (e.clientY - b.top)  + 'px';
-    btn.appendChild(r);
-    r.addEventListener('animationend', () => r.remove(), { once: true });
-  };
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.ripple');
-    if (!btn) return;
-    add(btn, e);
-  }, { passive: true });
-})();
-</script>
-
-<script>
-/* Preenche badges de preço */
-(() => {
-  const money = v => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.querySelectorAll('.item').forEach(card=>{
-    const price = card.dataset.price;
-    const badge = card.querySelector('[data-p]');
-    if(badge){ badge.textContent = money(price); }
   });
-})();
-</script>
+}
 
-<script>
-/* Filtro por chips — força display e mantém conteúdo no topo */
-(() => {
-  const bar   = document.querySelector('.filters');
-  const list  = document.querySelector('.list');
-  const items = Array.from(document.querySelectorAll('.item'));
+/** Eventos **/
+$('#btnReload').addEventListener('click', listServices);
+$('#q').addEventListener('input', ()=>{ clearTimeout(window._t); window._t=setTimeout(listServices, 300); });
+$('#filterActive').addEventListener('change', listServices);
+$('#btnClear').addEventListener('click', ()=> fillForm({}));
 
-  function apply(val){
-    // chips
-    bar.querySelectorAll('.chip').forEach(c=>{
-      const on = c.dataset.filter === val;
-      c.classList.toggle('is-on', on);
-      c.setAttribute('aria-pressed', on);
-    });
+$('#btnSave').addEventListener('click', async ()=>{
+  const payload = formToPayload();
+  try{
+    if(payload.id) await updateService(payload);
+    else await createService(payload);
+    fillForm({});
+    await listServices();
+    alert('Salvo com sucesso!');
+  }catch(e){ alert(e.message); }
+});
 
-    // itens
-    items.forEach(it=>{
-      const tags = (it.dataset.tags || '').trim().split(/\s+/);
-      const show = (val === 'all') || tags.includes(val);
-      it.style.display = show ? '' : 'none';
-      it.setAttribute('aria-hidden', show ? 'false' : 'true');
-    });
-
-    // garante que a lista fique visível logo abaixo dos filtros
-    list.scrollIntoView({ behavior: 'instant', block: 'start' });
+$('#btnDelete').addEventListener('click', async ()=>{
+  const id = $('#id').value;
+  if(!id) return;
+  if(confirm('Excluir este serviço?')){
+    try{ await deleteService(id); fillForm({}); await listServices(); }
+    catch(e){ alert(e.message); }
   }
+});
 
-  // Delegação de clique
-  bar.addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
-    if (!chip) return;
-    apply(chip.dataset.filter);
-  });
-
-  // estado inicial
-  const initial = bar.querySelector('.chip.is-on')?.dataset.filter || 'all';
-  apply(initial);
-})();
-</script>
-
-<script>
-/* Seleção com LIFO + persistência e navegação */
-(() => {
-  const cards = [...document.querySelectorAll('.list .item')].map(el => ({
-    id: el.dataset.id,
-    price: Number(el.dataset.price || 0),
-    min: Number(el.dataset.min || 0),
-    el,
-    btn: el.querySelector('.choose')
-  }));
-  const btnDel  = document.querySelector('[data-del]');
-  const btnNext = document.querySelector('[data-next]');
-  const moneyBR = v => 'R$ ' + v.toFixed(2).replace('.', ',');
-
-  const stack = [];
-
-  cards.forEach(({ id, price, min, btn }) => {
-    btn.addEventListener('click', () => {
-      const on = btn.classList.toggle('is-on');
-      const ix = stack.findIndex(s => s.id === id);
-      if (on && ix === -1) stack.push({ id, price, min });
-      if (!on && ix !== -1) stack.splice(ix, 1);
-      updateFooter();
-    });
-  });
-
-  btnDel.addEventListener('click', () => {
-    if (!stack.length) return;
-    const last = stack.pop();
-    const card = cards.find(c => c.id === last.id);
-    if (card) card.btn.classList.remove('is-on');
-    updateFooter();
-  });
-
-  function updateFooter(){
-    const count = stack.length;
-    const total = stack.reduce((a,s)=>a+s.price,0);
-    btnDel.disabled  = count === 0;
-    btnNext.disabled = count === 0;
-    btnNext.textContent = count ? `Avançar (${count}) — ${moneyBR(total)}` : 'Avançar';
-  }
-  updateFooter();
-
-  btnNext.addEventListener('click', () => {
-    const ids     = stack.map(s => s.id);
-    const total   = stack.reduce((a,s)=>a+s.price, 0);
-    const minutes = stack.reduce((a,s)=>a+s.min,   0);
-
-    localStorage.setItem('svc.selected', JSON.stringify(ids));
-    localStorage.setItem('svc.total', String(total));
-    localStorage.setItem('svc.minutes', String(minutes));
-    localStorage.setItem('svc.count', String(ids.length));
-
-    window.location.href = 'professionals.html';
-  });
-
-  // tratamento de falha de imagem
-  document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{
-      const box = img.parentElement;
-      img.remove();
-      box.classList.add('no-img');
-    });
-  });
-})();
+listServices();
 </script>
 </body>
 </html>
-
