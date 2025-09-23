@@ -418,7 +418,7 @@ function showToast(msg, ok=false){
 }
 
 async function fetchMetrics(params){
-  const u = new URL('/api/n8n-proxy', window.location.origin);
+  const u = new URL('../api/n8n-proxy', window.location.origin);
   Object.entries(params).forEach(([k,v]) => v!=='' && u.searchParams.set(k,String(v)));
   const r = await fetch(u, { headers: { 'accept':'application/json' } });
   if(!r.ok) throw new Error('Falha ao buscar métricas');
