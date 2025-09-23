@@ -385,121 +385,146 @@ a:hover, .btn:hover{ transform: translateY(-1px) }
 </div>
 
 <script>
-/** ======================================================================
- *  Dados mockados + render simples do gráfico (sem libs)
- *  Troque pelos dados reais (Supabase/n8n) nos pontos marcados TODO
- *  =====================================================================*/
-const state = {
-  // TODO: popular via API
-  balance: 2000,
-  kpis: {
-    revenue30d: 12450,
-    revenueDelta: 8,           // %
-    visits: 312,
-    avgTicket: 39.9,
-    noShow: 21,
-    noShowRate: 6.3           // %
-  },
-  top: {
-    service: { name: 'Corte & Barba', qty: 142 },
-    pro: { name: 'João Mineiro', gross: 5320 }
-  },
-  newCustomers30d: 58,
-  chart: Array.from({length: 30}, (_,i)=>({
-    label: new Date(Date.now()- (29-i)*864e5).toLocaleDateString('pt-BR',{day:'2-digit'}),
-    value: Math.round(200 + Math.random()*280)
-  }))
+const els = {
+  balance:       ()=>document.getElementById('balance'),
+  rev:           ()=>document.getElementById('kpi-revenue'),
+  revDelta:      ()=>document.getElementById('kpi-revenue-delta'),
+  visits:        ()=>document.getElementById('kpi-visits'),
+  ticket:        ()=>document.getElementById('kpi-avg-ticket'),
+  ns:            ()=>document.getElementById('kpi-noshow'),
+  nsRate:        ()=>document.getElementById('kpi-noshow-rate'),
+  newCust:       ()=>document.getElementById('new-customers'),
+  topServ:       ()=>document.getElementById('top-service'),
+  topServQty:    ()=>document.getElementById('top-service-qty'),
+  topPro:        ()=>document.getElementById('top-pro'),
+  topProGross:   ()=>document.getElementById('top-pro-gross'),
+  chart:         ()=>document.getElementById('barChart'),
+  // filtros
+  filterDays:    ()=>document.getElementById('f-days'),
+  filterPro:     ()=>document.getElementById('f-pro'),
+  filterBtn:     ()=>document.getElementById('f-apply'),
+  toast:         ()=>document.getElementById('toast')
 };
 
-function fmtBRL(n){
-  return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-function setText(id, text){
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
-
-function hydrate(){
-  // balance
-  setText('balance', fmtBRL(state.balance));
-
-  // KPIs
-  setText('kpi-revenue', fmtBRL(state.kpis.revenue30d));
-  setText('kpi-revenue-delta', (state.kpis.revenueDelta>=0?'+':'')+state.kpis.revenueDelta+'%');
-  setText('kpi-visits', state.kpis.visits);
-  setText('kpi-avg-ticket', 'Ticket '+fmtBRL(state.kpis.avgTicket));
-  setText('kpi-noshow', state.kpis.noShow);
-  setText('kpi-noshow-rate', state.kpis.noShowRate+'%');
-
-  // quick stats
-  setText('top-service', state.top.service.name);
-  setText('top-service-qty', state.top.service.qty+'x');
-  setText('top-pro', state.top.pro.name);
-  setText('top-pro-gross', fmtBRL(state.top.pro.gross));
-  setText('new-customers', state.newCustomers30d);
-
-  drawBarChart('barChart', state.chart);
+function fmtBRL(n){ return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function setText(el, v){ if(el) el.textContent = v; }
+function showToast(msg, ok=false){
+  const el = els.toast(); if(!el) return;
+  el.textContent = msg;
+  el.style.background = ok ? 'rgba(126,247,160,.14)' : 'rgba(255,154,160,.14)';
+  el.style.border = ok ? '1px solid rgba(126,247,160,.35)' : '1px solid rgba(255,154,160,.35)';
+  el.style.display = 'block';
+  setTimeout(()=> el.style.display='none', 2800);
 }
 
-/** Desenho simples de barras em <canvas> */
+async function fetchMetrics(params){
+  const u = new URL('/api/n8n-proxy', window.location.origin);
+  Object.entries(params).forEach(([k,v]) => v!=='' && u.searchParams.set(k,String(v)));
+  const r = await fetch(u, { headers: { 'accept':'application/json' } });
+  if(!r.ok) throw new Error('Falha ao buscar métricas');
+  return await r.json();
+}
+
+function renderMetrics(data){
+  setText(els.balance(), fmtBRL(data.balance));
+  setText(els.rev(), fmtBRL(data.kpis.revenue30d));
+  setText(els.revDelta(), `${data.kpis.revenueDelta>=0?'+':''}${(data.kpis.revenueDelta||0).toFixed(1)}%`);
+  setText(els.visits(), data.kpis.visits);
+  setText(els.ticket(), 'Ticket '+fmtBRL(data.kpis.avgTicket));
+  setText(els.ns(), data.kpis.noShow);
+  setText(els.nsRate(), (data.kpis.noShowRate||0).toFixed(1)+'%');
+  setText(els.newCust(), data.kpis.newCustomers30d);
+  setText(els.topServ(), data.top.service?.name || '—');
+  setText(els.topServQty(), (data.top.service?.qty||0)+'x');
+  setText(els.topPro(), data.top.pro?.name || '—');
+  setText(els.topProGross(), fmtBRL(data.top.pro?.gross || 0));
+  drawBarChart('barChart', data.chart || []);
+}
+
 function drawBarChart(canvasId, data){
   const c = document.getElementById(canvasId);
   if(!c) return;
   const dpr = window.devicePixelRatio || 1;
   const W = c.clientWidth, H = c.clientHeight;
-  c.width = W * dpr; c.height = H * dpr;
+  c.width = W*dpr; c.height = H*dpr;
   const ctx = c.getContext('2d'); ctx.scale(dpr,dpr);
 
-  // fundo
-  ctx.fillStyle = '#0e0f12';
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#0e0f12'; ctx.fillRect(0,0,W,H);
+  const pad = 28, max = Math.max(1, ...(data.map(d=>d.value||0)));
+  ctx.strokeStyle = '#23252b'; ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
 
-  // eixos
-  const pad = 28, max = Math.max(...data.map(d=>d.value)) * 1.15;
-  ctx.strokeStyle = '#23252b'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
-
-  // barras
-  const n = data.length;
-  const gap = 6;
-  const bw = (W - pad*2 - (n-1)*gap) / n;
+  const n = data.length, gap = 6;
+  const bw = (W - pad*2 - (n-1)*gap) / (n||1);
   for(let i=0;i<n;i++){
-    const v = data[i].value;
-    const h = Math.max(4, (v/max) * (H - pad*2));
+    const v = data[i].value||0;
+    const h = Math.max(4, (v/max)*(H-pad*2));
     const x = pad + i*(bw+gap);
     const y = H - pad - h;
 
-    // barra (gradiente dourado)
-    const grad = ctx.createLinearGradient(0,y,0,y+h);
-    grad.addColorStop(0,'#d3a85b');
-    grad.addColorStop(1,'#b88f49');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x,y,bw,h);
+    const g = ctx.createLinearGradient(0,y,0,y+h);
+    g.addColorStop(0,'#d3a85b'); g.addColorStop(1,'#b88f49');
+    ctx.fillStyle = g; ctx.fillRect(x,y,bw,h);
+    ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(x+bw-2,y,2,h);
 
-    // sombra sutil
-    ctx.fillStyle = 'rgba(0,0,0,.2)';
-    ctx.fillRect(x+bw-2,y,2,h);
-
-    // ticks mínimos (opcional)
-    if (n <= 14){
-      ctx.fillStyle = '#8e93a1';
-      ctx.font = '10px Poppins';
-      ctx.textAlign = 'center';
-      ctx.fillText(data[i].label, x+bw/2, H-10);
+    if(n<=14){
+      ctx.fillStyle = '#8e93a1'; ctx.font = '10px Poppins'; ctx.textAlign='center';
+      ctx.fillText(data[i].label||'', x+bw/2, H-10);
     }
   }
 }
 
-// (Exemplo) Como puxar dados do seu backend quando pronto
-async function loadRealData(){
-  // TODO: trocar URL por /api/n8n-proxy ou chamada direta ao Supabase Edge Function
-  // const res = await fetch('/api/metrics-30d');
-  // const json = await res.json();
-  // state.kpis = json.kpis; state.chart = json.chart; ...
-  // hydrate();
+/** Filtros UI */
+function buildFilters(){
+  const toolbar = document.createElement('div');
+  toolbar.className = 'card';
+  toolbar.innerHTML = `
+    <h3 style="margin-bottom:8px">Filtros</h3>
+    <div class="row">
+      <select id="f-days" class="btn">
+        <option value="7">Últimos 7 dias</option>
+        <option value="30" selected>Últimos 30 dias</option>
+        <option value="90">Últimos 90 dias</option>
+      </select>
+      <select id="f-pro" class="btn"><option value="">Todos profissionais</option></select>
+      <button id="f-apply" class="btn btn-primary">Aplicar</button>
+      <span id="toast" class="tag" style="display:none"></span>
+    </div>`;
+  const main = document.querySelector('.main > .grid');
+  main?.insertAdjacentElement('afterbegin', toolbar);
 }
 
-hydrate();
+/** Carrega profissionais no select */
+function fillProfessionals(list){
+  const sel = els.filterPro(); if(!sel) return;
+  sel.innerHTML = `<option value="">Todos profissionais</option>` +
+    (list||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+/** Boot */
+async function init(){
+  buildFilters();
+
+  try{
+    const data = await fetchMetrics({ days: 30 });
+    fillProfessionals(data.professionals);
+    renderMetrics(data);
+    showToast('Métricas carregadas', true);
+  }catch(e){ showToast('Erro ao carregar métricas'); console.error(e); }
+
+  els.filterBtn()?.addEventListener('click', async ()=>{
+    const days = els.filterDays()?.value || '30';
+    const pro  = els.filterPro()?.value || '';
+    try{
+      showToast('Atualizando…', true);
+      const data = await fetchMetrics({ days, pro_id: pro });
+      renderMetrics(data);
+      showToast('Atualizado', true);
+    }catch(e){ showToast('Erro ao atualizar'); console.error(e); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
+
 </body>
 </html>
