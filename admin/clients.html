@@ -43,7 +43,7 @@ body{margin:0;background:#0b0c0e;color:var(--text);font:15px/1.6 Poppins,system-
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .table{width:100%;border-collapse:separate;border-spacing:0 8px}
 .table thead th{color:#cfd0d4;text-align:left;font:700 12px/1 Poppins;padding:4px 8px 0}
-.tr{display:grid;grid-template-columns:220px 170px 220px 1fr 120px 140px;gap:8px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.tr{display:grid;grid-template-columns:220px 170px 220px 1fr 160px 140px;gap:8px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px}
 .badge{display:inline-grid;place-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:#111214;font:700 11px/1 Poppins;letter-spacing:.03em}
 .badge-ok{color:#7ef7a0;border-color:rgba(126,247,160,.25);background:rgba(126,247,160,.08)}
 .badge-off{color:#ff9aa0;border-color:rgba(255,154,160,.25);background:rgba(255,154,160,.08)}
@@ -54,11 +54,11 @@ textarea{min-height:72px;padding:10px}
 .sep{height:1px;background:var(--line);margin:8px -14px}
 .toast{position:fixed;right:16px;bottom:16px;background:#111214;border:1px solid rgba(255,255,255,.12);padding:10px 12px;border-radius:10px;display:none}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px}
-.modal .box{width:min(820px,96vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.modal .box{width:min(920px,96vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
 .modal .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal .grid .full{grid-column:1 / -1}
-@media (max-width:1024px){.app{grid-template-columns:88px 1fr}.brand strong,.nav a span{display:none}.tr{grid-template-columns:200px 150px 200px 1fr 110px 120px}}
-@media (max-width:720px){.app{grid-template-columns:1fr;grid-template-areas:"header" "main"}.sidebar{position:fixed;inset:auto 0 0 0;height:auto;flex-direction:row;overflow:auto;z-index:99}.sidebar .spacer{display:none}body{padding-bottom:86px}.tr{grid-template-columns:200px 140px 1fr 110px}}
+@media (max-width:1024px){.app{grid-template-columns:88px 1fr}.brand strong,.nav a span{display:none}.tr{grid-template-columns:200px 150px 200px 1fr 140px 120px}}
+@media (max-width:720px){.app{grid-template-columns:1fr;grid-template-areas:"header" "main"}.sidebar{position:fixed;inset:auto 0 0 0;height:auto;flex-direction:row;overflow:auto;z-index:99}.sidebar .spacer{display:none}body{padding-bottom:86px}.tr{grid-template-columns:200px 140px 1fr 140px}}
 a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s} a:hover,.btn:hover{transform:translateY(-1px)}
 </style>
 </head>
@@ -151,6 +151,26 @@ a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s}
           <option value="false">Inativo</option>
         </select>
       </div>
+
+      <!-- Acesso (login por e-mail) -->
+      <div>
+        <label>Criar acesso (e-mail)</label>
+        <select id="f-create-login">
+          <option value="false" selected>Não</option>
+          <option value="true">Criar usuário no Auth</option>
+        </select>
+      </div>
+      <div>
+        <label>Enviar convite por e-mail</label>
+        <select id="f-send-invite">
+          <option value="false" selected>Não</option>
+          <option value="true">Sim</option>
+        </select>
+      </div>
+      <div>
+        <label>auth_user_id</label>
+        <input id="f-auth-id" type="text" placeholder="—" disabled />
+      </div>
     </div>
     <div class="sep"></div>
     <div class="toolbar" style="justify-content:flex-end">
@@ -189,6 +209,10 @@ const els = {
   btnSave: () => document.getElementById('btnSave'),
   btnCancel: () => document.getElementById('btnCancel'),
   btnNew: () => document.getElementById('btnNew'),
+  // acesso
+  fCreateLogin: () => document.getElementById('f-create-login'),
+  fSendInvite:  () => document.getElementById('f-send-invite'),
+  fAuthId:      () => document.getElementById('f-auth-id'),
 };
 
 function toast(msg, ok=true){
@@ -207,7 +231,7 @@ function maskPhone(v){
 /* ================== STATE ================== */
 let page = 1;
 const PAGE_SIZE = 10;
-let allRows = [];   // lista completa para paginação client-side
+let allRows = [];
 let editingId = null;
 
 /* ================== DATA LAYER (n8n) ================== */
@@ -216,10 +240,10 @@ async function fetchClientsFromApi(){
   const active = els.activeFilter().value;
 
   const url = new URL(N8N_BASE_URL);
-  url.searchParams.set('limit','500');      // mesmo padrão do services.html
-  if(q) url.searchParams.set('search', q);  // busca por nome/telefone/email
+  url.searchParams.set('limit','500');
+  if(q) url.searchParams.set('search', q);
   if(active) url.searchParams.set('active', active);
-  url.searchParams.set('_', String(Date.now())); // anti-cache
+  url.searchParams.set('_', String(Date.now()));
 
   const headers = {
     // 'x-api-key': PUBLIC_API_KEY, // descomente se o fluxo exigir
@@ -293,22 +317,30 @@ function renderRows(){
       <strong>Telefone</strong>
       <strong>E-mail</strong>
       <strong>Notas</strong>
-      <strong>Status</strong>
+      <strong>Status / Acesso</strong>
       <span></span>
     </div>
-    ${slice.map(r=>`
-      <div class="tr" data-id="${r.id}">
-        <div>${r.name||'—'}</div>
-        <div>${maskPhone(r.phone)||'—'}</div>
-        <div>${r.email||'—'}</div>
-        <div style="color:#aeb2bb">${(r.notes||'—').slice(0,64)}</div>
-        <div>${r.is_active ? '<span class="badge badge-ok">Ativo</span>' : '<span class="badge badge-off">Inativo</span>'}</div>
-        <div class="actions">
-          <button class="btn" onclick="onEdit('${r.id}')">Editar</button>
-          <button class="btn" onclick="onDelete('${r.id}')">Excluir</button>
+    ${slice.map(r=>{
+      const hasAuth = !!(r.auth_user_id || r.id);
+      const nm = r.full_name || r.name || '—';
+      const em = (r.email || '').toLowerCase();
+      return `
+        <div class="tr" data-id="${r.id}">
+          <div>${nm}</div>
+          <div>${maskPhone(r.phone)||'—'}</div>
+          <div>${em || '—'}</div>
+          <div style="color:#aeb2bb">${(r.notes||'—').slice(0,64)}</div>
+          <div>
+            ${r.is_active ? '<span class="badge badge-ok">Ativo</span>' : '<span class="badge badge-off">Inativo</span>'}
+            ${hasAuth ? ' <span class="badge">Login</span>' : ''}
+          </div>
+          <div class="actions">
+            <button class="btn" onclick="onEdit('${r.id}')">Editar</button>
+            <button class="btn" onclick="onDelete('${r.id}')">Excluir</button>
+          </div>
         </div>
-      </div>
-    `).join('')}
+      `;
+    }).join('')}
   `;
   wrap.innerHTML = html;
 
@@ -320,12 +352,16 @@ function renderRows(){
 function openModal(title){ els.modalTitle().textContent = title; els.modal().style.display = 'flex'; }
 function closeModal(){ els.modal().style.display = 'none'; editingId = null; clearForm(); }
 function fillForm(row){
-  els.fName().value  = row?.name || '';
-  els.fPhone().value = row?.phone || '';
-  els.fEmail().value = row?.email || '';
-  els.fLast().value  = row?.last_visit_at ? new Date(row.last_visit_at).toISOString().slice(0,16) : '';
-  els.fNotes().value = row?.notes || '';
-  els.fActive().value= String(!!row?.is_active);
+  els.fName().value   = row?.full_name || row?.name || '';
+  els.fPhone().value  = row?.phone || '';
+  els.fEmail().value  = (row?.email || '').toLowerCase();
+  els.fLast().value   = row?.last_visit_at ? new Date(row.last_visit_at).toISOString().slice(0,16) : '';
+  els.fNotes().value  = row?.notes || '';
+  els.fActive().value = String( row?.is_active ?? true );
+
+  els.fCreateLogin().value = 'false';
+  els.fSendInvite().value  = 'false';
+  if (els.fAuthId()) els.fAuthId().value = row?.auth_user_id || row?.id || '';
 }
 function clearForm(){ fillForm({}) }
 
@@ -363,14 +399,20 @@ function bind(){
   els.fPhone().addEventListener('input', e=> e.target.value = maskPhone(e.target.value));
   els.btnSave().addEventListener('click', async ()=>{
     const payload = {
-      name: els.fName().value.trim(),
-      phone: els.fPhone().value.trim(),
-      email: els.fEmail().value.trim() || null,
+      // profile
+      full_name: els.fName().value.trim(),
+      name:      els.fName().value.trim(), // compat
+      phone:     els.fPhone().value.trim(),
+      email:     (els.fEmail().value || '').trim().toLowerCase() || null,
       last_visit_at: els.fLast().value ? new Date(els.fLast().value).toISOString() : null,
-      notes: els.fNotes().value.trim() || null,
-      is_active: els.fActive().value === 'true'
+      notes:     els.fNotes().value.trim() || null,
+      is_active: els.fActive().value === 'true',
+      // auth flags
+      create_login: els.fCreateLogin().value === 'true',
+      send_invite:  els.fSendInvite().value === 'true'
     };
-    if(!payload.name){ toast('Informe o nome', false); return; }
+    if(!payload.full_name){ toast('Informe o nome', false); return; }
+
     try{
       if(editingId){ await updateClient(editingId, payload); toast('Cliente atualizado'); }
       else{ await createClient(payload); toast('Cliente criado'); }
