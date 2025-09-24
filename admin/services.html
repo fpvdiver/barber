@@ -84,32 +84,13 @@
       <h3 class="mb-8" style="margin:0">Cadastrar / Editar</h3>
       <form id="frm" class="row" onsubmit="return false">
         <input type="hidden" id="id">
-        <div style="width:100%">
-          <label>Nome</label>
-          <input id="name" required placeholder="Ex.: Corte + Barba Deluxe">
-        </div>
-        <div style="width:100%">
-          <label>Descrição</label>
-          <textarea id="description" rows="3" placeholder="Detalhes do serviço, produtos, diferenciais…"></textarea>
-        </div>
-        <div style="width:50%">
-          <label>Preço (R$)</label>
-          <input id="price" type="number" min="0" step="0.01" required>
-        </div>
-        <div style="width:50%">
-          <label>Duração (min)</label>
-          <input id="duration" type="number" min="5" step="5" required>
-        </div>
-        <div style="width:60%">
-          <label>Categoria</label>
-          <input id="category" placeholder="Ex.: Cabelo, Barba, Combo">
-        </div>
-        <div style="width:40%">
-          <label>Ativo</label>
-          <select id="active">
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
+        <div style="width:100%"><label>Nome</label><input id="name" required placeholder="Ex.: Corte + Barba Deluxe"></div>
+        <div style="width:100%"><label>Descrição</label><textarea id="description" rows="3" placeholder="Detalhes do serviço…"></textarea></div>
+        <div style="width:50%"><label>Preço (R$)</label><input id="price" type="number" min="0" step="0.01" required></div>
+        <div style="width:50%"><label>Duração (min)</label><input id="duration" type="number" min="5" step="5" required></div>
+        <div style="width:60%"><label>Categoria</label><input id="category" placeholder="Ex.: Cabelo, Barba, Combo"></div>
+        <div style="width:40%"><label>Ativo</label>
+          <select id="active"><option value="true">Sim</option><option value="false">Não</option></select>
         </div>
         <div class="row mt-12">
           <button class="btn" id="btnSave">Salvar</button>
@@ -122,40 +103,42 @@
 </div>
 
 <script>
-/** CONFIG **/
+/** ====== CONFIG ====== **/
 const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/services';
-const PUBLIC_API_KEY = '78c212eafa48e2528d81c5937af5c8ba0825d9895ebe9da4';
+const PUBLIC_API_KEY = 'COLOQUE_SUA_API_PUBLIC_AQUI'; // precisa bater com o Code node
+const ENVIAR_DESCRIPTION = false; // mude para true se a coluna existir na tabela
 
-
-/** Helpers **/
+/** ====== Helpers ====== **/
 const $ = sel => document.querySelector(sel);
 const fmtBRL = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
 function formToPayload() {
   const price = parseFloat($('#price').value || '0');
-  return {
+  const payload = {
     id: $('#id').value || undefined,
     name: $('#name').value.trim(),
-    description: $('#description').value.trim() || null,
     price_cents: Math.round(price * 100),
     duration_min: parseInt($('#duration').value,10),
     category: $('#category').value.trim() || null,
-    active: $('#active').value === 'true'
+    is_active: $('#active').value === 'true'
   };
+  if (ENVIAR_DESCRIPTION) payload.description = $('#description').value.trim() || null;
+  return payload;
 }
 
-function fillForm(s) {
+function fillForm(s = {}) {
   $('#id').value = s.id || '';
   $('#name').value = s.name || '';
-  $('#description').value = s.description || '';
+  $('#description').value = (s.description ?? '') || '';
   $('#price').value = s.price_cents ? (s.price_cents/100).toFixed(2) : '';
-  $('#duration').value = s.duration_min || '';
-  $('#category').value = s.category || '';
-  $('#active').value = String(!!s.active);
+  $('#duration').value = s.duration_min ?? '';
+  $('#category').value = s.category ?? '';
+  $('#active').value = String(!!(s.is_active ?? s.active));
   $('#btnDelete').disabled = !s.id;
 }
 
-/** CRUD via n8n **/
+/** ====== CRUD via n8n ====== **/
 async function listServices() {
   try {
     const q = encodeURIComponent($('#q').value.trim());
@@ -165,104 +148,95 @@ async function listServices() {
     url.searchParams.set('limit', '500');
     if (q) url.searchParams.set('search', q);
     if (active) url.searchParams.set('active', active);
-    // buster para não pegar cache do CDN
-    url.searchParams.set('_', String(Date.now()));
+    url.searchParams.set('_', String(Date.now())); // anti-cache
 
-    const res = await fetch(url.toString(), {
-      method: 'GET',
-      mode: 'cors',
-      // NÃO envie headers custom aqui para evitar preflight.
-      // Se seu fluxo exigir x-api-key também no GET, descomente:
-      // headers: { 'x-api-key': PUBLIC_API_KEY }
-    });
+    const headers = {};
+    // Se seu GET no n8n exige x-api-key, descomente:
+    // headers['x-api-key'] = PUBLIC_API_KEY;
 
-    // debug útil:
-    console.log('[services] status', res.status, res.headers.get('content-type'));
-
+    const res = await fetch(url.toString(), { method:'GET', headers });
     if (!res.ok) {
       const t = await res.text().catch(()=> '');
       throw new Error(`GET ${res.status}: ${t || 'Falha ao listar'}`);
     }
 
-    // tente json
-    let body;
-    try { body = await res.json(); } catch { body = null; }
+    let body = null;
+    try { body = await res.json(); } catch {}
 
-    // normalização: o Respond pode vir como array direto,
-    // ou { data: [...] }, ou array de items no formato do n8n.
     let items = [];
-
     if (Array.isArray(body)) {
-      // pode ser array de objetos ou array de {json:{...}}
-      if (body.length && body[0] && body[0].json) {
-        items = body.map(x => x.json);
-      } else {
-        items = body;
-      }
-    } else if (body && Array.isArray(body.data)) {
+      items = body.map(x => x?.json ?? x);
+    } else if (body?.data && Array.isArray(body.data)) {
       items = body.data;
     } else if (body && typeof body === 'object') {
-      // às vezes vem como {0:{...},1:{...}} (quando usaram {{$items()}})
       const vals = Object.values(body);
       if (vals.length && typeof vals[0] === 'object') {
-        // pode ser { json: {...} }
-        items = vals.map(v => v && v.json ? v.json : v);
+        items = vals.map(v => v?.json ?? v);
       }
     }
 
-    console.log('[services] items', items);
     renderTable(items);
   } catch (err) {
     console.error(err);
     alert('Erro ao carregar serviços: ' + (err.message || err));
-    renderTable([]); // zera a tabela para não confundir
+    renderTable([]);
   }
 }
-
 
 async function createService(payload) {
   const res = await fetch(N8N_BASE_URL, {
     method: 'POST',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    headers: { 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
     body: JSON.stringify(payload)
   });
-  if(!res.ok){ throw new Error('Falha ao criar'); }
+  if(!res.ok){
+    const t = await res.text().catch(()=> '');
+    throw new Error(`POST ${res.status}: ${t || 'Falha ao criar'}`);
+  }
   return res.json();
 }
 
 async function updateService(payload) {
   const res = await fetch(N8N_BASE_URL, {
     method: 'PATCH',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    headers: { 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
     body: JSON.stringify(payload)
   });
-  if(!res.ok){ throw new Error('Falha ao atualizar'); }
+  if(!res.ok){
+    const t = await res.text().catch(()=> '');
+    throw new Error(`PATCH ${res.status}: ${t || 'Falha ao atualizar'}`);
+  }
   return res.json();
 }
 
 async function deleteService(id) {
   const res = await fetch(N8N_BASE_URL, {
     method: 'DELETE',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
+    headers: { 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
     body: JSON.stringify({ id })
   });
-  if(!res.ok){ throw new Error('Falha ao excluir'); }
+  if(!res.ok){
+    const t = await res.text().catch(()=> '');
+    throw new Error(`DELETE ${res.status}: ${t || 'Falha ao excluir'}`);
+  }
   return res.json();
 }
 
-/** UI **/
+/** ====== UI ====== **/
 function renderTable(items) {
   const tbody = $('#tbl tbody');
   tbody.innerHTML = '';
   $('#count').textContent = items.length;
+
   for (const s of items) {
+    const ativo = !!(s.is_active ?? s.active);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${s.name ?? ''}</td>
       <td>${s.category ?? '-'}</td>
       <td>${fmtBRL(s.price_cents ?? 0)}</td>
       <td>${s.duration_min ?? '-'} min</td>
-      <td><span class="pill" style="background:${s.active?'#0f2a18':'#2a0f10'};border-color:${s.active?'#195f3a':'#6b1b1b'}">${s.active?'Ativo':'Inativo'}</span></td>
+      <td><span class="pill" style="background:${ativo?'#0f2a18':'#2a0f10'};border-color:${ativo?'#195f3a':'#6b1b1b'}">${ativo?'Ativo':'Inativo'}</span></td>
       <td class="right">
         <button class="btn secondary" data-edit="${s.id}">Editar</button>
         <button class="btn danger" data-del="${s.id}">Excluir</button>
@@ -270,7 +244,6 @@ function renderTable(items) {
     tbody.appendChild(tr);
   }
 
-  // actions
   tbody.querySelectorAll('[data-edit]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const id = btn.getAttribute('data-edit');
@@ -279,21 +252,22 @@ function renderTable(items) {
       window.scrollTo({top:0,behavior:'smooth'});
     });
   });
+
   tbody.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const id = btn.getAttribute('data-del');
       if(confirm('Excluir este serviço?')) {
         try {
           await deleteService(id);
-          await listServices();
           if($('#id').value===id) fillForm({});
+          await listServices();
         } catch(e){ alert(e.message); }
       }
     });
   });
 }
 
-/** Eventos **/
+/** ====== Eventos ====== **/
 $('#btnReload').addEventListener('click', listServices);
 $('#q').addEventListener('input', ()=>{ clearTimeout(window._t); window._t=setTimeout(listServices, 300); });
 $('#filterActive').addEventListener('change', listServices);
@@ -323,6 +297,3 @@ listServices();
 </script>
 </body>
 </html>
-
-
-
