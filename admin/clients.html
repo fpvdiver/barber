@@ -162,18 +162,12 @@ a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s}
 
 <div id="toast" class="toast"></div>
 
-<!-- Supabase JS v2 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-/* ====== CONFIG ====== */
-const SUPABASE_URL  = "https://SEU-PROJETO.supabase.co";
-const SUPABASE_ANON = "SEU-ANON-KEY";
-const TABLE = "clients";
-const PAGE_SIZE = 10;
+/* ================== DADOS (n8n façade) ================== */
+const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/clients';
+const PUBLIC_API_KEY = '78c212eafa48e2528d81c5937af5c8ba0825d9895ebe9da4'; // se exigir, mantém
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-/* ====== UI HELPERS ====== */
+/* ================== UI HELPERS ================== */
 const els = {
   q: () => document.getElementById('q'),
   activeFilter: () => document.getElementById('activeFilter'),
@@ -204,66 +198,95 @@ function toast(msg, ok=true){
   t.style.background = ok ? 'rgba(126,247,160,.10)' : 'rgba(255,154,160,.10)';
   setTimeout(()=> t.style.display='none', 2400);
 }
-
 function maskPhone(v){
   return (v||'').replace(/\D/g,'')
     .replace(/^(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d{4}).*/, '$1-$2');
 }
 
-/* ====== STATE ====== */
+/* ================== STATE ================== */
 let page = 1;
-let total = 0;
+const PAGE_SIZE = 10;
+let allRows = [];   // lista completa para paginação client-side
 let editingId = null;
 
-/* ====== CRUD ====== */
-async function fetchClients(){
+/* ================== DATA LAYER (n8n) ================== */
+async function fetchClientsFromApi(){
   const q = els.q().value.trim();
   const active = els.activeFilter().value;
 
-  let query = db.from(TABLE).select('*', { count: 'exact' }).order('created_at',{ascending:false});
+  const url = new URL(N8N_BASE_URL);
+  url.searchParams.set('limit','500');      // mesmo padrão do services.html
+  if(q) url.searchParams.set('search', q);  // busca por nome/telefone/email
+  if(active) url.searchParams.set('active', active);
+  url.searchParams.set('_', String(Date.now())); // anti-cache
 
-  if(q){
-    // busca por name/phone/email
-    query = query.or(`name.ilike.%${q}%,phone.ilike.%${q}%,email.ilike.%${q}%`);
+  const headers = {
+    // 'x-api-key': PUBLIC_API_KEY, // descomente se o fluxo exigir
+  };
+
+  const res = await fetch(url.toString(), { method:'GET', headers });
+  if(!res.ok){
+    const t = await res.text().catch(()=> '');
+    throw new Error(`GET ${res.status}: ${t||'Falha ao listar clientes'}`);
   }
-  if(active === 'true' || active === 'false'){
-    query = query.eq('is_active', active === 'true');
+  const body = await res.json().catch(()=> null);
+
+  let items = [];
+  if(Array.isArray(body)) items = body.map(x=>x?.json ?? x);
+  else if(body?.data && Array.isArray(body.data)) items = body.data;
+  else if(body && typeof body === 'object'){
+    const vals = Object.values(body);
+    if(vals.length && typeof vals[0] === 'object') items = vals.map(v=>v?.json ?? v);
   }
 
-  const from = (page-1)*PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-
-  const { data, error, count } = await query.range(from, to);
-  if(error){ console.error(error); toast('Erro ao carregar clientes', false); return { data:[], count:0 }; }
-  total = count || 0;
-  return { data, count: total };
+  return items;
 }
 
 async function createClient(payload){
-  const { error, data } = await db.from(TABLE).insert(payload).select().single();
-  if(error) throw error;
-  return data;
+  const res = await fetch(N8N_BASE_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ const t = await res.text().catch(()=> ''); throw new Error(`POST ${res.status}: ${t}`); }
+  return res.json();
 }
 async function updateClient(id, payload){
-  const { error, data } = await db.from(TABLE).update(payload).eq('id', id).select().single();
-  if(error) throw error;
-  return data;
+  const res = await fetch(N8N_BASE_URL, {
+    method:'PATCH',
+    headers:{ 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify({ id, ...payload })
+  });
+  if(!res.ok){ const t = await res.text().catch(()=> ''); throw new Error(`PATCH ${res.status}: ${t}`); }
+  return res.json();
 }
 async function deleteClient(id){
-  const { error } = await db.from(TABLE).delete().eq('id', id);
-  if(error) throw error;
+  const res = await fetch(N8N_BASE_URL, {
+    method:'DELETE',
+    headers:{ 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
+    body: JSON.stringify({ id })
+  });
+  if(!res.ok){ const t = await res.text().catch(()=> ''); throw new Error(`DELETE ${res.status}: ${t}`); }
+  return res.json();
 }
 
-/* ====== RENDER ====== */
-function renderRows(rows){
+/* ================== RENDER ================== */
+function renderRows(){
   const wrap = els.rows();
-  if(!rows.length){
+  const total = allRows.length;
+  if(!total){
     wrap.innerHTML = `<div class="tr" style="grid-template-columns:1fr"><span style="opacity:.8">Nenhum cliente encontrado.</span></div>`;
     els.count().textContent = `0 resultados`;
-    els.pageInfo().textContent = `Página ${page}`;
+    els.pageInfo().textContent = `Página 1 / 1`;
     return;
   }
+
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if(page > pages) page = pages;
+  const from = (page-1)*PAGE_SIZE;
+  const slice = allRows.slice(from, from + PAGE_SIZE);
+
   const html = `
     <div class="tr" style="background:transparent;border:0">
       <strong>Nome</strong>
@@ -273,7 +296,7 @@ function renderRows(rows){
       <strong>Status</strong>
       <span></span>
     </div>
-    ${rows.map(r=>`
+    ${slice.map(r=>`
       <div class="tr" data-id="${r.id}">
         <div>${r.name||'—'}</div>
         <div>${maskPhone(r.phone)||'—'}</div>
@@ -288,36 +311,32 @@ function renderRows(rows){
     `).join('')}
   `;
   wrap.innerHTML = html;
+
   els.count().textContent = `${total} resultado${total===1?'':'s'}`;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   els.pageInfo().textContent = `Página ${page} / ${pages}`;
 }
 
-/* ====== MODAL ====== */
-function openModal(title){
-  els.modalTitle().textContent = title;
-  els.modal().style.display = 'flex';
-}
+/* ================== MODAL/FORM ================== */
+function openModal(title){ els.modalTitle().textContent = title; els.modal().style.display = 'flex'; }
 function closeModal(){ els.modal().style.display = 'none'; editingId = null; clearForm(); }
 function fillForm(row){
-  els.fName().value = row?.name || '';
+  els.fName().value  = row?.name || '';
   els.fPhone().value = row?.phone || '';
   els.fEmail().value = row?.email || '';
-  els.fLast().value = row?.last_visit_at ? new Date(row.last_visit_at).toISOString().slice(0,16) : '';
+  els.fLast().value  = row?.last_visit_at ? new Date(row.last_visit_at).toISOString().slice(0,16) : '';
   els.fNotes().value = row?.notes || '';
-  els.fActive().value = String(!!row?.is_active);
+  els.fActive().value= String(!!row?.is_active);
 }
 function clearForm(){ fillForm({}) }
 
-/* ====== EVENTS (expostos) ====== */
-window.onEdit = async function(id){
+/* ================== EVENTS (expostos) ================== */
+window.onEdit = function(id){
+  const row = allRows.find(r => r.id === id);
+  if(!row){ toast('Registro não encontrado', false); return; }
   editingId = id;
-  const { data, error } = await db.from(TABLE).select('*').eq('id', id).single();
-  if(error){ toast('Erro ao abrir cliente', false); return; }
-  fillForm(data);
+  fillForm(row);
   openModal('Editar cliente');
 };
-
 window.onDelete = async function(id){
   if(!confirm('Excluir este cliente?')) return;
   try{
@@ -327,17 +346,18 @@ window.onDelete = async function(id){
   }catch(e){ console.error(e); toast('Erro ao excluir', false); }
 };
 
-/* ====== FLOW ====== */
+/* ================== FLOW ================== */
 async function reload(){
-  const { data } = await fetchClients();
-  renderRows(data);
+  try{
+    allRows = await fetchClientsFromApi();
+    renderRows();
+  }catch(e){ console.error(e); toast('Erro ao carregar clientes', false); }
 }
-
 function bind(){
   els.q().addEventListener('input', async ()=>{ page=1; await reload(); });
   els.activeFilter().addEventListener('change', async ()=>{ page=1; await reload(); });
-  els.prev().addEventListener('click', async ()=>{ if(page>1){ page--; await reload(); } });
-  els.next().addEventListener('click', async ()=>{ const pages = Math.ceil(total/PAGE_SIZE)||1; if(page<pages){ page++; await reload(); } });
+  els.prev().addEventListener('click', ()=>{ if(page>1){ page--; renderRows(); } });
+  els.next().addEventListener('click', ()=>{ const pages = Math.ceil((allRows.length||0)/PAGE_SIZE)||1; if(page<pages){ page++; renderRows(); } });
   els.btnNew().addEventListener('click', ()=>{ clearForm(); openModal('Novo cliente'); });
   els.btnCancel().addEventListener('click', closeModal);
   els.fPhone().addEventListener('input', e=> e.target.value = maskPhone(e.target.value));
@@ -352,23 +372,14 @@ function bind(){
     };
     if(!payload.name){ toast('Informe o nome', false); return; }
     try{
-      if(editingId){
-        await updateClient(editingId, payload);
-        toast('Cliente atualizado');
-      }else{
-        await createClient(payload);
-        toast('Cliente criado');
-      }
+      if(editingId){ await updateClient(editingId, payload); toast('Cliente atualizado'); }
+      else{ await createClient(payload); toast('Cliente criado'); }
       closeModal();
       await reload();
     }catch(e){ console.error(e); toast('Erro ao salvar', false); }
   });
 }
-
-async function boot(){
-  bind();
-  await reload();
-}
+async function boot(){ bind(); await reload(); }
 document.addEventListener('DOMContentLoaded', boot);
 </script>
 </body>
