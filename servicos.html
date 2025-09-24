@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8" />
+<title>Testar Services</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Arial;margin:20px;background:#0f1115;color:#e6e9f1}
+  input,select,button{padding:8px 10px;border-radius:8px;border:1px solid #283042;background:#121826;color:#e6e9f1}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{border-top:1px solid #243043;padding:8px 10px}
+  thead th{background:#141b2b}
+  .muted{opacity:.7}
+</style>
+<h1>Services (via n8n)</h1>
+
+<div>
+  <input id="q" placeholder="buscar por nome…" />
+  <select id="active">
+    <option value="">todos</option>
+    <option value="true">ativos</option>
+    <option value="false">inativos</option>
+  </select>
+  <button id="btn">Carregar</button>
+  <span id="count" class="muted"></span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Categoria</th>
+      <th>Preço</th>
+      <th>Duração</th>
+      <th>Ativo</th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<script>
+const N8N_URL = 'https://primary-jow9-barber.up.railway.app/webhook/services';
+
+const $ = s => document.querySelector(s);
+const fmtBRL = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function normalize(body){
+  // aceita vários formatos de Respond do n8n
+  if (Array.isArray(body)) {
+    return body.map(x => x && x.json ? x.json : x);
+  }
+  if (body && Array.isArray(body.data)) return body.data;
+  if (body && typeof body === 'object') {
+    const vals = Object.values(body);
+    if (vals.length && typeof vals[0] === 'object') {
+      return vals.map(v => v && v.json ? v.json : v);
+    }
+  }
+  return [];
+}
+
+async function load(){
+  const url = new URL(N8N_URL);
+  const q = $('#q').value.trim();
+  const act = $('#active').value;
+  if (q) url.searchParams.set('search', q);
+  if (act) url.searchParams.set('active', act);
+  url.searchParams.set('limit','500');
+  url.searchParams.set('_', Date.now());
+
+  const res = await fetch(url.toString(), { method:'GET', mode:'cors' });
+  const ct = res.headers.get('content-type') || '';
+  const body = ct.includes('application/json') ? await res.json() : await res.text();
+
+  console.log('status', res.status, 'body', body);
+
+  const items = normalize(body);
+  $('#count').textContent = `(${items.length})`;
+
+  const tbody = $('#rows');
+  tbody.innerHTML = items.map(s => `
+    <tr>
+      <td>${s.name ?? ''}</td>
+      <td>${s.category ?? '-'}</td>
+      <td>${fmtBRL(s.price_cents ?? 0)}</td>
+      <td>${s.duration_min ?? '-'} min</td>
+      <td>${String(s.active ?? false)}</td>
+    </tr>
+  `).join('');
+}
+
+$('#btn').addEventListener('click', load);
+load(); // carrega ao abrir
+</script>
