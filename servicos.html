@@ -79,7 +79,7 @@ async function load(){
   tbody.innerHTML = items.map(s => `
     <tr>
       <td>${s.name ?? ''}</td>
-      <td>${s.category ?? '-'}</td>
+      <td>${s.category_id ?? '-'}</td>
       <td>${fmtBRL(s.price_cents ?? 0)}</td>
       <td>${s.duration_min ?? '-'} min</td>
       <td>${String(s.active ?? false)}</td>
