@@ -13,65 +13,15 @@
   <!-- Topbar -->
   <header class="topbar">
     <a class="back ripple" href="services.html" aria-label="Voltar">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
     </a>
     <h1 id="title">Profissionais</h1>
   </header>
 
-  <!-- Lista de profissionais (grid igual ao Services) -->
-  <section class="list" id="proList" aria-label="Lista de profissionais">
-    <!-- Fernando -->
-    <article class="item reveal" data-id="fernando" data-skills="corte barba">
-      <figure class="thumb"><img src="img/pro-fernando.jpg" alt="Fernando"></figure>
-      <div class="meta">
-        <h3 class="name">Fernando <span class="rate">★ 4,8</span></h3>
-        <p class="desc">Barbeiro • Corte e Barba</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Jonnier -->
-    <article class="item reveal" data-id="jonnier" data-skills="corte coloracao">
-      <figure class="thumb"><img src="img/pro-jonnier.jpg" alt="Jonnier"></figure>
-      <div class="meta">
-        <h3 class="name">Jonnier <span class="rate">★ 4,7</span></h3>
-        <p class="desc">Stylist • Corte e Coloração</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Marcos -->
-    <article class="item reveal" data-id="marcos" data-skills="corte">
-      <figure class="thumb"><img src="img/pro-marcos.jpg" alt="Marcos"></figure>
-      <div class="meta">
-        <h3 class="name">Marcos <span class="rate">★ 4,6</span></h3>
-        <p class="desc">Barbeiro • Corte masculino</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-
-    <!-- Aline -->
-    <article class="item reveal" data-id="aline" data-skills="coloracao tratamento sobrancelha">
-      <figure class="thumb"><img src="img/pro-aline.jpg" alt="Aline"></figure>
-      <div class="meta">
-        <h3 class="name">Aline <span class="rate">★ 4,9</span></h3>
-        <p class="desc">Colorista • Coloração, Tratamentos</p>
-      </div>
-      <button class="choose ripple" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Escolher</span>
-      </button>
-    </article>
-  </section>
+  <!-- Lista (render via JS) -->
+  <section class="list" id="proList" aria-label="Lista de profissionais"></section>
 
   <!-- Rodapé com resumo e ações -->
   <div class="pro-bar">
@@ -81,28 +31,25 @@
   </div>
 </main>
 
-<!-- ===== JS ===== -->
 <script>
-/* Helpers base */
+/* ================== Config ================== */
+const N8N_PROS_URLS = [
+  'https://primary-jow9-barber.up.railway.app/webhook/professionals',
+  'https://primary-jow9-barber.up.railway.app/webhook/profissionals', // fallback se seu fluxo usa esse path
+];
+
+/* ================== Utils ================== */
 const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
 
-/* Estado vindo de Serviços */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ex.: ["corte","coloracao"]
+/* ================== Estado vindo de Serviços ================== */
+const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ids dos serviços escolhidos
 const total   = Number(getStore('svc.total')   || 0);
 const minutes = Number(getStore('svc.minutes') || 0);
 const count   = Number(getStore('svc.count')   || 0);
 document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
 
-/* Reveal suave */
-(() => {
-  const obs = new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
-  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-})();
-
-/* Ripple */
+/* ================== Ripple ================== */
 (() => {
   document.addEventListener('click', (e) => {
     const el = e.target.closest('.ripple'); if(!el) return;
@@ -115,66 +62,118 @@ document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} ser
   }, { passive:true });
 })();
 
-/* Profissionais: ativação/desativação + seleção */
-(() => {
-  const cards = [...document.querySelectorAll('.professionals-page .item')].map(el => ({
-    id: el.dataset.id,
-    skills: (el.dataset.skills||'').split(/\s+/).filter(Boolean),
-    el,
-    btn: el.querySelector('.choose')
-  }));
+/* ================== Reveal ================== */
+function applyReveal() {
+  const obs = new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
 
-  // Desativar quem NÃO faz nenhum dos serviços requeridos
-  const hasRequirements = REQUIRED.size > 0;
-  if (hasRequirements) {
-    cards.forEach(c => {
-      const ok = c.skills.some(s => REQUIRED.has(s));
-      if (!ok) {
-        c.el.classList.add('is-disabled');
-        c.btn.setAttribute('disabled','');
+/* ================== Fetch profissionais (n8n) ================== */
+async function fetchProfessionals() {
+  let lastErr;
+  for (const base of N8N_PROS_URLS) {
+    try {
+      const url = new URL(base);
+      url.searchParams.set('limit','500');
+      url.searchParams.set('_', String(Date.now()));
+      const res = await fetch(url.toString(), { method:'GET' });
+      if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
+      const body = await res.json().catch(()=> ({}));
+
+      // normaliza formatos (igual fizemos no services admin)
+      let items = [];
+      if (Array.isArray(body)) items = body.map(x => x?.json ?? x);
+      else if (body?.data && Array.isArray(body.data)) items = body.data;
+      else if (body && typeof body === 'object') {
+        const vals = Object.values(body);
+        if (vals.length && typeof vals[0] === 'object') items = vals.map(v => v?.json ?? v);
       }
-    });
+
+      // Só ativos e ordena por nome
+      items = (items || []).filter(p => (p.is_active ?? true));
+      items.sort((a,b)=> String(a.full_name||a.name||'').localeCompare(String(b.full_name||b.name||'')));
+
+      return items;
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('Falha ao obter profissionais');
+}
+
+/* ================== Render lista ================== */
+function renderPros(pros) {
+  const wrap = document.getElementById('proList');
+  if (!pros.length) {
+    wrap.innerHTML = `<div class="empty">Nenhum profissional disponível no momento.</div>`;
+    return;
   }
 
-  // Seleção (multi) + CTA
-  const selected = new Set();
+  wrap.innerHTML = pros.map(p => {
+    const id    = p.id || p.profile_id || p.slug || p.email || crypto.randomUUID();
+    const name  = p.full_name || p.name || 'Profissional';
+    const rate  = (p.rating_avg != null) ? Number(p.rating_avg).toFixed(1) : null;
+    const role  = p.role || 'Barbeiro';
+    const bio   = p.bio || p.description || '';
+    const phone = p.phone || '';
+    const desc  = bio || `${role}${phone ? ' • ' + phone : ''}`;
+    const img   = p.avatar_url || p.image_url || '';
+
+    return `
+    <article class="item reveal" data-id="${id}">
+      <figure class="thumb">${img ? `<img src="${img}" alt="${name}">` : ''}</figure>
+      <div class="meta">
+        <h3 class="name">${name}${rate ? ` <span class="rate">★ ${rate}</span>` : ''}</h3>
+        <p class="desc">${desc}</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Escolher</span>
+      </button>
+    </article>`;
+  }).join('');
+
+  // fallback de imagem
+  document.querySelectorAll('.thumb img').forEach(img=>{
+    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+  });
+
+  applyReveal();
+}
+
+/* ================== Seleção / CTA ================== */
+function bindSelection() {
   const btnNext  = document.getElementById('btnNext');
   const btnBack  = document.getElementById('btnBack');
+  const items = [...document.querySelectorAll('#proList .item')].map(el => ({
+    id: el.dataset.id,
+    btn: el.querySelector('.choose'),
+    el
+  }));
+  const selected = new Set();
 
   function syncUI(){
-    cards.forEach(c => c.btn.classList.toggle('is-on', selected.has(c.id)));
+    items.forEach(c => c.btn.classList.toggle('is-on', selected.has(c.id)));
     btnNext.disabled = selected.size === 0;
     btnNext.textContent = selected.size ? `Continuar (${selected.size})` : 'Continuar';
   }
+  syncUI();
 
-  cards.forEach(c => {
+  items.forEach(c => {
     c.btn.addEventListener('click', () => {
-      if (c.el.classList.contains('is-disabled')) return;
       selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
       syncUI();
     });
   });
 
-  function unionSkills(ids){
-    const set = new Set();
-    ids.forEach(id => {
-      const c = cards.find(x => x.id === id);
-      (c?.skills || []).forEach(s => set.add(s));
-    });
-    return set;
-  }
-  const label = s => ({corte:'corte', barba:'barba', coloracao:'coloração', tratamento:'tratamento', sobrancelha:'sobrancelha'}[s] || s);
-
   btnNext.addEventListener('click', () => {
     if (selected.size === 0) return;
 
-    // Validação: seleção cobre todos os serviços?
-    const covered = unionSkills([...selected]);
-    const missing = [...REQUIRED].filter(s => !covered.has(s));
-    if (missing.length){
-      alert('Você selecionou profissionais que não cobrem: ' + missing.map(label).join(', ') + '.');
-      return;
-    }
+    // (Opcional) Validação de cobertura de serviços
+    // → se no futuro você devolver "skills" do profissional pelo n8n,
+    //   dá pra checar se cobrem todos os REQUIRED antes de seguir.
 
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
     localStorage.setItem('proMode', 'per'); // multi por serviço
@@ -182,15 +181,19 @@ document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} ser
   });
 
   btnBack.addEventListener('click', () => window.location.href = 'services.html');
+}
 
-  syncUI();
-
-  // Fallback de imagem
-  document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{
-      const box = img.parentElement; img.remove(); box.classList.add('no-img');
-    });
-  });
+/* ================== Boot ================== */
+(async function boot(){
+  try{
+    const pros = await fetchProfessionals();
+    renderPros(pros);
+    bindSelection();
+  }catch(err){
+    console.error(err);
+    document.getElementById('proList').innerHTML =
+      `<div class="error" role="alert">Não foi possível carregar os profissionais. Tente novamente.</div>`;
+  }
 })();
 </script>
 </body>
