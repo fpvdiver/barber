@@ -128,8 +128,8 @@
   function pageForRole(role){
     const r = String(role || '').toLowerCase();
     if (r === 'admin')         return 'admin/rootpage.html';
-    if (r === 'professional')  return 'profissionalpage.html';
-    return 'clientpage.html';
+    if (r === 'professional')  return 'admin/profissionalpage.html';
+    return 'admin/clientpage.html';
   }
 
   async function supabaseSignIn(email, password){
@@ -211,4 +211,5 @@
 </script>
 </body>
 </html>
+
 
