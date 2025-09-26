@@ -168,21 +168,37 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 /* Pega sessão em qualquer formato comum */
 function getSbSession() {
-  // formato custom usado no seu login (sb.session)
+  // seu formato custom
   const custom = localStorage.getItem('sb.session');
   if (custom) {
-    try { return JSON.parse(custom); } catch(_) {}
+    try {
+      const s = JSON.parse(custom);
+      // normaliza um pouco pra evitar undefined
+      return {
+        access_token: s.access_token || s.token || '',
+        refresh_token: s.refresh_token || s.refreshToken || '',
+        user: s.user || null,
+        user_id: s.user_id || (s.user && s.user.id) || '',
+        user_email: s.user_email || (s.user && s.user.email) || ''
+      };
+    } catch(_) {}
   }
+
   // formato oficial do supabase-js v2
   const ref = SUPABASE_URL.split('https://')[1].split('.')[0]; // rlhrnmzlfiyyycrhggjv
   const officialKey = `sb-${ref}-auth-token`;
   const raw = localStorage.getItem(officialKey);
   if (raw) {
     try {
-      const parsed = JSON.parse(raw);
-      // lib salva { currentSession, expiresAt } ou { access_token, ... }
-      if (parsed?.currentSession) return parsed.currentSession;
-      return parsed;
+      const p = JSON.parse(raw);
+      const sess = p?.currentSession || p;
+      return {
+        access_token: sess?.access_token || '',
+        refresh_token: sess?.refresh_token || '',
+        user: sess?.user || null,
+        user_id: sess?.user?.id || '',
+        user_email: sess?.user?.email || ''
+      };
     } catch(_) {}
   }
   return null;
@@ -241,23 +257,30 @@ function fillForm(){
 /* ========= carrega dados reais do usuário ========= */
 async function loadUser() {
   try {
-    // 1) dados da conta (email + metadata)
-    const ures = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      method:'GET',
-      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
-    });
-    if (!ures.ok) throw new Error(await ures.text());
-    const u = await ures.json();
+    // tenta primeiro pegar do /auth/v1/user (melhor fonte pro e-mail atual)
+    let u = null;
+    try {
+      const ures = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        method:'GET',
+        headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+      });
+      if (ures.ok) u = await ures.json();
+    } catch(_) {}
 
-    activeUser.id    = u?.id || sb?.user?.id || '';
-    activeUser.email = u?.email || '';
+    // identifica o userId mesmo se o passo acima não funcionar
+    const userId = u?.id || sb?.user?.id || sb?.user_id || '';
+    const userEmail = u?.email || sb?.user?.email || sb?.user_email || '';
+
+    // defaults
+    activeUser.id    = userId || '';
+    activeUser.email = userEmail || '';
     activeUser.name  = (u?.user_metadata?.full_name || '').trim() || 'Cliente';
     activeUser.phone = u?.user_metadata?.phone || '';
 
-    // 2) complementa com public.profiles (full_name, phone)
-    if (activeUser.id) {
+    // complementa com public.profiles
+    if (userId) {
       const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-      url.searchParams.set('id', `eq.${activeUser.id}`);
+      url.searchParams.set('id', `eq.${userId}`);
       url.searchParams.set('select', 'full_name,phone');
       const pres = await fetch(url, {
         headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
@@ -271,6 +294,15 @@ async function loadUser() {
         }
       }
     }
+
+    // se ainda não veio nome/email por nenhum caminho, usa o que tinha salvo na sessão
+    if (!activeUser.name || activeUser.name === 'Cliente') {
+      const meta = sb?.user?.user_metadata || {};
+      const full = (meta.full_name || '').trim();
+      if (full) activeUser.name = full;
+    }
+    if (!activeUser.email && sb?.user_email) activeUser.email = sb.user_email;
+
   } catch (e) {
     console.error('loadUser error:', e);
   } finally {
@@ -424,3 +456,4 @@ qs('#deleteAcc').addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
+
