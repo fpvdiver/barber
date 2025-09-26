@@ -59,7 +59,10 @@
           <div id="phEmail" class="muted" style="font-size:13px">—</div>
         </div>
       </div>
-      <label class="edit-photo ripple" for="avatarInput">Trocar foto</label>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <label class="edit-photo ripple" for="avatarInput">Trocar foto</label>
+        <button class="edit-photo ripple" id="removeAvatar" type="button">Remover foto</button>
+      </div>
       <input id="avatarInput" type="file" accept="image/*" hidden>
     </section>
 
@@ -168,7 +171,7 @@
 <script>
 /* ========= SUPABASE ========= */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
 /* lê sessão salva (custom e oficial) */
 function getSbSession() {
@@ -217,13 +220,30 @@ document.addEventListener('click',(e)=>{
 const io = new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){en.target.classList.add('is-in');io.unobserve(en.target);}});},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
+/* ========= estado + avatar POR USUÁRIO ========= */
 let activeUser = { id:'', name:'Cliente', email:'', phone:'' };
-const avatarData = localStorage.getItem('auth.avatar');
+const avatarKey = (id, email) => `avatar:${id || email || 'anon'}`;
+let AVATAR_KEY = avatarKey('', ''); // será atualizado após carregar o usuário
+
+function getAvatar() {
+  const legacy = localStorage.getItem('auth.avatar');   // migração da chave antiga
+  if (legacy && AVATAR_KEY) {
+    localStorage.setItem(AVATAR_KEY, legacy);
+    localStorage.removeItem('auth.avatar');
+  }
+  return localStorage.getItem(AVATAR_KEY);
+}
 const initials = n => (n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
+
 function renderHeader(){
   const box = qs('#avatarBox'); box.innerHTML = '';
-  if(avatarData){ const img = new Image(); img.src = avatarData; img.alt='Foto do perfil'; box.appendChild(img); }
-  else{ box.textContent = initials(activeUser.name); }
+  const data = getAvatar();
+  if (data) {
+    const img = new Image(); img.src = data; img.alt='Foto do perfil';
+    box.appendChild(img);
+  } else {
+    box.textContent = initials(activeUser.name);
+  }
   qs('#phName').textContent  = activeUser.name || '—';
   qs('#phEmail').textContent = activeUser.email || '—';
 }
@@ -256,18 +276,28 @@ async function loadFromAuth() {
       phone: meta.phone || ''
     };
   } finally {
+    AVATAR_KEY = avatarKey(activeUser.id, activeUser.email);
     renderHeader();
     fillForm();
   }
 }
 loadFromAuth();
 
-/* ========= trocar foto (local) ========= */
+/* ========= trocar/remover foto ========= */
 qs('#avatarInput').addEventListener('change', (ev)=>{
   const file = ev.target.files?.[0]; if(!file) return;
   const rd = new FileReader();
-  rd.onload = () => { localStorage.setItem('auth.avatar', rd.result); renderHeader(); };
+  rd.onload = () => {
+    if (!AVATAR_KEY) AVATAR_KEY = avatarKey(activeUser.id, activeUser.email);
+    localStorage.setItem(AVATAR_KEY, rd.result);
+    renderHeader();
+  };
   rd.readAsDataURL(file);
+});
+qs('#removeAvatar').addEventListener('click', ()=>{
+  if (!AVATAR_KEY) return;
+  localStorage.removeItem(AVATAR_KEY);
+  renderHeader();
 });
 
 /* ========= salvar no Auth (email + user_metadata) ========= */
@@ -288,7 +318,7 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
       body: JSON.stringify({ email, data:{ full_name: name, phone } })
     });
     if(!r.ok){
-      // alguns projetos não permitem trocar email sem verificação — mantemos metadata ao menos
+      // poucos projetos permitem trocar email sem verificação; se falhar, atualiza só metadata
       const metaOnly = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
         method:'PUT',
         headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
@@ -297,6 +327,7 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
       if(!metaOnly.ok) throw new Error(await metaOnly.text());
     }
     activeUser.name = name; activeUser.email = email; activeUser.phone = phone;
+    AVATAR_KEY = avatarKey(activeUser.id, activeUser.email); // caso o e-mail mude
     renderHeader(); fillForm();
     msg.className='msg ok'; msg.textContent='Dados atualizados!';
     setTimeout(()=>msg.textContent='', 1400);
@@ -345,19 +376,25 @@ qs('#savePrefs').addEventListener('click', ()=>{
 });
 
 /* ========= sair / excluir ========= */
+function cleanSessionKeys(){
+  try{
+    if (AVATAR_KEY) localStorage.removeItem(AVATAR_KEY);   // foto desse usuário
+    localStorage.removeItem('auth.avatar');                // chave legacy
+    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+    localStorage.removeItem(`sb-${ref}-auth-token`);
+    localStorage.removeItem('sb.session');
+  }catch{}
+}
 qs('#logout').addEventListener('click', async ()=>{
   try{
     await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
       method:'POST', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     }).catch(()=>{});
   } finally {
-    localStorage.removeItem('sb.session');
-    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
-    localStorage.removeItem(`sb-${ref}-auth-token`);
+    cleanSessionKeys();
     location.href='login.html';
   }
 });
-
 qs('#deleteAcc').addEventListener('click', async ()=>{
   if(!confirm('Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.')) return;
   try{
@@ -365,11 +402,7 @@ qs('#deleteAcc').addEventListener('click', async ()=>{
       method:'POST', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     }).catch(()=>{});
   } finally {
-    localStorage.removeItem('sb.session');
-    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
-    localStorage.removeItem(`sb-${ref}-auth-token`);
-    localStorage.removeItem('auth.avatar');
-    localStorage.removeItem('prefs');
+    cleanSessionKeys();
     location.href='login.html';
   }
 });
