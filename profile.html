@@ -172,8 +172,9 @@
 /* ========= SUPABASE ========= */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+const STORAGE_BUCKET = 'avatars'; // certifique-se de que existe
 
-/* lê sessão salva (custom e oficial) */
+/* sessão (custom ou oficial) */
 function getSbSession() {
   const custom = localStorage.getItem('sb.session');
   if (custom) {
@@ -204,42 +205,23 @@ function getSbSession() {
   return null;
 }
 const sb = getSbSession();
-if (!sb?.access_token) {
-  sessionStorage.setItem('postLoginRedirect','profile.html');
-  location.href = 'login.html';
-}
+if (!sb?.access_token) { sessionStorage.setItem('postLoginRedirect','profile.html'); location.href = 'login.html'; }
 
 /* ========= helpers/UI ========= */
 const qs = s => document.querySelector(s);
-document.addEventListener('click',(e)=>{
-  const t=e.target.closest('.ripple'); if(!t) return;
-  const r=document.createElement('span'); r.className='r';
-  const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
-  t.appendChild(r); r.addEventListener('animationend',()=>r.remove());
-},{passive:true});
+document.addEventListener('click',(e)=>{const t=e.target.closest('.ripple'); if(!t) return; const r=document.createElement('span'); r.className='r'; const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px'; t.appendChild(r); r.addEventListener('animationend',()=>r.remove());},{passive:true});
 const io = new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){en.target.classList.add('is-in');io.unobserve(en.target);}});},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* ========= estado + avatar POR USUÁRIO ========= */
-let activeUser = { id:'', name:'Cliente', email:'', phone:'' };
-const avatarKey = (id, email) => `avatar:${id || email || 'anon'}`;
-let AVATAR_KEY = avatarKey('', ''); // será atualizado após carregar o usuário
+/* ========= estado ========= */
+let activeUser = { id:'', email:'', name:'Cliente', phone:'', avatar_url:'', avatar_path:'' };
 
-function getAvatar() {
-  const legacy = localStorage.getItem('auth.avatar');   // migração da chave antiga
-  if (legacy && AVATAR_KEY) {
-    localStorage.setItem(AVATAR_KEY, legacy);
-    localStorage.removeItem('auth.avatar');
-  }
-  return localStorage.getItem(AVATAR_KEY);
-}
 const initials = n => (n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
-
 function renderHeader(){
   const box = qs('#avatarBox'); box.innerHTML = '';
-  const data = getAvatar();
-  if (data) {
-    const img = new Image(); img.src = data; img.alt='Foto do perfil';
+  if (activeUser.avatar_url) {
+    const img = new Image(); img.src = activeUser.avatar_url; img.alt='Foto do perfil';
+    img.onerror = ()=>{ box.textContent = initials(activeUser.name); };
     box.appendChild(img);
   } else {
     box.textContent = initials(activeUser.name);
@@ -253,54 +235,151 @@ function fillForm(){
   qs('#phone').value = activeUser.phone || '';
 }
 
-/* ========= carregar do Auth (email + user_metadata) ========= */
-async function loadFromAuth() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      method: 'GET',
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${sb.access_token}` }
+/* ========= carregar do Auth ========= */
+async function loadFromAuth(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method:'GET', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     });
-    if (!res.ok) throw new Error(await res.text());
-    const u = await res.json();
-    activeUser.id    = u.id || sb.user_id || '';
-    activeUser.email = u.email || sb.user_email || '';
-    activeUser.name  = (u.user_metadata?.full_name || '').trim() || 'Cliente';
-    activeUser.phone = u.user_metadata?.phone || '';
-  } catch (e) {
+    if(!r.ok) throw new Error(await r.text());
+    const u = await r.json();
+    activeUser.id          = u.id || sb.user_id || '';
+    activeUser.email       = u.email || sb.user_email || '';
+    activeUser.name        = (u.user_metadata?.full_name || '').trim() || 'Cliente';
+    activeUser.phone       = u.user_metadata?.phone || '';
+    activeUser.avatar_url  = u.user_metadata?.avatar_url || '';
+    activeUser.avatar_path = u.user_metadata?.avatar_path || '';
+  }catch(e){
     console.error('Auth load error:', e);
     const meta = sb?.user?.user_metadata || {};
     activeUser = {
       id: sb?.user_id || sb?.user?.id || '',
       email: sb?.user_email || sb?.user?.email || '',
       name: (meta.full_name || '').trim() || 'Cliente',
-      phone: meta.phone || ''
+      phone: meta.phone || '',
+      avatar_url: meta.avatar_url || '',
+      avatar_path: meta.avatar_path || ''
     };
-  } finally {
-    AVATAR_KEY = avatarKey(activeUser.id, activeUser.email);
-    renderHeader();
-    fillForm();
+  }finally{
+    renderHeader(); fillForm();
   }
 }
 loadFromAuth();
 
-/* ========= trocar/remover foto ========= */
-qs('#avatarInput').addEventListener('change', (ev)=>{
-  const file = ev.target.files?.[0]; if(!file) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    if (!AVATAR_KEY) AVATAR_KEY = avatarKey(activeUser.id, activeUser.email);
-    localStorage.setItem(AVATAR_KEY, rd.result);
-    renderHeader();
-  };
-  rd.readAsDataURL(file);
-});
-qs('#removeAvatar').addEventListener('click', ()=>{
-  if (!AVATAR_KEY) return;
-  localStorage.removeItem(AVATAR_KEY);
+/* ========= upload/remover avatar (Storage) ========= */
+async function uploadAvatar(file){
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const safeExt = ({jpeg:'jpg'}[ext] || ext);
+  const path = `${activeUser.id}/${Date.now()}.${safeExt}`;
+
+  // remove o anterior se existir (best-effort)
+  if (activeUser.avatar_path) {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(activeUser.avatar_path)}`, {
+      method:'DELETE',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+    }).catch(()=>{});
+  }
+
+  // upload
+  const up = await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(path)}`, {
+    method:'POST',
+    headers:{
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${sb.access_token}`,
+      'x-upsert':'true',
+      'Content-Type': file.type || 'application/octet-stream'
+    },
+    body: file
+  });
+  if(!up.ok) throw new Error(await up.text());
+
+  // URL pública
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${encodeURIComponent(path)}`;
+
+  // grava no auth metadata (e opcionalmente em profiles)
+  await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method:'PUT',
+    headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ data: { ...((activeUser||{}).user_metadata||{}), full_name: activeUser.name, phone: activeUser.phone, avatar_url: publicUrl, avatar_path: path } })
+  });
+
+  // opcional: manter em public.profiles
+  try{
+    const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+    url.searchParams.set('id', `eq.${activeUser.id}`);
+    await fetch(url, {
+      method:'PATCH',
+      headers:{
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${sb.access_token}`,
+        'Content-Type':'application/json',
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ avatar_url: publicUrl })
+    });
+  }catch{}
+
+  // atualiza estado local
+  activeUser.avatar_url = publicUrl;
+  activeUser.avatar_path = path;
   renderHeader();
+}
+
+async function deleteAvatar(){
+  // deleta do Storage
+  if (activeUser.avatar_path) {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(activeUser.avatar_path)}`, {
+      method:'DELETE',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+    }).catch(()=>{});
+  }
+  // limpa metadata
+  await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method:'PUT',
+    headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ data: { ...((activeUser||{}).user_metadata||{}), avatar_url: '', avatar_path: '' } })
+  }).catch(()=>{});
+
+  // opcional: limpar em profiles
+  try{
+    const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+    url.searchParams.set('id', `eq.${activeUser.id}`);
+    await fetch(url, {
+      method:'PATCH',
+      headers:{
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${sb.access_token}`,
+        'Content-Type':'application/json',
+        Prefer: 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ avatar_url: null })
+    });
+  }catch{}
+
+  activeUser.avatar_url = '';
+  activeUser.avatar_path = '';
+  renderHeader();
+}
+
+/* input handlers */
+qs('#avatarInput').addEventListener('change', async (ev)=>{
+  const file = ev.target.files?.[0]; if(!file) return;
+  try{
+    await uploadAvatar(file);
+  }catch(err){
+    console.error(err);
+    alert('Falha ao enviar a imagem.');
+  } finally {
+    ev.target.value = '';
+  }
+});
+qs('#removeAvatar').addEventListener('click', async ()=>{
+  if (!activeUser.avatar_path && !activeUser.avatar_url) return;
+  if (!confirm('Remover foto de perfil?')) return;
+  try{ await deleteAvatar(); }catch{ alert('Não foi possível remover agora.'); }
 });
 
-/* ========= salvar no Auth (email + user_metadata) ========= */
+/* ========= salvar perfil ========= */
 qs('#formProfile').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = qs('#msgProfile');
@@ -315,19 +394,35 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
     const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       method:'PUT',
       headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-      body: JSON.stringify({ email, data:{ full_name: name, phone } })
+      body: JSON.stringify({ email, data:{ full_name: name, phone, avatar_url: activeUser.avatar_url, avatar_path: activeUser.avatar_path } })
     });
     if(!r.ok){
-      // poucos projetos permitem trocar email sem verificação; se falhar, atualiza só metadata
+      // se não puder trocar e-mail, salva só metadata
       const metaOnly = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
         method:'PUT',
         headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-        body: JSON.stringify({ data:{ full_name: name, phone } })
+        body: JSON.stringify({ data:{ full_name: name, phone, avatar_url: activeUser.avatar_url, avatar_path: activeUser.avatar_path } })
       });
       if(!metaOnly.ok) throw new Error(await metaOnly.text());
     }
+
+    // opcional: espelha em profiles
+    try{
+      const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+      url.searchParams.set('id', `eq.${activeUser.id}`);
+      await fetch(url, {
+        method:'PATCH',
+        headers:{
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${sb.access_token}`,
+          'Content-Type':'application/json',
+          Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ full_name: name, phone, avatar_url: activeUser.avatar_url })
+      });
+    }catch{}
+
     activeUser.name = name; activeUser.email = email; activeUser.phone = phone;
-    AVATAR_KEY = avatarKey(activeUser.id, activeUser.email); // caso o e-mail mude
     renderHeader(); fillForm();
     msg.className='msg ok'; msg.textContent='Dados atualizados!';
     setTimeout(()=>msg.textContent='', 1400);
@@ -378,8 +473,6 @@ qs('#savePrefs').addEventListener('click', ()=>{
 /* ========= sair / excluir ========= */
 function cleanSessionKeys(){
   try{
-    if (AVATAR_KEY) localStorage.removeItem(AVATAR_KEY);   // foto desse usuário
-    localStorage.removeItem('auth.avatar');                // chave legacy
     const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
     localStorage.removeItem(`sb-${ref}-auth-token`);
     localStorage.removeItem('sb.session');
