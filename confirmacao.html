@@ -119,25 +119,91 @@
   </div>
 </main>
 
+<!-- ... cabeçalho igual ao seu ... -->
+
 <script>
-  // ===== util =====
   const money = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
   const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
 
-  // ===== mapeamentos simples (exibidos na revisão) =====
-  const PROS = {
-    fernando: {name:'Fernando', role:'Barbeiro', avatar:'img/pro-fernando.jpg'},
-    jonnier:  {name:'Jonnier',  role:'Stylist',  avatar:'img/pro-jonnier.jpg'},
-    marcos:   {name:'Marcos',   role:'Barbeiro', avatar:'img/pro-marcos.jpg'},
-    aline:    {name:'Aline',    role:'Colorista',avatar:'img/pro-aline.jpg'}
-  };
-  const SERVICES_NAMES = {
-    corte:'Corte', barba:'Barba', coloracao:'Coloração', tratamento:'Tratamento', sobrancelha:'Sobrancelha'
+  /* ==== Endpoints do n8n ==== */
+  const N8N = {
+    services: [
+      'https://primary-jow9-barber.up.railway.app/webhook/services',
+      // 'https://primary-jow9-barber.up.railway.app/webhook/services-public',
+    ],
+    pros: [
+      'https://primary-jow9-barber.up.railway.app/webhook/professionals',
+      'https://primary-jow9-barber.up.railway.app/webhook/profissionals', // fallback
+    ],
   };
 
-  // ===== leitura do agendamento salvo =====
+  async function fetchList(urls) {
+    let lastErr;
+    for (const base of urls) {
+      try {
+        const url = new URL(base);
+        url.searchParams.set('limit','500');
+        url.searchParams.set('_', String(Date.now()));
+        const res = await fetch(url.toString(), {
+          method:'GET',
+          // headers: { 'x-api-key': 'SE_TIVER' }
+        });
+        if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
+        const body = await res.json().catch(()=> ({}));
+
+        let items = [];
+        if (Array.isArray(body)) items = body.map(x=>x?.json ?? x);
+        else if (body?.data && Array.isArray(body.data)) items = body.data;
+        else if (body && typeof body === 'object') {
+          const vals = Object.values(body);
+          if (vals.length && typeof vals[0] === 'object') items = vals.map(v => v?.json ?? v);
+        }
+        return items;
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error('fetch failed');
+  }
+
+  function byIdMap(items, idKey, nameKey) {
+    const map = {};
+    items.forEach(it => {
+      const id   = it[idKey] ?? it.id;
+      const name = it[nameKey] ?? it.full_name ?? it.name ?? it.title ?? '';
+      if (id && name) map[id] = name;
+    });
+    return map;
+  }
+
+  async function resolveNames(booking) {
+    // Busca em paralelo
+    const [svcs, pros] = await Promise.all([
+      fetchList(N8N.services).catch(()=>[]),
+      fetchList(N8N.pros).catch(()=>[]),
+    ]);
+
+    const svcsMap = byIdMap(svcs, 'id', 'name');
+    const prosMap = byIdMap(pros, 'id', 'full_name');
+
+    // Profissionais
+    let prosText = 'Qualquer profissional';
+    if (booking.professionals?.length) {
+      prosText = booking.professionals.map(id => prosMap[id] || id).join(', ');
+    }
+    document.getElementById('fPros').textContent = prosText;
+
+    // Serviços (chips)
+    const svcWrap = document.getElementById('fServices');
+    svcWrap.innerHTML = '';
+    (booking.services || []).forEach(id => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = svcsMap[id] || id;
+      svcWrap.appendChild(span);
+    });
+  }
+
+  /* ===== leitura do agendamento salvo ===== */
   const booking = JSON.parse(getStore('booking') || 'null');
-
   if(!booking){
     alert('Nenhum agendamento em progresso. Voltando…');
     location.href = 'services.html';
@@ -147,35 +213,30 @@
   const fee  = Math.round((booking.total * rate) * 100) / 100;
   const rest = Math.max(0, Math.round((booking.total - fee) * 100) / 100);
 
-  // ===== preenche UI =====
+  // Preenche campos fixos
   document.getElementById('fDate').textContent = booking.date;
   document.getElementById('fTime').textContent = booking.time;
-
-  // profissionais
-  let prosText = 'Qualquer profissional';
-  if(booking.professionals && booking.professionals.length){
-    prosText = booking.professionals.map(id => PROS[id]?.name || id).join(', ');
-  }
-  document.getElementById('fPros').textContent = prosText;
-
-  // serviços
-  const svcWrap = document.getElementById('fServices');
-  (booking.services || []).forEach(tok=>{
-    const span = document.createElement('span');
-    span.className = 'tag';
-    span.textContent = SERVICES_NAMES[tok] || tok;
-    svcWrap.appendChild(span);
-  });
-
-  // duração
-  document.getElementById('fDur').textContent = `${booking.minutes} min`;
-
-  // cobrança
+  document.getElementById('fDur').textContent  = `${booking.minutes} min`;
   document.getElementById('bServices').textContent = money(booking.total);
   document.getElementById('bFee').textContent      = money(fee);
   document.getElementById('bRest').textContent     = money(rest);
 
-  // botão pagar
+  // Resolve nomes via n8n e preenche
+  resolveNames(booking).catch(err=>{
+    console.error('Falha ao resolver nomes:', err);
+    // fallback: mostra os IDs caso a API esteja fora
+    const svcWrap = document.getElementById('fServices');
+    (booking.services || []).forEach(id => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = id;
+      svcWrap.appendChild(span);
+    });
+    document.getElementById('fPros').textContent =
+      (booking.professionals||[]).join(', ') || 'Qualquer profissional';
+  });
+
+  // Botões
   const btnPay  = document.getElementById('btnPay');
   btnPay.textContent = `Confirmar e pagar ${money(fee)}`;
   btnPay.disabled = false;
@@ -183,7 +244,6 @@
   document.getElementById('btnBack').addEventListener('click', ()=> history.back());
 
   btnPay.addEventListener('click', ()=>{
-    // aqui você integraria o gateway; por enquanto só persiste o "pagamento" e finaliza
     const payload = Object.assign({}, booking, {
       depositRate: 0.30,
       depositPaid: fee,
@@ -192,21 +252,13 @@
       paidAt: new Date().toISOString()
     });
     localStorage.setItem('lastBooking', JSON.stringify(payload));
-
     alert(`Pagamento confirmado de ${money(fee)}.\n\nSeu agendamento está garantido!`);
-    // redireciona para uma tela de sucesso (ou home)
     window.location.href = 'index.html';
   });
-
-  // ===== ripple simples (usa suas variáveis) =====
-  document.addEventListener('click',(e)=>{
-    const btn=e.target.closest('.ripple'); if(!btn) return;
-    const r=document.createElement('span'); r.className='r';
-    const b=btn.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
-    btn.appendChild(r); r.addEventListener('animationend',()=>r.remove());
-  }, {passive:true});
 </script>
+
 </body>
 </html>
+
 
 
