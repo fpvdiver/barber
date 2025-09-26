@@ -9,56 +9,34 @@
   <link rel="stylesheet" href="css/styles.css">
 
   <style>
-    /* ====== estilos específicos da tela de auth ====== */
     .auth-wrap{max-width:428px;margin:0 auto;padding:18px}
     .brand{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
     .brand .dot{width:36px;height:36px;border-radius:10px;background:#1b1b1f;border:1px solid var(--line);display:grid;place-items:center}
     .brand h1{margin:0;font:700 18px/1 Poppins}
     .muted{color:var(--muted);}
 
-    .auth-card{
-      background:var(--panel);border:1px solid var(--line);
-      border-radius:14px;padding:18px;box-shadow:var(--shadow)
-    }
-
+    .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
     .field{margin:0 0 12px}
     .label{display:block;margin:0 0 6px;font:600 12px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#d9dade}
     .input-wrap{position:relative}
-    .input{
-      width:100%;padding:12px 42px 12px 42px;border-radius:12px;
-      border:1px solid var(--line);background:#111214;color:var(--text);
-      font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s
-    }
+    .input{width:100%;padding:12px 42px 12px 42px;border-radius:12px;border:1px solid var(--line);background:#111214;color:var(--text);font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s}
     .input:focus{border-color:rgba(211,168,91,.55);box-shadow:0 0 0 3px rgba(211,168,91,.14)}
-    .ico{
-      position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#b8bac1
-    }
-    .pass-toggle{
-      position:absolute;right:8px;top:50%;transform:translateY(-50%);
-      width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
-      background:#1b1c20;color:#e6e7ea;display:grid;place-items:center;cursor:pointer
-    }
+    .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#b8bac1}
+    .pass-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#1b1c20;color:#e6e7ea;display:grid;place-items:center;cursor:pointer}
 
     .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px}
     .check{display:flex;align-items:center;gap:8px;color:#cfd0d4;font-size:14px}
     .check input{accent-color:var(--gold)}
-
     .btn-full{width:100%}
     .hr{height:1px;background:rgba(255,255,255,.08);margin:16px 0}
-
     .helpers{display:flex;justify-content:space-between;gap:12px;margin-top:12px}
     .link{color:var(--gold);text-decoration:none}
     .link:hover{opacity:.9}
-
-    /* mensagens */
     .msg{margin-top:10px;font-size:14px}
     .msg.err{color:#ffb3b3}
     .msg.ok{color:#b6f4c6}
 
-    /* ripple span base (usa animação global) */
-    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
-      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
-      animation:ripple-kf 600ms ease-out forwards}
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf 600ms ease-out forwards}
     @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
   </style>
 </head>
@@ -119,7 +97,7 @@
 </main>
 
 <script>
-  // ripple leve
+  // ripple
   document.addEventListener('click',(e)=>{
     const t=e.target.closest('.ripple'); if(!t) return;
     const r=document.createElement('span'); r.className='r';
@@ -135,13 +113,30 @@
     });
   });
 
-  // preencher e lembrar email
+  // lembrar email
   const emailInput = document.getElementById('email');
   const remember   = document.getElementById('remember');
   const savedEmail = localStorage.getItem('auth.remember.email');
   if(savedEmail){ emailInput.value = savedEmail; remember.checked = true; }
 
-  // login fake (demo) contra o usuário salvo no cadastro.html
+  // util: normaliza role
+  function normalizeRole(user){
+    const r =
+      user?.role ||
+      user?.app_metadata?.role ||
+      user?.profile?.role ||
+      'customer';
+    const s = String(r).toLowerCase();
+    if (['admin','administrator'].includes(s)) return 'admin';
+    if (['professional','profissional','barbeiro'].includes(s)) return 'professional';
+    return 'customer';
+  }
+  function pageForRole(role){
+    if(role==='admin') return 'admin/rootpage.html';
+    if(role==='professional') return 'profissionalpage.html';
+    return 'clientpage.html';
+  }
+
   const form = document.getElementById('loginForm');
   const msg  = document.getElementById('msg');
 
@@ -152,10 +147,11 @@
     const email = emailInput.value.trim().toLowerCase();
     const pass  = document.getElementById('password').value;
 
+    // DEMO: valida contra usuário salvo localmente pelo cadastro.html
     const raw = localStorage.getItem('auth.user');
     const user = raw ? JSON.parse(raw) : null;
 
-    if(!user || user.email.toLowerCase()!==email || user.password!==pass){
+    if(!user || (user.email||'').toLowerCase()!==email || user.password!==pass){
       msg.className='msg err';
       msg.textContent='Credenciais inválidas. Tente novamente.';
       return;
@@ -165,10 +161,16 @@
     if(remember.checked) localStorage.setItem('auth.remember.email', email);
     else localStorage.removeItem('auth.remember.email');
 
+    // status de sessão + rota por perfil
+    const role = normalizeRole(user);
     localStorage.setItem('auth.logged','1');
+    localStorage.setItem('auth.role', role);
+    if (user.id) localStorage.setItem('auth.userId', user.id);
+
+    const dest = pageForRole(role);
     msg.className='msg ok';
-    msg.textContent='Login realizado! Redirecionando…';
-    setTimeout(()=>{ window.location.href='index.html'; }, 700);
+    msg.textContent=`Login realizado! Redirecionando…`;
+    setTimeout(()=>{ window.location.href = dest; }, 700);
   });
 </script>
 </body>
