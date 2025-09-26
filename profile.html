@@ -164,13 +164,33 @@
 <script>
 /* ========= SUPABASE SESSION / GUARD ========= */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y'; // <-- troque pela sua anon key
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
-const sbRaw = localStorage.getItem('sb.session');
-const sb = sbRaw ? JSON.parse(sbRaw) : null;
-const demoLogged = localStorage.getItem('auth.logged') === '1';
-const isLogged = !!(sb?.access_token && sb?.user_id) || demoLogged;
+/* Pega sessão em qualquer formato comum */
+function getSbSession() {
+  // formato custom usado no seu login (sb.session)
+  const custom = localStorage.getItem('sb.session');
+  if (custom) {
+    try { return JSON.parse(custom); } catch(_) {}
+  }
+  // formato oficial do supabase-js v2
+  const ref = SUPABASE_URL.split('https://')[1].split('.')[0]; // rlhrnmzlfiyyycrhggjv
+  const officialKey = `sb-${ref}-auth-token`;
+  const raw = localStorage.getItem(officialKey);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      // lib salva { currentSession, expiresAt } ou { access_token, ... }
+      if (parsed?.currentSession) return parsed.currentSession;
+      return parsed;
+    } catch(_) {}
+  }
+  return null;
+}
+const sb = getSbSession();
+const isLogged = !!(sb?.access_token);
 
+/* Guard */
 if (!isLogged) {
   sessionStorage.setItem('postLoginRedirect','profile.html');
   window.location.href = 'login.html';
@@ -193,25 +213,13 @@ const io = new IntersectionObserver(ents=>{
 },{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* ========= carregar dados do usuário ========= */
-const sbUser = sb?.user || null;
-const demoUser = JSON.parse(localStorage.getItem('auth.user') || 'null');
-
-const activeUser = sbUser
-  ? {
-      id: sb.user_id,
-      name: (sbUser.user_metadata?.full_name || '').trim() || 'Cliente',
-      email: sbUser.email || '',
-      phone: sbUser.user_metadata?.phone || ''
-    }
-  : (demoUser || { name: 'Cliente', email: '', phone: '' });
-
+/* ========= estado do usuário ========= */
+let activeUser = { id:'', name:'Cliente', email:'', phone:'' };
 const avatarData = localStorage.getItem('auth.avatar');
 
 function initials(name){
   return (name||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
 }
-
 function renderHeader(){
   const box = qs('#avatarBox');
   box.innerHTML = '';
@@ -229,7 +237,48 @@ function fillForm(){
   qs('#email').value = activeUser.email || '';
   qs('#phone').value = activeUser.phone || '';
 }
-renderHeader(); fillForm();
+
+/* ========= carrega dados reais do usuário ========= */
+async function loadUser() {
+  try {
+    // 1) dados da conta (email + metadata)
+    const ures = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method:'GET',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+    });
+    if (!ures.ok) throw new Error(await ures.text());
+    const u = await ures.json();
+
+    activeUser.id    = u?.id || sb?.user?.id || '';
+    activeUser.email = u?.email || '';
+    activeUser.name  = (u?.user_metadata?.full_name || '').trim() || 'Cliente';
+    activeUser.phone = u?.user_metadata?.phone || '';
+
+    // 2) complementa com public.profiles (full_name, phone)
+    if (activeUser.id) {
+      const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+      url.searchParams.set('id', `eq.${activeUser.id}`);
+      url.searchParams.set('select', 'full_name,phone');
+      const pres = await fetch(url, {
+        headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+      });
+      if (pres.ok) {
+        const arr = await pres.json();
+        const p = arr?.[0];
+        if (p) {
+          if (p.full_name) activeUser.name = p.full_name;
+          if (p.phone)     activeUser.phone = p.phone;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('loadUser error:', e);
+  } finally {
+    renderHeader();
+    fillForm();
+  }
+}
+loadUser();
 
 /* ========= trocar foto (local) ========= */
 qs('#avatarInput').addEventListener('change', (ev)=>{
@@ -242,7 +291,7 @@ qs('#avatarInput').addEventListener('change', (ev)=>{
   reader.readAsDataURL(file);
 });
 
-/* ========= salvar perfil (PATCH na tabela profiles se logado no Supabase) ========= */
+/* ========= salvar perfil (PATCH na tabela profiles + user_metadata) ========= */
 qs('#formProfile').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = qs('#msgProfile');
@@ -256,10 +305,10 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
   }
 
   try {
-    if (sb?.access_token && sb?.user_id) {
-      // atualiza perfil (public.profiles)
+    // profiles
+    if (activeUser.id) {
       const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-      url.searchParams.set('id', `eq.${sb.user_id}`);
+      url.searchParams.set('id', `eq.${activeUser.id}`);
       const res = await fetch(url, {
         method:'PATCH',
         headers:{
@@ -271,20 +320,20 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
         body: JSON.stringify({ full_name: name, phone })
       });
       if(!res.ok) throw new Error(await res.text());
-      // atualiza user_metadata (opcional)
-      await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-        method:'PUT',
-        headers:{
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${sb.access_token}`,
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({ email, data: { full_name: name, phone } })
-      }).catch(()=>{});
-    } else {
-      // fallback demo
-      const updated = {...(demoUser||{}), name, email, phone};
-      localStorage.setItem('auth.user', JSON.stringify(updated));
+    }
+    // user metadata/email
+    const ures = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method:'PUT',
+      headers:{
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${sb.access_token}`,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({ email, data: { full_name: name, phone } })
+    });
+    if (!ures.ok) {
+      // alguns projetos não permitem mudar email por aqui; se falhar, ignora e segue
+      console.warn('PUT /auth/v1/user (email/metadata) falhou:', await ures.text());
     }
 
     activeUser.name = name; activeUser.email = email; activeUser.phone = phone;
@@ -297,11 +346,10 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
   }
 });
 
-/* ========= trocar senha (Supabase: PATCH /auth/v1/user) ========= */
+/* ========= trocar senha ========= */
 qs('#formPwd').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = qs('#msgPwd');
-  const cur = qs('#cur').value;
   const nw  = qs('#new').value;
   const nw2 = qs('#new2').value;
 
@@ -309,24 +357,16 @@ qs('#formPwd').addEventListener('submit', async (e)=>{
   if(nw !== nw2){ msg.className='msg err'; msg.textContent='Confirmação não confere.'; return; }
 
   try{
-    if (sb?.access_token) {
-      // Supabase não exige enviar a senha atual aqui; a verificação é via token
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-        method:'PUT',
-        headers:{
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${sb.access_token}`,
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({ password: nw })
-      });
-      if(!res.ok) throw new Error(await res.text());
-    } else {
-      // demo
-      if(cur !== (demoUser?.password||'')){ msg.className='msg err'; msg.textContent='Senha atual incorreta.'; return; }
-      demoUser.password = nw;
-      localStorage.setItem('auth.user', JSON.stringify(demoUser));
-    }
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method:'PUT',
+      headers:{
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${sb.access_token}`,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({ password: nw })
+    });
+    if(!res.ok) throw new Error(await res.text());
 
     qs('#cur').value = qs('#new').value = qs('#new2').value = '';
     msg.className='msg ok'; msg.textContent='Senha atualizada com sucesso!';
@@ -352,15 +392,15 @@ qs('#savePrefs').addEventListener('click', ()=>{
 /* ========= sair / excluir ========= */
 qs('#logout').addEventListener('click', async ()=>{
   try{
-    if (sb?.access_token) {
-      await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
-        method:'POST',
-        headers:{ apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${sb.access_token}` }
-      }).catch(()=>{});
-    }
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method:'POST',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${sb.access_token}` }
+    }).catch(()=>{});
   } finally {
+    // limpa todas as chaves possíveis
     localStorage.removeItem('sb.session');
-    localStorage.removeItem('auth.logged'); // fallback
+    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+    localStorage.removeItem(`sb-${ref}-auth-token`);
     window.location.href='login.html';
   }
 });
@@ -368,17 +408,15 @@ qs('#logout').addEventListener('click', async ()=>{
 qs('#deleteAcc').addEventListener('click', async ()=>{
   if(!confirm('Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.')) return;
   try{
-    if (sb?.access_token) {
-      await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
-        method:'POST',
-        headers:{ apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${sb.access_token}` }
-      }).catch(()=>{});
-    }
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method:'POST',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${sb.access_token}` }
+    }).catch(()=>{});
   } finally {
     localStorage.removeItem('sb.session');
-    localStorage.removeItem('auth.user');
+    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+    localStorage.removeItem(`sb-${ref}-auth-token`);
     localStorage.removeItem('auth.avatar');
-    localStorage.removeItem('auth.logged');
     localStorage.removeItem('prefs');
     window.location.href='login.html';
   }
