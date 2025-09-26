@@ -1,63 +1,250 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Minha Conta • Mineiro Barbershop</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#0f0f10;--panel:#141416;--panel-2:#101113;--text:#f5f6f9;--muted:#a7aab3;--line:#22242a;--gold:#d3a85b;--gold-2:#b88f49;--gold-rgb:211,168,91;--shadow:0 18px 50px rgba(0,0,0,.35)}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:#0b0c0e;color:var(--text);font:15px/1.6 Poppins,system-ui}
-.wrap{max-width:1040px;margin:0 auto;padding:18px}
-.header{display:flex;align-items:center;gap:12px;padding:14px 0;margin-bottom:6px}
-.search{flex:1;min-width:0;display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:center;height:44px;padding:0 12px;border-radius:12px;background:#131418;border:1px solid #23252b;color:#cfd0d4}
-.search input{background:transparent;border:0;outline:0;color:inherit;font:500 13px/1 Poppins}
-.grid{display:grid;gap:14px;grid-template-columns:1.2fr .8fr}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 10px;font:600 14px/1 Poppins}
-.item{display:flex;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
-.btn{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#1b1c20;color:#e6e7ea;font:600 12px/1 Poppins;cursor:pointer}
-.btn-primary{border-color:#7b6335;background:linear-gradient(180deg,var(--gold),var(--gold-2));color:#111}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mineiro Barbershop — Início</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <div class="search">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-3.5-3.5"/></svg>
-      <input placeholder="Pesquisar serviços…"/>
+
+<main class="app app--padded">
+  <!-- HEADER -->
+  <header class="header header-brand">
+    <div class="brandbar">
+      <a class="brand-logo" href="clientpage.html" aria-label="Mineiro Barbershop">
+        <img src="img/logobarber.png" alt="" onerror="this.remove()" />
+      </a>
+      <div class="brand-name">
+        <strong class="title">Mineiro Barbershop</strong>
+      </div>
     </div>
-    <button class="btn">Sair</button>
+  </header>
+
+  <!-- HERO (vídeo propaganda) -->
+  <section class="hero reveal" aria-label="Destaque" style="position:relative; overflow:hidden;">
+    <video autoplay muted loop playsinline preload="metadata"
+           style="width:100%;height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--line)">
+      <!-- substitua pelos seus arquivos -->
+      <source src="video/propaganda.mp4" type="video/mp4">
+      <source src="video/propaganda.webm" type="video/webm">
+    </video>
+    <div class="copy" style="position:absolute;left:16px;bottom:16px;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12)">
+      <h2 style="margin:0">ENCONTRE SEU<br>NOVO VISUAL</h2>
+      <p style="margin:4px 0 0">Corte • Coloração • Estilo • Tratamento</p>
+    </div>
+  </section>
+
+  <!-- CATEGORIAS -->
+  <div class="cat-row" aria-label="Categorias">
+    <a class="cat reveal ripple" href="services.html?cat=cabelo" title="Corte">
+      <div class="ico">
+        <img src="img/cat-corte.jpg" alt="Corte" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      </div>
+      <small>Corte</small>
+    </a>
+    <a class="cat reveal ripple" href="services.html?cat=coloracao" title="Coloração">
+      <div class="ico">
+        <img src="img/cat-coloracao.jpg" alt="Coloração" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      </div>
+      <small>Coloração</small>
+    </a>
+    <a class="cat reveal ripple" href="estilos.html" title="Estilo">
+      <div class="ico">
+        <img src="img/cat-estilo.jpg" alt="Estilo" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      </div>
+      <small>Estilo</small>
+    </a>
+    <a class="cat reveal ripple" href="tratamentos.html" title="Tratamento">
+      <div class="ico">
+        <img src="img/cat-tratamento.jpg" alt="Tratamento" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      </div>
+      <small>Tratamento</small>
+    </a>
   </div>
 
-  <div class="grid">
-    <section class="card">
-      <h3>Meus agendamentos</h3>
-      <div id="bookings"></div>
-    </section>
-    <aside class="card">
-      <h3>Minha conta</h3>
-      <div class="item"><span>Nome</span><strong id="u-name">—</strong></div>
-      <div class="item"><span>E-mail</span><strong id="u-email">—</strong></div>
-      <div class="item"><span>Telefone</span><strong id="u-phone">—</strong></div>
-      <div class="item" style="justify-content:center"><button class="btn btn-primary">Atualizar dados</button></div>
-    </aside>
+  <!-- PRÓXIMO AGENDAMENTO (no lugar de “Recomendados”) -->
+  <div class="sec-head">
+    <h3>Seu próximo agendamento</h3>
+    <a id="seeAll" href="reservas.html">Ver todos</a>
   </div>
-</div>
+
+  <article id="nextBookingCard" class="card reveal" aria-label="Próximo agendamento">
+    <div class="rate" title="Profissional">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+      <span id="proName">—</span>
+    </div>
+
+    <div class="meta">
+      <h4 class="name" id="bkWhen">—</h4>
+      <p class="addr" id="bkServices">—</p>
+      <p class="addr" id="bkTotal">—</p>
+    </div>
+
+    <!-- FAB WhatsApp opcional -->
+    <a class="wa-fab ripple" id="waLink" href="#" target="_blank" rel="noopener"
+       aria-label="Falar com a barbearia no WhatsApp">
+      <img src="img/whatsapp.gif" alt="" loading="lazy" decoding="async"
+           onerror="this.src='img/whatsapp.png'">
+    </a>
+  </article>
+</main>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Principal">
+  <a href="clientpage.html" class="active ripple" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 10l9-7 9 7"></path><path d="M9 22V12h6v10"></path>
+    </svg>
+    Início
+  </a>
+  <a href="services.html" class="ripple">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12" y2="8"></line>
+    </svg>
+    Explorar
+  </a>
+  <a href="reservas.html" class="ripple">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18"></path>
+    </svg>
+    Minhas reservas
+  </a>
+  <a href="profile.html" class="ripple">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M4 21v-2a4 4 0 0 1 3-3.87"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    Perfil
+  </a>
+</nav>
 
 <script>
-const user = { name:'João Mineiro', email:'joao.mineiro@example.com', phone:'(31) 9 9876-5432' };
-const bookings = [
-  { date:'Sex, 25/10 • 09:00', service:'Corte', pro:'Rafael', status:'Confirmado' },
-  { date:'Sex, 08/11 • 10:30', service:'Corte + Barba', pro:'Marcos', status:'Pendente' },
-];
-document.getElementById('u-name').textContent = user.name;
-document.getElementById('u-email').textContent = user.email;
-document.getElementById('u-phone').textContent = user.phone;
-document.getElementById('bookings').innerHTML = bookings.map(b=>`
-  <div class="item"><div><strong>${b.date}</strong><div style="opacity:.8">${b.service} • ${b.pro}</div></div><div>${b.status}</div></div>
-`).join('');
+  /* ====== CONFIG SUPABASE ====== */
+  const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
+  const SUPABASE_ANON_KEY = 'COLOQUE_AQUI_SUA_ANON_PUBLIC_KEY';
+
+  /* ====== sessão obrigatória ====== */
+  const sessRaw = localStorage.getItem('sb.session');
+  const session = sessRaw ? JSON.parse(sessRaw) : null;
+  if(!session?.access_token || !session?.user_id){
+    window.location.href = 'login.html';
+  }
+
+  /* ====== util ====== */
+  const money = v => (Number(v||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const fmtDate = iso => {
+    try{
+      const d = new Date(iso);
+      const dia = d.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short' }).replace('.','');
+      const hora= d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute:'2-digit' });
+      return `${dia} • ${hora}`;
+    }catch(_){ return iso }
+  };
+
+  /* ====== buscar próximo agendamento do usuário ====== */
+  async function loadNextBooking(){
+    const nowIso = new Date().toISOString();
+
+    // appointments com profissional e snapshot dos serviços
+    const url = new URL(`${SUPABASE_URL}/rest/v1/appointments`);
+    url.searchParams.set('select',
+      'id,starts_at,ends_at,total_cents,' +
+      'professional:professionals(id,full_name),' +
+      'services:appointment_services(name_snapshot,price_cents_snapshot,duration_min_snapshot)'
+    );
+    url.searchParams.set('customer_id', `eq.${session.user_id}`);
+    url.searchParams.set('starts_at', `gt.${nowIso}`);
+    url.searchParams.set('order', 'starts_at.asc');
+    url.searchParams.set('limit', '1');
+
+    const res = await fetch(url, {
+      headers:{
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${session.access_token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if(!res.ok){
+      console.error('appointments error', await res.text());
+      renderEmpty();
+      return;
+    }
+
+    const data = await res.json();
+    if(!Array.isArray(data) || !data.length){
+      renderEmpty();
+      return;
+    }
+
+    const bk = data[0];
+    const proName = bk.professional?.full_name || 'Profissional';
+    const when    = fmtDate(bk.starts_at);
+    const total   = money(bk.total_cents || 0);
+    const services = (bk.services||[])
+      .map(s => s.name_snapshot)
+      .filter(Boolean)
+      .join(' • ');
+
+    document.getElementById('proName').textContent = proName;
+    document.getElementById('bkWhen').textContent  = when;
+    document.getElementById('bkServices').textContent = services || 'Serviços selecionados';
+    document.getElementById('bkTotal').textContent    = `Total: ${total}`;
+
+    // link WA (ajuste o número)
+    const wa = document.getElementById('waLink');
+    const msg = encodeURIComponent(`Olá! Tenho um agendamento em ${when} com ${proName}.`);
+    wa.href = `https://wa.me/5531999999999?text=${msg}`;
+  }
+
+  function renderEmpty(){
+    document.getElementById('proName').textContent = '—';
+    document.getElementById('bkWhen').textContent  = 'Sem agendamentos futuros';
+    document.getElementById('bkServices').textContent = 'Faça seu agendamento em Serviços';
+    document.getElementById('bkTotal').textContent    = '';
+    document.getElementById('waLink').href = '#';
+  }
+
+  /* ===== animações e ripple iguais ao index ===== */
+  const io = new IntersectionObserver((entries)=>entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); }
+  }), {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  document.querySelectorAll('.ripple').forEach(el=>{
+    el.addEventListener('click', (ev)=>{
+      const r=document.createElement('span'); r.className='r';
+      const rect=el.getBoundingClientRect();
+      r.style.left=(ev.clientX-rect.left)+'px';
+      r.style.top =(ev.clientY-rect.top )+'px';
+      el.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+    });
+  });
+
+  // leve parallax no overlay do vídeo
+  const heroCopy=document.querySelector('.hero .copy');
+  if(heroCopy){
+    window.addEventListener('scroll', ()=>{
+      const y=Math.min(1, window.scrollY/260);
+      heroCopy.style.transform=`translateY(${y*6}px)`;
+      heroCopy.style.opacity=`${1-y*0.15}`;
+    }, {passive:true});
+  }
+
+  // start
+  loadNextBooking();
 </script>
 </body>
 </html>
