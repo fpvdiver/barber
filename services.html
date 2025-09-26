@@ -1,274 +1,225 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Serviços — CRUD (Supabase + n8n)</title>
-<style>
-  :root{
-    --bg:#0f1115; --panel:#131720; --line:#1f2430;
-    --text:#f5f7fb; --muted:#a7b0c0;
-    --brand:#0a6ebd; --brand-2:#094f8a; --ok:#16a34a; --warn:#f59e0b; --danger:#ef4444;
-    --radius:14px; --chip:#1a2030; --shadow:0 18px 50px rgba(0,0,0,.35);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);
-       font:14px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
-  .wrap{max-width:1040px;margin:28px auto;padding:18px}
-  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-  h1{font-size:20px;margin:0}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
-  .grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  input,select,textarea{background:#0d111a;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;width:100%}
-  label{font-size:12px;color:var(--muted)}
-  .btn{appearance:none;border:1px solid var(--line);background:var(--brand);color:#fff;
-       padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-  .btn.secondary{background:#0d111a;color:#fff}
-  .btn.danger{background:var(--danger);border-color:#9f1239}
-  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  th,td{padding:10px 12px;border-top:1px solid var(--line)}
-  thead th{background:#0c1220;color:#cbd5e1;text-align:left;border-top:none}
-  tbody tr:nth-child(odd) td{background:#0f1422}
-  .pill{padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid var(--line);background:var(--chip);color:#d1d8e6}
-  .right{display:flex;gap:8px;align-items:center}
-  .muted{color:var(--muted)}
-  .search{display:flex;gap:8px}
-  .w-120{width:120px}
-  .mt-8{margin-top:8px}
-  .mt-12{margin-top:12px}
-  .mb-8{margin-bottom:8px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Serviços — Mineiro Barbershop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>💈 Serviços</h1>
-    <div class="search">
-      <input id="q" placeholder="Buscar por nome…" />
-      <select id="filterActive" class="w-120">
-        <option value="">Todos</option>
-        <option value="true">Ativos</option>
-        <option value="false">Inativos</option>
-      </select>
-      <button class="btn" id="btnReload">Recarregar</button>
-    </div>
+
+<main class="app" aria-labelledby="page-title">
+  <!-- Topbar -->
+  <header class="topbar">
+    <a class="back ripple" href="index.html" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <h1 id="page-title">Serviços</h1>
   </header>
 
-  <div class="grid">
-    <!-- Lista -->
-    <section class="card">
-      <div class="row right mb-8">
-        <span class="muted">Listagem</span>
-        <span id="count" class="pill">0</span>
-      </div>
-      <div style="overflow:auto">
-        <table id="tbl">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Categoria</th>
-              <th>Preço</th>
-              <th>Duração</th>
-              <th>Ativo</th>
-              <th class="right">Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+  <!-- Filtros (preenchidos via JS) -->
+  <nav class="filters" aria-label="Filtrar categorias" id="filters"></nav>
 
-    <!-- Form -->
-    <aside class="card">
-      <h3 class="mb-8" style="margin:0">Cadastrar / Editar</h3>
-      <form id="frm" class="row" onsubmit="return false">
-        <input type="hidden" id="id">
-        <div style="width:100%">
-          <label>Nome</label>
-          <input id="name" required placeholder="Ex.: Corte + Barba Deluxe">
-        </div>
-        <div style="width:100%">
-          <label>Descrição</label>
-          <textarea id="description" rows="3" placeholder="Detalhes do serviço, produtos, diferenciais…"></textarea>
-        </div>
-        <div style="width:50%">
-          <label>Preço (R$)</label>
-          <input id="price" type="number" min="0" step="0.01" required>
-        </div>
-        <div style="width:50%">
-          <label>Duração (min)</label>
-          <input id="duration" type="number" min="5" step="5" required>
-        </div>
-        <div style="width:60%">
-          <label>Categoria</label>
-          <input id="category" placeholder="Ex.: Cabelo, Barba, Combo">
-        </div>
-        <div style="width:40%">
-          <label>Ativo</label>
-          <select id="active">
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
-        </div>
-        <div class="row mt-12">
-          <button class="btn" id="btnSave">Salvar</button>
-          <button class="btn secondary" id="btnClear" type="button">Limpar</button>
-          <button class="btn danger" id="btnDelete" type="button" disabled>Excluir</button>
-        </div>
-      </form>
-    </aside>
+  <!-- Lista (render via JS) -->
+  <section class="list" aria-label="Lista de serviços" id="svc-list"></section>
+
+  <!-- CTA inferior -->
+  <div class="cta-bar">
+    <button class="btn" data-del disabled>Deletar</button>
+    <button class="btn btn-primary" data-next disabled>Avançar</button>
   </div>
-</div>
+
+  <p class="hide-text" aria-live="polite" id="sr-status"></p>
+</main>
 
 <script>
-/** CONFIG **/
-const N8N_BASE_URL = 'https://SEU-N8N/webhook/services';
-const PUBLIC_API_KEY = 'troque-isto-por-um-segredo'; // mesmo de API_KEY_PUBLIC no n8n
+/* ================== Config ================== */
+const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/services';
 
-/** Helpers **/
-const $ = sel => document.querySelector(sel);
-const fmtBRL = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+/* ================== Utils ================== */
+const money = v => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const moneyBR = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+const slug = s => String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
-function formToPayload() {
-  const price = parseFloat($('#price').value || '0');
-  return {
-    id: $('#id').value || undefined,
-    name: $('#name').value.trim(),
-    description: $('#description').value.trim() || null,
-    price_cents: Math.round(price * 100),
-    duration_min: parseInt($('#duration').value,10),
-    category: $('#category').value.trim() || null,
-    active: $('#active').value === 'true'
+/* ================== Ripple ================== */
+(() => {
+  const add = (e)=>{
+    const el = e.currentTarget, r=document.createElement('span');
+    r.className='r'; const b=el.getBoundingClientRect();
+    r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+    el.appendChild(r); r.addEventListener('animationend',()=>r.remove());
   };
+  document.addEventListener('click',(e)=>{const btn=e.target.closest('.ripple'); if(btn) add(e);},{passive:true});
+})();
+
+/* ================== Reveal on scroll ================== */
+function applyReveal() {
+  const obs = new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 }
 
-function fillForm(s) {
-  $('#id').value = s.id || '';
-  $('#name').value = s.name || '';
-  $('#description').value = s.description || '';
-  $('#price').value = s.price_cents ? (s.price_cents/100).toFixed(2) : '';
-  $('#duration').value = s.duration_min || '';
-  $('#category').value = s.category || '';
-  $('#active').value = String(!!s.active);
-  $('#btnDelete').disabled = !s.id;
-}
-
-/** CRUD via n8n **/
-async function listServices() {
-  const q = encodeURIComponent($('#q').value.trim());
-  const active = $('#filterActive').value;
+/* ================== Fetch serviços (n8n) ================== */
+async function fetchServices() {
   const url = new URL(N8N_BASE_URL);
-  url.searchParams.set('limit','500');
-  if(q) url.searchParams.set('search', q);
-  if(active) url.searchParams.set('active', active);
+  url.searchParams.set('limit', '500');
+  url.searchParams.set('_', String(Date.now()));
+  const res = await fetch(url.toString(), { method: 'GET' });
+  if (!res.ok) {
+    const t = await res.text().catch(()=> '');
+    throw new Error(`Falha ao listar serviços (${res.status}): ${t||'-'}`);
+  }
+  const body = await res.json().catch(()=> null);
 
-  const res = await fetch(url, { method: 'GET' });
-  if(!res.ok) { alert('Erro ao listar'); return; }
-  const data = await res.json();
-  renderTable(Array.isArray(data) ? data : (data.data || []));
+  // normaliza retorno (igual fizemos no admin)
+  let items = [];
+  if (Array.isArray(body)) items = body.map(x => x?.json ?? x);
+  else if (body?.data && Array.isArray(body.data)) items = body.data;
+  else if (body && typeof body === 'object') {
+    const vals = Object.values(body);
+    if (vals.length && typeof vals[0] === 'object') items = vals.map(v => v?.json ?? v);
+  }
+  // filtra ativos e com preço/duração válidos
+  items = items.filter(s => (s.is_active ?? s.active ?? true) && (s.price_cents != null) && (s.duration_min != null));
+  // ordena por categoria, depois nome
+  items.sort((a,b)=> String(a.category||'').localeCompare(String(b.category||'')) || String(a.name||'').localeCompare(String(b.name||'')));
+  return items;
 }
 
-async function createService(payload) {
-  const res = await fetch(N8N_BASE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
-    body: JSON.stringify(payload)
-  });
-  if(!res.ok){ throw new Error('Falha ao criar'); }
-  return res.json();
+/* ================== Render filtros ================== */
+function renderFilters(services) {
+  const wrap = document.getElementById('filters');
+  const cats = Array.from(new Set(services.map(s => (s.category || 'Outros').trim())));
+
+  const chips = [
+    { key: 'all', label: 'Todos', on: true },
+    ...cats.map(c => ({ key: slug(c)||'outros', label: c, on: false }))
+  ];
+
+  wrap.innerHTML = chips.map(ch => `
+    <button class="chip ripple ${ch.on?'is-on':''}" type="button" data-filter="${ch.key}">${ch.label}</button>
+  `).join('');
+
+  // bind
+  const items = document.querySelectorAll('.list .item');
+  function apply(val){
+    wrap.querySelectorAll('.chip').forEach(c=>c.classList.toggle('is-on', c.dataset.filter===val));
+    document.querySelectorAll('.list .item').forEach(it=>{
+      const tag = it.dataset.tag || 'outros';
+      const show = (val==='all') || (tag === val);
+      it.toggleAttribute('hidden', !show);
+    });
+  }
+  wrap.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', ()=> apply(chip.dataset.filter)));
 }
 
-async function updateService(payload) {
-  const res = await fetch(N8N_BASE_URL, {
-    method: 'PATCH',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
-    body: JSON.stringify(payload)
-  });
-  if(!res.ok){ throw new Error('Falha ao atualizar'); }
-  return res.json();
-}
-
-async function deleteService(id) {
-  const res = await fetch(N8N_BASE_URL, {
-    method: 'DELETE',
-    headers: { 'Content-Type':'application/json','x-api-key': PUBLIC_API_KEY },
-    body: JSON.stringify({ id })
-  });
-  if(!res.ok){ throw new Error('Falha ao excluir'); }
-  return res.json();
-}
-
-/** UI **/
-function renderTable(items) {
-  const tbody = $('#tbl tbody');
-  tbody.innerHTML = '';
-  $('#count').textContent = items.length;
-  for (const s of items) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${s.name ?? ''}</td>
-      <td>${s.category ?? '-'}</td>
-      <td>${fmtBRL(s.price_cents ?? 0)}</td>
-      <td>${s.duration_min ?? '-'} min</td>
-      <td><span class="pill" style="background:${s.active?'#0f2a18':'#2a0f10'};border-color:${s.active?'#195f3a':'#6b1b1b'}">${s.active?'Ativo':'Inativo'}</span></td>
-      <td class="right">
-        <button class="btn secondary" data-edit="${s.id}">Editar</button>
-        <button class="btn danger" data-del="${s.id}">Excluir</button>
-      </td>`;
-    tbody.appendChild(tr);
+/* ================== Render lista ================== */
+function renderList(services) {
+  const list = document.getElementById('svc-list');
+  if (!services.length) {
+    list.innerHTML = `<div class="empty">Nenhum serviço disponível no momento.</div>`;
+    return;
   }
 
-  // actions
-  tbody.querySelectorAll('[data-edit]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-edit');
-      const s = items.find(x=>x.id===id);
-      if(s) fillForm(s);
-      window.scrollTo({top:0,behavior:'smooth'});
+  list.innerHTML = services.map(s => {
+    const catSlug = slug(s.category || 'Outros') || 'outros';
+    const imgSrc  = s.image_url || '';
+    const desc    = s.description ? String(s.description) : `Duração aproximada — ${s.duration_min}min`;
+    return `
+    <article class="item reveal" data-id="${s.id}" data-price="${s.price_cents/100}" data-min="${s.duration_min}" data-tag="${catSlug}">
+      <figure class="thumb">${imgSrc ? `<img src="${imgSrc}" alt="${s.name}">` : ''}</figure>
+      <div class="meta">
+        <h3 class="name">${s.name || 'Serviço'}</h3>
+        <span class="price-badge" data-p>${money(s.price_cents/100)}</span>
+        <p class="desc">${desc}</p>
+      </div>
+      <button class="choose ripple" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Escolher</span>
+      </button>
+    </article>`;
+  }).join('');
+
+  // fallback de imagem
+  document.querySelectorAll('.thumb img').forEach(img=>{
+    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+  });
+
+  applyReveal();
+}
+
+/* ================== Seleção / Footer ================== */
+function bindSelection() {
+  const btnDel  = document.querySelector('[data-del]');
+  const btnNext = document.querySelector('[data-next]');
+  const cards = [...document.querySelectorAll('.list .item')].map(el => ({
+    id: el.dataset.id,
+    price: Number(el.dataset.price || 0),
+    min: Number(el.dataset.min || 0),
+    el,
+    btn: el.querySelector('.choose')
+  }));
+
+  const stack = []; // [{id, price, min}]
+
+  function updateFooter(){
+    const count = stack.length;
+    const total = stack.reduce((a,s)=>a+s.price,0);
+    btnDel.disabled  = count === 0;
+    btnNext.disabled = count === 0;
+    btnNext.textContent = count ? `Avançar (${count}) — ${moneyBR(total)}` : 'Avançar';
+  }
+  updateFooter();
+
+  cards.forEach(({ id, price, min, btn }) => {
+    btn.addEventListener('click', () => {
+      const on = btn.classList.toggle('is-on');
+      const ix = stack.findIndex(s => s.id === id);
+      if (on && ix === -1) stack.push({ id, price, min });
+      if (!on && ix !== -1) stack.splice(ix, 1);
+      updateFooter();
     });
   });
-  tbody.querySelectorAll('[data-del]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id = btn.getAttribute('data-del');
-      if(confirm('Excluir este serviço?')) {
-        try {
-          await deleteService(id);
-          await listServices();
-          if($('#id').value===id) fillForm({});
-        } catch(e){ alert(e.message); }
-      }
-    });
+
+  btnDel.addEventListener('click', () => {
+    if (!stack.length) return;
+    const last = stack.pop();
+    const card = cards.find(c => c.id === last.id);
+    if (card) card.btn.classList.remove('is-on');
+    updateFooter();
+  });
+
+  btnNext.addEventListener('click', () => {
+    const ids     = stack.map(s => s.id);
+    const total   = stack.reduce((a,s)=>a+s.price, 0);
+    const minutes = stack.reduce((a,s)=>a+s.min,   0);
+
+    localStorage.setItem('svc.selected', JSON.stringify(ids));
+    localStorage.setItem('svc.total', String(total));
+    localStorage.setItem('svc.minutes', String(minutes));
+    localStorage.setItem('svc.count', String(ids.length));
+
+    window.location.href = 'professionals.html';
   });
 }
 
-/** Eventos **/
-$('#btnReload').addEventListener('click', listServices);
-$('#q').addEventListener('input', ()=>{ clearTimeout(window._t); window._t=setTimeout(listServices, 300); });
-$('#filterActive').addEventListener('change', listServices);
-$('#btnClear').addEventListener('click', ()=> fillForm({}));
-
-$('#btnSave').addEventListener('click', async ()=>{
-  const payload = formToPayload();
+/* ================== Boot ================== */
+(async function boot(){
   try{
-    if(payload.id) await updateService(payload);
-    else await createService(payload);
-    fillForm({});
-    await listServices();
-    alert('Salvo com sucesso!');
-  }catch(e){ alert(e.message); }
-});
-
-$('#btnDelete').addEventListener('click', async ()=>{
-  const id = $('#id').value;
-  if(!id) return;
-  if(confirm('Excluir este serviço?')){
-    try{ await deleteService(id); fillForm({}); await listServices(); }
-    catch(e){ alert(e.message); }
+    const services = await fetchServices();
+    renderList(services);
+    renderFilters(services);
+    bindSelection();
+  }catch(err){
+    console.error(err);
+    document.getElementById('svc-list').innerHTML =
+      `<div class="error" role="alert">Não foi possível carregar os serviços. Tente novamente em instantes.</div>`;
   }
-});
-
-listServices();
+})();
 </script>
 </body>
 </html>
