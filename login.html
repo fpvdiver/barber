@@ -13,17 +13,15 @@
     .brand{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
     .brand .dot{width:36px;height:36px;border-radius:10px;background:#1b1b1f;border:1px solid var(--line);display:grid;place-items:center}
     .brand h1{margin:0;font:700 18px/1 Poppins}
-    .muted{color:var(--muted);}
-
+    .muted{color:var(--muted)}
     .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
     .field{margin:0 0 12px}
     .label{display:block;margin:0 0 6px;font:600 12px/1 Poppins;letter-spacing:.14em;text-transform:uppercase;color:#d9dade}
     .input-wrap{position:relative}
-    .input{width:100%;padding:12px 42px 12px 42px;border-radius:12px;border:1px solid var(--line);background:#111214;color:var(--text);font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s}
+    .input{width:100%;padding:12px 42px;border-radius:12px;border:1px solid var(--line);background:#111214;color:var(--text);font:15px/1.4 Poppins;outline:0;transition:border-color .2s,box-shadow .2s}
     .input:focus{border-color:rgba(211,168,91,.55);box-shadow:0 0 0 3px rgba(211,168,91,.14)}
     .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#b8bac1}
     .pass-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#1b1c20;color:#e6e7ea;display:grid;place-items:center;cursor:pointer}
-
     .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px}
     .check{display:flex;align-items:center;gap:8px;color:#cfd0d4;font-size:14px}
     .check input{accent-color:var(--gold)}
@@ -35,7 +33,6 @@
     .msg{margin-top:10px;font-size:14px}
     .msg.err{color:#ffb3b3}
     .msg.ok{color:#b6f4c6}
-
     .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf 600ms ease-out forwards}
     @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
   </style>
@@ -84,7 +81,7 @@
         <a class="link" href="#" onclick="alert('Fluxo de recuperação aqui 😉');return false;">Esqueci a senha</a>
       </div>
 
-      <button class="btn btn-primary btn-full ripple" type="submit">Entrar</button>
+      <button class="btn btn-primary btn-full ripple" type="submit" id="btnSubmit">Entrar</button>
       <div class="msg" id="msg"></div>
 
       <div class="hr"></div>
@@ -97,15 +94,17 @@
 </main>
 
 <script>
-  // ripple
+  /* ===== CONFIG SUPABASE (preencha com o seu projeto) ===== */
+  const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
+  const SUPABASE_ANON_KEY = 'COLOQUE_AQUI_SUA_ANON_PUBLIC_KEY';
+
+  /* ===== helpers visuais ===== */
   document.addEventListener('click',(e)=>{
     const t=e.target.closest('.ripple'); if(!t) return;
     const r=document.createElement('span'); r.className='r';
     const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
     t.appendChild(r); r.addEventListener('animationend',()=>r.remove());
   }, {passive:true});
-
-  // mostrar/ocultar senha
   document.querySelectorAll('.pass-toggle').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const input=document.querySelector(btn.dataset.toggle);
@@ -113,64 +112,101 @@
     });
   });
 
-  // lembrar email
   const emailInput = document.getElementById('email');
   const remember   = document.getElementById('remember');
   const savedEmail = localStorage.getItem('auth.remember.email');
   if(savedEmail){ emailInput.value = savedEmail; remember.checked = true; }
 
-  // util: normaliza role
-  function normalizeRole(user){
-    const r =
-      user?.role ||
-      user?.app_metadata?.role ||
-      user?.profile?.role ||
-      'customer';
-    const s = String(r).toLowerCase();
-    if (['admin','administrator'].includes(s)) return 'admin';
-    if (['professional','profissional','barbeiro'].includes(s)) return 'professional';
-    return 'customer';
+  const form = document.getElementById('loginForm');
+  const msg  = document.getElementById('msg');
+  const btn  = document.getElementById('btnSubmit');
+
+  function setMsg(text, ok=false){
+    msg.className = 'msg ' + (ok ? 'ok' : 'err');
+    msg.textContent = text;
   }
   function pageForRole(role){
-    if(role==='admin') return 'admin/rootpage.html';
-    if(role==='professional') return 'profissionalpage.html';
+    const r = String(role || '').toLowerCase();
+    if (r === 'admin')         return 'admin/rootpage.html';
+    if (r === 'professional')  return 'profissionalpage.html';
     return 'clientpage.html';
   }
 
-  const form = document.getElementById('loginForm');
-  const msg  = document.getElementById('msg');
-
-  form.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    msg.textContent='';
-
-    const email = emailInput.value.trim().toLowerCase();
-    const pass  = document.getElementById('password').value;
-
-    // DEMO: valida contra usuário salvo localmente pelo cadastro.html
-    const raw = localStorage.getItem('auth.user');
-    const user = raw ? JSON.parse(raw) : null;
-
-    if(!user || (user.email||'').toLowerCase()!==email || user.password!==pass){
-      msg.className='msg err';
-      msg.textContent='Credenciais inválidas. Tente novamente.';
-      return;
+  async function supabaseSignIn(email, password){
+    const url = `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if(!res.ok) {
+      const code = data?.error || data?.code || 'auth_error';
+      const desc = data?.error_description || data?.message || 'Falha ao autenticar.';
+      throw new Error(`${code}: ${desc}`);
     }
+    return data; // {access_token, refresh_token, user, ...}
+  }
 
-    // lembrar
-    if(remember.checked) localStorage.setItem('auth.remember.email', email);
-    else localStorage.removeItem('auth.remember.email');
+  async function fetchProfile(userId, accessToken){
+    const url = `${SUPABASE_URL}/rest/v1/profiles?select=role,full_name&id=eq.${encodeURIComponent(userId)}`;
+    const res = await fetch(url, {
+      headers:{
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
+      }
+    });
+    if(!res.ok) return null;
+    const arr = await res.json().catch(()=>null);
+    return Array.isArray(arr) && arr[0] ? arr[0] : null;
+  }
 
-    // status de sessão + rota por perfil
-    const role = normalizeRole(user);
-    localStorage.setItem('auth.logged','1');
-    localStorage.setItem('auth.role', role);
-    if (user.id) localStorage.setItem('auth.userId', user.id);
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    setMsg('');
+    btn.disabled = true;
 
-    const dest = pageForRole(role);
-    msg.className='msg ok';
-    msg.textContent=`Login realizado! Redirecionando…`;
-    setTimeout(()=>{ window.location.href = dest; }, 700);
+    try{
+      const email = emailInput.value.trim().toLowerCase();
+      const pass  = document.getElementById('password').value;
+
+      if(!email || !pass){
+        setMsg('Informe e-mail e senha.');
+        btn.disabled = false;
+        return;
+      }
+
+      // 1) autentica
+      const session = await supabaseSignIn(email, pass);
+      const { access_token, refresh_token, user } = session;
+
+      // 2) busca role no perfil (ou cai para app_metadata.role)
+      const profile = await fetchProfile(user.id, access_token);
+      const role = profile?.role || user?.app_metadata?.role || 'customer';
+
+      // 3) persiste sessão mínima (você pode ajustar)
+      localStorage.setItem('sb.session', JSON.stringify({
+        access_token, refresh_token, user_id: user.id, role, email: user.email
+      }));
+
+      // lembrar email
+      if(remember.checked) localStorage.setItem('auth.remember.email', email);
+      else localStorage.removeItem('auth.remember.email');
+
+      setMsg('Login realizado! Redirecionando…', true);
+      const target = pageForRole(role);
+      setTimeout(()=>{ window.location.href = target; }, 400);
+
+    } catch(err){
+      console.error(err);
+      setMsg('Credenciais inválidas. Tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
   });
 </script>
 </body>
