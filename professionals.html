@@ -6,67 +6,31 @@
   <title>Profissionais — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+
   <style>
-    /* ==== Card de profissionais (NOMES ÚNICOS p/ não colidir com o tema) ==== */
-    .pro-list { display: grid; gap: 12px; padding: 12px; }
-    .pro-card {
-      position: relative;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .pro-row {
-      display: grid;
-      grid-template-columns: 64px 1fr auto;
-      gap: 12px;
-      align-items: center;
-      min-height: 64px;
-      position: relative;
-      z-index: 1; /* acima de qualquer overlay genérico do tema */
-    }
-    .pro-thumb {
-      width: 64px; height: 64px; border-radius: 12px; overflow: hidden;
-      border: 1px solid var(--line); background: #0f1012;
-      display: grid; place-items: center;
-      user-select: none;
-    }
-    .pro-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .pro-thumb.no-img span { color:#d8dae2; font:700 16px/1 Poppins; }
-
-    .pro-meta h3 {
-      margin: 0 0 4px;
-      font: 600 16px/1.2 Poppins;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .pro-sub { color: var(--muted); font-size: 13px; line-height: 1.2; }
-    .pro-sub .sep { margin: 0 6px; opacity: .35; }
-
-    .pro-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font: 700 12px/1 Poppins; color: #1b1c20;
-      background: #d3a85b; border-radius: 999px; padding: 6px 10px;
-      white-space: nowrap;
-    }
-    .pro-badge svg { width: 12px; height: 12px; }
-
-    .pro-choose {
-      position: relative; z-index: 2;
-      height: 40px; padding: 0 16px; border-radius: 999px;
-      border: 1px solid var(--line); background: #15161a; color: #e9eaef;
-      font: 600 14px/1 Poppins; cursor: pointer;
-    }
-    .pro-choose.is-on {
-      background: var(--gold); color: #111; border-color: transparent;
-    }
-    .pro-card.is-disabled { opacity: .55; }
-    .pro-card.is-disabled .pro-choose { pointer-events: none; }
-
-    /* ripple local (não usa .ripple global para evitar overlays do tema) */
-    .rip {position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
-      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
-      animation:r-kf 600ms ease-out forwards}
-    @keyframes r-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+    /* ====== Estilo do card (pixel-perfect com o mock) ====== */
+    .pro-list{display:grid;gap:12px;padding:12px}
+    .pro-card{background:#111214;border:1px solid #1e222a;border-radius:14px;padding:12px}
+    .pro-row{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center}
+    .pro-thumb{width:48px;height:48px;border-radius:12px;overflow:hidden;background:#0b0d10;border:1px solid #232831;display:grid;place-items:center;font:600 14px/1 Poppins;color:#d1d5db;user-select:none}
+    .pro-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .pro-meta h3{margin:0 0 4px;font:600 14px/1.2 Poppins;color:#fff;display:flex;align-items:center;gap:6px}
+    .pro-sub{color:#9ca3af;font:12px/1.3 Poppins}
+    .pro-badge{display:inline-flex;align-items:center;gap:4px;font:600 11px/1 Poppins;color:#1b1c20;background:#d3a85b;border-radius:999px;padding:3px 7px}
+    .pro-badge svg{width:11px;height:11px}
+    .pro-choose{border:1px solid #2a2f37;background:#16181d;color:#e5e7eb;font:600 13px/1 Poppins;border-radius:999px;padding:6px 14px;cursor:pointer;transition:background .2s,color .2s}
+    .pro-choose:hover{background:#1f2329}
+    .pro-choose.is-on{background:#d3a85b;color:#111;border-color:#d3a85b}
+    /* acessibilidade: card inteiro clicável sem bloquear botões */
+    .pro-card .click-area{position:absolute;inset:0;border-radius:14px}
+    .pro-card{position:relative}
+    .pro-card .pro-choose{position:relative;z-index:2}
+    /* ripple simples (usa animação global se já existir) */
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf .6s ease-out forwards}
+    @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+    /* barra inferior */
+    .pro-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:min(428px,94vw);display:grid;grid-template-columns:1fr auto auto;gap:10px;background:var(--panel-2,#0f1115);border:1px solid var(--line,#22262e);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow,0 6px 24px rgba(0,0,0,.35))}
+    .pro-bar .summary{align-self:center;color:#cfd2d8;font:500 13px/1.2 Poppins}
   </style>
 </head>
 <body>
@@ -74,9 +38,7 @@
 <main class="app professionals-page" aria-labelledby="title">
   <header class="topbar">
     <a class="back ripple" href="services.html" aria-label="Voltar">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </a>
     <h1 id="title">Profissionais</h1>
   </header>
@@ -94,39 +56,27 @@
 /* ================== Config ================== */
 const N8N_PROS_URLS = [
   'https://primary-jow9-barber.up.railway.app/webhook/professionals',
-  'https://primary-jow9-barber.up.railway.app/webhook/profissionals'
+  'https://primary-jow9-barber.up.railway.app/webhook/profissionals', // fallback
 ];
 
 /* ================== Utils ================== */
 const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
-const initials = (n) => (String(n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('') || 'MB');
+const initials = n => (n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
 
 /* ================== Estado vindo de Serviços ================== */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]'));
 const total   = Number(getStore('svc.total')   || 0);
 const minutes = Number(getStore('svc.minutes') || 0);
 const count   = Number(getStore('svc.count')   || 0);
 document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
 
-/* ================== Ripple local ================== */
-function addRip(e, target){
-  const b = target.getBoundingClientRect();
-  const s = document.createElement('span');
-  s.className='rip';
-  s.style.left = (e.clientX - b.left)+'px';
-  s.style.top  = (e.clientY - b.top )+'px';
-  target.appendChild(s);
-  s.addEventListener('animationend',()=>s.remove(),{once:true});
-}
-
-/* ================== Reveal ================== */
-function applyReveal() {
-  const obs = new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); obs.unobserve(e.target); } });
-  }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
-  document.querySelectorAll('.pro-card').forEach(el=>obs.observe(el));
-}
+/* ================== Ripple ================== */
+document.addEventListener('click',(e)=>{
+  const t=e.target.closest('.ripple'); if(!t) return;
+  const r=document.createElement('span'); r.className='r';
+  const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
+  t.appendChild(r); r.addEventListener('animationend',()=>r.remove(),{once:true});
+},{passive:true});
 
 /* ================== Fetch profissionais (n8n) ================== */
 async function fetchProfessionals() {
@@ -136,10 +86,10 @@ async function fetchProfessionals() {
       const url = new URL(base);
       url.searchParams.set('limit','500');
       url.searchParams.set('_', String(Date.now()));
-      const res = await fetch(url.toString(), { method:'GET' });
+      const res = await fetch(url.toString());
       if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
-      const body = await res.json().catch(()=> ({}));
 
+      const body = await res.json().catch(()=> ({}));
       let items = [];
       if (Array.isArray(body)) items = body.map(x => x?.json ?? x);
       else if (body?.data && Array.isArray(body.data)) items = body.data;
@@ -150,24 +100,13 @@ async function fetchProfessionals() {
 
       items = (items || []).filter(p => (p.is_active ?? true));
       items.sort((a,b)=> String(a.full_name||a.name||'').localeCompare(String(b.full_name||b.name||'')));
-
       return items;
     } catch (e) { lastErr = e; }
   }
   throw lastErr || new Error('Falha ao obter profissionais');
 }
 
-/* ================== Cobre serviços requeridos? ================== */
-function proCoversRequired(pro, required) {
-  const pool = new Set();
-  (pro.skills || pro.tags || []).forEach(x => pool.add(String(x)));
-  (pro.service_ids || []).forEach(x => pool.add(String(x)));
-  if (!required || !required.size) return true;
-  for (const r of required) if (pool.has(String(r))) return true;
-  return false;
-}
-
-/* ================== Render ================== */
+/* ================== Render lista ================== */
 function renderPros(pros) {
   const wrap = document.getElementById('proList');
   if (!pros.length) {
@@ -175,103 +114,74 @@ function renderPros(pros) {
     return;
   }
 
-  wrap.innerHTML = pros.map(p => {
-    const id    = p.id || p.profile_id || p.slug || p.email || crypto.randomUUID();
+  wrap.innerHTML = pros.map((p, idx) => {
+    const id    = p.id || p.profile_id || p.slug || p.email || `pro_${idx}`;
     const name  = p.full_name || p.name || 'Profissional';
-    const rate  = (p.rating_avg != null) ? Number(p.rating_avg||0).toFixed(1) : '0.0';
-    const role  = p.role || 'professional';
+    const role  = (p.role || 'professional').toLowerCase();
     const phone = p.phone || '';
-    const imgUrl = p.avatar_url || p.image_url || '';
-    const disabled = !proCoversRequired(p, REQUIRED);
+    const img   = p.avatar_url || p.image_url || '';
+    const rate  = Number(p.rating_avg ?? 0).toFixed(1);
 
     return `
-      <article class="pro-card ${disabled ? 'is-disabled':''}" data-id="${id}">
+      <article class="pro-card" data-id="${id}" tabindex="0" aria-label="${name}">
         <div class="pro-row">
-          <figure class="pro-thumb ${imgUrl ? '' : 'no-img'}">
-            ${imgUrl ? `<img src="${imgUrl}" alt="${name}">` : `<span>${initials(name)}</span>`}
+          <figure class="pro-thumb">
+            ${img ? `<img src="${img}" alt="${name}" onerror="this.remove()">` : initials(name)}
           </figure>
-
           <div class="pro-meta">
             <h3>${name}
-              <span class="pro-badge" title="Avaliação ${rate}">
+              <span class="pro-badge" title="Nota">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                </svg>
-                ${rate}
+                </svg>${rate}
               </span>
             </h3>
-            <div class="pro-sub">
-              ${role}
-              ${phone ? `<span class="sep">•</span><span class="phone">${phone}</span>` : ''}
-            </div>
+            <div class="pro-sub">${role}<br>${phone ? phone : ''}</div>
           </div>
-
-          <button class="pro-choose" type="button" aria-pressed="false" ${disabled ? 'disabled':''}>
-            Escolher
-          </button>
+          <button class="pro-choose ripple" type="button">Escolher</button>
         </div>
-      </article>`;
+        <button class="click-area" type="button" aria-hidden="true"></button>
+      </article>
+    `;
   }).join('');
 
-  // fallback de imagem
-  document.querySelectorAll('.pro-thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{
-      const box=img.parentElement; img.remove(); box.classList.add('no-img');
-      const who = img.getAttribute('alt') || 'Profissional';
-      const sp = document.createElement('span'); sp.textContent = initials(who);
-      box.appendChild(sp);
-    });
-  });
-
-  applyReveal();
+  bindSelection();
 }
 
 /* ================== Seleção / CTA ================== */
 function bindSelection() {
   const btnNext  = document.getElementById('btnNext');
   const btnBack  = document.getElementById('btnBack');
-  const items = [...document.querySelectorAll('#proList .pro-card')].map(el => ({
+
+  const cards = [...document.querySelectorAll('.pro-card')].map(el => ({
     id: el.dataset.id,
-    btn: el.querySelector('.pro-choose'),
-    el
+    el,
+    chooseBtn: el.querySelector('.pro-choose'),
+    clickArea: el.querySelector('.click-area')
   }));
+
   const selected = new Set();
 
   function syncUI(){
-    items.forEach(c => c.btn.classList.toggle('is-on', selected.has(c.id)));
+    cards.forEach(c => c.chooseBtn.classList.toggle('is-on', selected.has(c.id)));
     btnNext.disabled = selected.size === 0;
     btnNext.textContent = selected.size ? `Continuar (${selected.size})` : 'Continuar';
   }
   syncUI();
 
-  // clique no botão (sempre por cima do layout)
-  items.forEach(c => {
-    c.btn.addEventListener('click', (ev) => {
-      addRip(ev, c.btn);
-      if (c.el.classList.contains('is-disabled') || c.btn.hasAttribute('disabled')) return;
-      selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
-      c.btn.setAttribute('aria-pressed', selected.has(c.id) ? 'true' : 'false');
-      syncUI();
-    });
-
-    // clique no card inteiro também seleciona (sem interferir no botão)
-    c.el.addEventListener('click', (ev) => {
-      if (ev.target.closest('.pro-choose')) return; // já tratado acima
-      if (c.el.classList.contains('is-disabled')) return;
-      selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
-      c.btn.classList.toggle('is-on', selected.has(c.id));
-      c.btn.setAttribute('aria-pressed', selected.has(c.id) ? 'true' : 'false');
-      syncUI();
-    });
+  cards.forEach(c => {
+    const toggle = () => { selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id); syncUI(); };
+    c.chooseBtn.addEventListener('click', toggle);
+    c.clickArea.addEventListener('click', toggle);
+    c.el.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggle(); }});
   });
 
   btnNext.addEventListener('click', () => {
     if (selected.size === 0) return;
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
-    localStorage.setItem('proMode', 'per');
+    localStorage.setItem('proMode', 'per'); // multi por serviço
     window.location.href = 'agendamentos.html';
   });
-
   btnBack.addEventListener('click', () => window.location.href = 'services.html');
 }
 
@@ -280,7 +190,6 @@ function bindSelection() {
   try{
     const pros = await fetchProfessionals();
     renderPros(pros);
-    bindSelection();
   }catch(err){
     console.error(err);
     document.getElementById('proList').innerHTML =
