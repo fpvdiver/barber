@@ -300,14 +300,19 @@ button{-webkit-tap-highlight-color:transparent}
   margin:0; color:var(--muted); font-size:12px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.professionals-page .item .rate{
-  display:inline-grid; place-items:center;
-  height:22px; padding:0 8px; border-radius:999px;
-  background:rgba(247,201,72,.12);
-  border:1px solid rgba(247,201,72,.35);
-  color:#f7c948; font:700 11px/1 Poppins; letter-spacing:.02em;
-  flex:0 0 auto;
-top: -2px;
+.professionals-page .item .rate {
+    place-items: center;
+    height: 20px;
+    width: 53px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(247, 201, 72, .12);
+    border: 1px solid rgba(247, 201, 72, .35);
+    color: #f7c948;
+    font: 700 11px / 1 Poppins;
+    letter-spacing: .02em;
+    flex: 0 0 auto;
+    top: -2px;
 }
 .professionals-page .choose{ min-width:104px }
 @media (max-width:380px){ .professionals-page .choose{ min-width:90px; padding:0 10px; font-size:12px } }
@@ -712,6 +717,7 @@ top: -2px;
 
 /* se antes você tinha esta linha, pode remover/ignorar: */
 /* .card .wa-fab svg{ width:24px; height:24px } */
+
 
 
 
