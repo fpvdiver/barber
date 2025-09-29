@@ -9,9 +9,8 @@
   <link rel="stylesheet" href="css/styles.css">
 
   <style>
-    /* ===== específicos desta página ===== */
     .wrap{max-width:428px;margin:0 auto;padding:14px 14px 96px}
-    .filters{ padding:0 0 10px; display:flex; gap:10px; overflow:auto; }
+    .filters{ padding:0 0 10px; display:flex; gap:10px; overflow:auto }
     .filters::-webkit-scrollbar{ display:none }
     .chip{
       border:1px solid var(--line); background:#1b1c20; color:#e6e7ea;
@@ -23,13 +22,15 @@
 
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
     .empty{padding:28px;text-align:center;color:var(--muted)}
+    .error{padding:12px;border:1px solid #48222a;background:#1b1214;color:#ffd6d6;border-radius:12px;margin:12px 0}
 
     .item{
       display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;
       padding:12px;border:1px solid var(--line);border-radius:14px;background:#141416;margin-bottom:10px
     }
-    .thumb{width:56px;height:56px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0f0f10}
+    .thumb{width:56px;height:56px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0f0f10;display:grid;place-items:center}
     .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb.no-img{color:#cbd5e1;font:600 12px Poppins}
 
     .meta h3{margin:0 0 2px;font:600 14px/1.2 Poppins}
     .meta p{margin:0;color:#cfd0d4;font-size:12px}
@@ -53,7 +54,16 @@
     .btnx.danger{background:#1a1112;border-color:#3c1a1b;color:#ffcccc}
     .btnx:disabled{opacity:.55;cursor:not-allowed}
 
-    /* Detalhes (dialog) */
+    /* Skeleton loading */
+    .skel{animation:sk 1.2s linear infinite;background:
+      linear-gradient(90deg, #1a1b20 25%, #22252c 37%, #1a1b20 63%) ; background-size:400% 100%}
+    @keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+    .sk-item{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+    .sk-thumb{width:56px;height:56px;border-radius:12px}
+    .sk-line{height:12px;border-radius:8px}
+    .sk-line.w60{width:60%}.sk-line.w40{width:40%}.sk-line.w30{width:30%}.sk-line.w80{width:80%}
+
+    /* Dialog */
     dialog::backdrop{background:rgba(0,0,0,.7)}
     dialog{border:0;border-radius:14px;background:#141416;color:var(--text);width:min(420px,92vw)}
     .dlg{padding:16px}
@@ -62,14 +72,14 @@
     .dlg .grid{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:8px}
     .dlg .foot{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
 
-    .muted{color:var(--muted)}
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf .6s ease-out forwards}
+    @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
   </style>
 </head>
 <body>
 
 <main class="app app--padded reservas-page">
-
-  <!-- Topbar -->
   <header class="topbar">
     <a class="back ripple" href="index.html" aria-label="Voltar">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -78,9 +88,8 @@
   </header>
 
   <div class="wrap">
-    <!-- filtros -->
     <nav class="filters" aria-label="Filtrar status">
-      <button class="chip ripple is-on" data-filter="all"    type="button">Todas</button>
+      <button class="chip ripple is-on" data-filter="all"          type="button">Todas</button>
       <button class="chip ripple"        data-filter="upcoming"    type="button">Próximas</button>
       <button class="chip ripple"        data-filter="completed"   type="button">Concluídas</button>
       <button class="chip ripple"        data-filter="cancelled"   type="button">Canceladas</button>
@@ -88,22 +97,20 @@
       <button class="chip ripple"        data-filter="no_show"     type="button">Não compareceu</button>
     </nav>
 
-    <!-- lista -->
     <section class="panel" aria-live="polite">
       <div id="list"></div>
       <div id="empty" class="empty" hidden>Nenhuma reserva encontrada.</div>
+      <div id="err" class="error" hidden></div>
     </section>
   </div>
 </main>
 
-<!-- bottom nav -->
 <nav class="navbar" role="navigation" aria-label="Principal">
   <a href="index.html" class="active ripple" aria-current="page">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M3 10l9-7 9 7"></path><path d="M9 22V12h6v10"></path>
-    </svg>
-    Início
+    </svg> Início
   </a>
   <a href="#" class="ripple">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -111,16 +118,14 @@
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="16" x2="12" y2="12"></line>
       <line x1="12" y1="8" x2="12" y2="8"></line>
-    </svg>
-    Explorar
+    </svg> Explorar
   </a>
   <a href="reservas.html" class="ripple">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <rect x="3" y="4" width="18" height="18" rx="2"></rect>
       <path d="M16 2v4M8 2v4M3 10h18"></path>
-    </svg>
-    Minhas reservas
+    </svg> Minhas reservas
   </a>
   <a href="profile.html" class="ripple">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -128,12 +133,10 @@
       <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path>
       <path d="M4 21v-2a4 4 0 0 1 3-3.87"></path>
       <circle cx="12" cy="7" r="4"></circle>
-    </svg>
-    Perfil
+    </svg> Perfil
   </a>
 </nav>
 
-<!-- dialog detalhes -->
 <dialog id="dlg">
   <div class="dlg">
     <h3>Detalhes da reserva</h3>
@@ -145,190 +148,290 @@
 </dialog>
 
 <script>
-/* ==== utilidades ==== */
+/* ======= CONFIG (mesma do profile) ======= */
+const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+
+/* --- RLS (SQL sugestão) ---
+  create policy "user_reads_own_bookings" on public.bookings
+  for select to authenticated
+  using (customer_id = auth.uid());
+
+  create policy "user_updates_own_bookings" on public.bookings
+  for update to authenticated
+  using (customer_id = auth.uid())
+  with check (customer_id = auth.uid());
+-------------------------------- */
+
+/* ======= Session guard ======= */
+function getSbSession() {
+  const custom = localStorage.getItem('sb.session');
+  if (custom) try {
+    const s = JSON.parse(custom);
+    return { access_token: s.access_token||s.token||'', user_id: s.user_id||s.user?.id||'', user: s.user||null };
+  } catch {}
+  const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+  const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+  if (raw) try {
+    const p = JSON.parse(raw), sess = p?.currentSession || p;
+    return { access_token: sess?.access_token||'', user_id: sess?.user?.id||'', user: sess?.user||null };
+  } catch {}
+  return null;
+}
+const sb = getSbSession();
+if (!sb?.access_token) { sessionStorage.setItem('postLoginRedirect','reservas.html'); location.href='login.html'; }
+
+/* ======= Utils/UI ======= */
 const money = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
-const SVC = { corte:'Corte', barba:'Barba', coloracao:'Coloração', tratamento:'Tratamento', sobrancelha:'Sobrancelha' };
-const PROS = {
-  mineiro:{name:'Mineiro'}, joao:{name:'João Fade'}, maria:{name:'Maria Color'}, pedro:{name:'Pedro Blade'}
-};
-const THUMBS = { corte:'img/svc-corte.jpg', barba:'img/svc-barba.jpg', coloracao:'img/svc-color.jpg', tratamento:'img/svc-trat.jpg', sobrancelha:'img/svc-sobr.jpg' };
+const qs = s => document.querySelector(s);
+const listEl = qs('#list'), emptyEl = qs('#empty'), errEl = qs('#err');
+const dlg = qs('#dlg'), dlgBody = qs('#dlgBody');
 
-const listEl = document.getElementById('list');
-const emptyEl = document.getElementById('empty');
-const dlg = document.getElementById('dlg');
-const dlgBody = document.getElementById('dlgBody');
-
-/* ==== ripple leve ==== */
-document.addEventListener('click',(e)=>{
-  const t=e.target.closest('.ripple'); if(!t) return;
+document.addEventListener('click',(e)=>{ const t=e.target.closest('.ripple'); if(!t) return;
   const r=document.createElement('span'); r.className='r';
   const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px';
-  t.appendChild(r); r.addEventListener('animationend',()=>r.remove());
-},{passive:true});
+  t.appendChild(r); r.addEventListener('animationend',()=>r.remove()); },{passive:true});
 
-/* ==== seeds (se não houver nada salvo) ==== */
-function seedIfEmpty(){
-  const arr = JSON.parse(localStorage.getItem('bookings') || '[]');
-  if(arr.length) return;
-  const now = new Date();
-  const addDays = (d)=>{ const x=new Date(now); x.setDate(x.getDate()+d); return x; };
-  const fmt = (d)=>({
-    date: String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(),
-    time: '14:30',
-    iso: d.toISOString().slice(0,16)
-  });
-
-  const seeds = [
-    { id: 'b1', services:['corte','barba'], professionals:['mineiro'], proMode:'any', total:90, minutes:55, count:2, status:'upcoming', ...fmt(addDays(2)) },
-    { id: 'b2', services:['coloracao'], professionals:['maria'], proMode:'by_service', total:90, minutes:45, count:1, status:'completed', ...fmt(addDays(-7)) },
-    { id: 'b3', services:['tratamento'], professionals:['joao'], proMode:'any', total:70, minutes:35, count:1, status:'cancelled', ...fmt(addDays(-3)) },
-    { id: 'b4', services:['corte','coloracao'], professionals:['joao','maria'], proMode:'by_service', total:140, minutes:90, count:2, status:'rescheduled', ...fmt(addDays(-1)) },
-    { id: 'b5', services:['sobrancelha'], professionals:['pedro'], proMode:'any', total:30, minutes:15, count:1, status:'no_show', ...fmt(addDays(-10)) },
-  ];
-  localStorage.setItem('bookings', JSON.stringify(seeds));
+/* ======= Status helpers ======= */
+function mapStatusToFilter(s){
+  s = (s||'').toLowerCase();
+  if (['completed','done'].includes(s)) return 'completed';
+  if (['cancelled','canceled'].includes(s)) return 'cancelled';
+  if (['rescheduled'].includes(s)) return 'rescheduled';
+  if (['no_show','noshow'].includes(s)) return 'no_show';
+  // pending / confirmed / scheduled / null -> upcoming
+  return 'upcoming';
 }
-seedIfEmpty();
-
-/* ==== carregar ==== */
-function loadBookings(){ return JSON.parse(localStorage.getItem('bookings') || '[]'); }
-function saveBookings(arr){ localStorage.setItem('bookings', JSON.stringify(arr)); }
-
-/* ==== render ==== */
 const statusClass = s => ({
   upcoming:'st-upcoming', completed:'st-completed', cancelled:'st-cancelled', rescheduled:'st-rescheduled', no_show:'st-no_show'
 }[s] || 'st-upcoming');
-
 const statusLabel = s => ({
   upcoming:'Agendado', completed:'Concluído', cancelled:'Cancelado', rescheduled:'Remarcado', no_show:'Não compareceu'
 }[s] || s);
 
-function render(filter='all'){
-  const data = loadBookings();
-  const list = data
-    .filter(b => filter==='all' ? true : b.status===filter)
-    .sort((a,b)=> (b.iso||'').localeCompare(a.iso||''));
+/* ======= Fetch bookings (paginated) ======= */
+async function fetchBookingsAll() {
+  const rows = [];
+  let from = 0, to = 49; // 50 por página
+  for (let i=0; i<10; i++) { // hard cap 500
+    const url = new URL(`${SUPABASE_URL}/rest/v1/bookings`);
+    url.searchParams.set('select','id,customer_id,service_ids,professional_ids,start_at,minutes,price_cents,status,created_at');
+    url.searchParams.set('customer_id',`eq.${sb.user_id}`);
+    url.searchParams.set('order','start_at.desc');
+    url.searchParams.set('limit', String(to-from+1));
+    url.searchParams.set('offset', String(from));
+    const res = await fetch(url, { headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } });
+    if(!res.ok) throw new Error(await res.text());
+    const page = await res.json();
+    rows.push(...page);
+    if (page.length < (to-from+1)) break;
+    from += 50; to += 50;
+  }
+  return rows;
+}
 
+/* ======= Hydrate helpers (services & professionals) ======= */
+async function hydrateServices(serviceIds){
+  if (!serviceIds.length) return {};
+  const url = new URL(`${SUPABASE_URL}/rest/v1/services`);
+  url.searchParams.set('select','id,name,slug,image_url');
+  url.searchParams.set('id',`in.(${serviceIds.map(id=>`"${id}"`).join(',')})`);
+  const r = await fetch(url,{ headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } });
+  if(!r.ok) return {};
+  const arr = await r.json();
+  const map = {}; arr.forEach(s=> map[s.id]=s);
+  return map;
+}
+async function hydrateProfessionals(proIds){
+  if (!proIds.length) return {};
+  const url = new URL(`${SUPABASE_URL}/rest/v1/professionals`);
+  url.searchParams.set('select','id,full_name,profile_id');
+  url.searchParams.set('id',`in.(${proIds.map(id=>`"${id}"`).join(',')})`);
+  const r = await fetch(url,{ headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } });
+  if(!r.ok) return {};
+  const pros = await r.json();
+
+  // pega avatar do profile (opcional)
+  const profIds = pros.map(p=>p.profile_id).filter(Boolean);
+  let avatars = {};
+  if (profIds.length){
+    const u = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+    u.searchParams.set('select','id,avatar_url');
+    u.searchParams.set('id',`in.(${profIds.map(id=>`"${id}"`).join(',')})`);
+    const rr = await fetch(u,{ headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } });
+    if (rr.ok) {
+      const arr = await rr.json();
+      arr.forEach(p=> avatars[p.id]=p.avatar_url||'');
+    }
+  }
+  const map = {};
+  pros.forEach(p=> map[p.id] = { name:p.full_name, avatar: avatars[p.profile_id]||'' });
+  return map;
+}
+
+/* ======= Render ======= */
+function showSkeleton(){
   listEl.innerHTML = '';
-  emptyEl.hidden = list.length>0;
+  errEl.hidden = true;
+  emptyEl.hidden = true;
+  for(let i=0;i<4;i++){
+    listEl.insertAdjacentHTML('beforeend', `
+      <div class="sk-item">
+        <div class="sk-thumb skel"></div>
+        <div>
+          <div class="sk-line skel w80" style="margin:4px 0 8px"></div>
+          <div class="sk-line skel w40"></div>
+        </div>
+        <div class="sk-line skel w30" style="height:28px"></div>
+      </div>
+    `);
+  }
+}
+function clearList(){ listEl.innerHTML=''; }
 
-  list.forEach(b=>{
-    const firstSvc = b.services?.[0] || 'corte';
-    const img = THUMBS[firstSvc] || 'img/reco1.jpg';
-    const prosNames = (b.professionals||[]).map(id => PROS[id]?.name || 'Profissional').join(', ');
+function render(list, filter='all', svcMap={}, proMap={}){
+  clearList();
+  const normalized = list.map(b=>{
+    const f = mapStatusToFilter(b.status);
+    return { ...b, _filter:f };
+  }).filter(b => filter==='all' ? true : b._filter===filter)
+    .sort((a,b)=> String(b.start_at||'').localeCompare(String(a.start_at||'')));
+
+  emptyEl.hidden = normalized.length>0;
+
+  normalized.forEach(b=>{
+    const svcNames = (b.service_ids||[]).map(id => svcMap[id]?.name || 'Serviço').join(' + ');
+    const firstSvc = (b.service_ids||[])[0];
+    const svcImg   = (firstSvc && svcMap[firstSvc]?.image_url) || 'img/reco1.jpg';
+
+    const proNames = (b.professional_ids||[]).map(id => proMap[id]?.name || 'Profissional').join(', ');
+    const dateObj = b.start_at ? new Date(b.start_at) : null;
+    const dateTxt = dateObj ? dateObj.toLocaleDateString('pt-BR') : '--/--/----';
+    const timeTxt = dateObj ? dateObj.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
 
     const el = document.createElement('article');
     el.className = 'item reveal';
     el.innerHTML = `
-      <figure class="thumb"><img src="${img}" alt=""></figure>
+      <figure class="thumb">${svcImg ? `<img src="${svcImg}" alt="">` : `<span class="no-img">MB</span>`}</figure>
       <div class="meta">
-        <h3>${b.services.map(s=>SVC[s]||s).join(' + ')}</h3>
-        <p>${b.date} • ${b.time} • ${prosNames || 'Qualquer profissional'}</p>
+        <h3>${svcNames || 'Serviço'}</h3>
+        <p>${dateTxt} • ${timeTxt} • ${proNames || 'Qualquer profissional'}</p>
         <div class="row">
-          <span class="tag">${b.proMode==='by_service'?'Por serviço':'Qualquer profissional'}</span>
+          <span class="tag">${(b.professional_ids||[]).length>1?'Por serviço':'Qualquer profissional'}</span>
           <span class="tag">${b.minutes||0} min</span>
-          <span class="tag">${money(b.total||0)}</span>
+          <span class="tag">${money((b.price_cents||0)/100)}</span>
         </div>
-        <span class="status ${statusClass(b.status)}">${statusLabel(b.status)}</span>
+        <span class="status ${statusClass(b._filter)}">${statusLabel(b._filter)}</span>
       </div>
       <div class="actions">
         <button class="btnx primary ripple" data-act="rebook" data-id="${b.id}">Remarcar</button>
-        <button class="btnx danger ripple" data-act="cancel" data-id="${b.id}" ${b.status!=='upcoming'?'disabled':''}>Cancelar</button>
+        <button class="btnx danger ripple" data-act="cancel" data-id="${b.id}" ${b._filter!=='upcoming'?'disabled':''}>Cancelar</button>
       </div>
     `;
     listEl.appendChild(el);
   });
 
-  // reveal simples
-  const io = new IntersectionObserver(ents=>{
+  // reveal
+  const io = new IntersectionObserver(ents => {
     ents.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); }});
   },{threshold:.12});
   document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
 }
-render();
 
-/* ==== filtros ==== */
+/* ======= Actions ======= */
+async function cancelBooking(id){
+  const url = new URL(`${SUPABASE_URL}/rest/v1/bookings`);
+  url.searchParams.set('id',`eq.${id}`);
+  const res = await fetch(url, {
+    method:'PATCH',
+    headers:{
+      apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`,
+      'Content-Type':'application/json', Prefer:'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({ status:'cancelled' })
+  });
+  if(!res.ok) throw new Error(await res.text());
+}
+
+listEl.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-act]'); if(!btn) return;
+  const id = btn.dataset.id, act = btn.dataset.act;
+
+  if(act==='rebook'){
+    const b = currentData.find(x=>String(x.id)===String(id));
+    if(!b) return;
+    sessionStorage.setItem('rebookFrom', JSON.stringify({
+      services: b.service_ids || [],
+      professionals: b.professional_ids || [],
+      proMode: (b.professional_ids||[]).length>1 ? 'by_service' : 'any'
+    }));
+    sessionStorage.setItem('svc.selected', JSON.stringify(b.service_ids||[]));
+    sessionStorage.setItem('selectedPros', JSON.stringify(b.professional_ids||[]));
+    sessionStorage.setItem('proMode', (b.professional_ids||[]).length>1 ? 'by_service' : 'any');
+    location.href = 'agendamentos.html';
+    return;
+  }
+  if(act==='cancel'){
+    if(!confirm('Deseja cancelar esta reserva?')) return;
+    try{
+      btn.disabled = true;
+      await cancelBooking(id);
+      await boot(true); // reload
+    }catch(err){
+      console.error(err);
+      alert('Não foi possível cancelar agora.');
+    }finally{
+      btn.disabled = false;
+    }
+  }
+});
+
+/* dialog close */
+document.querySelector('[data-close]').addEventListener('click', ()=> dlg.close());
+
+/* filtros */
 document.querySelectorAll('.chip').forEach(ch=>{
-  ch.addEventListener('click', ()=>{
+  ch.addEventListener('click', ()=> {
     document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('is-on', c===ch));
-    render(ch.dataset.filter);
+    render(currentData, ch.dataset.filter, serviceMap, proMap);
   });
 });
 
-/* ==== ações ==== */
-listEl.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button[data-act]'); if(!btn) return;
-  const id = btn.dataset.id;
-  const act = btn.dataset.act;
-  const arr = loadBookings();
-  const ix = arr.findIndex(x=>x.id===id);
-  if(ix<0) return;
+/* ======= Boot ======= */
+let currentData = [];
+let serviceMap = {};
+let proMap = {};
 
-  const b = arr[ix];
+async function boot(skipSkeleton){
+  try{
+    if(!skipSkeleton) showSkeleton();
+    errEl.hidden = true;
 
-  if(act==='details'){
-    // abre dialog com detalhes
-    dlgBody.innerHTML = `
-      <div class="grid">
-        <span class="muted">Status:</span><strong>${statusLabel(b.status)}</strong>
-        <span class="muted">Data:</span><strong>${b.date}</strong>
-        <span class="muted">Hora:</span><strong>${b.time}</strong>
-        <span class="muted">Serviços:</span><strong>${b.services.map(s=>SVC[s]||s).join(', ')}</strong>
-        <span class="muted">Profissional(is):</span><strong>${(b.professionals||[]).map(p=>PROS[p]?.name||p).join(', ') || 'Qualquer'}</strong>
-        <span class="muted">Duração:</span><strong>${b.minutes||0} min</strong>
-        <span class="muted">Total:</span><strong>${money(b.total||0)}</strong>
-        ${b.deposit ? `<span class="muted">Pré-agendamento (30%):</span><strong>${money(b.deposit)}</strong>` : ''}
-      </div>
-    `;
-    dlg.showModal();
-    return;
+    // 1) bookings do usuário
+    const rows = await fetchBookingsAll();
+    currentData = rows;
+
+    // 2) hidrata nomes/avatares
+    const svcIds = [...new Set(rows.flatMap(r=> r.service_ids || []))];
+    const prIds  = [...new Set(rows.flatMap(r=> r.professional_ids || []))];
+
+    [serviceMap, proMap] = await Promise.all([
+      hydrateServices(svcIds),
+      hydrateProfessionals(prIds)
+    ]);
+
+    // 3) render
+    const activeFilter = document.querySelector('.chip.is-on')?.dataset.filter || 'all';
+    render(currentData, activeFilter, serviceMap, proMap);
+  }catch(err){
+    console.error(err);
+    listEl.innerHTML = '';
+    emptyEl.hidden = true;
+    errEl.hidden = false;
+    errEl.textContent = 'Erro ao carregar suas reservas. Tente novamente em instantes.';
   }
-
-  if(act==='rebook'){
-    // guarda intenção e manda para agendamento com os mesmos serviços
-    sessionStorage.setItem('rebookFrom', JSON.stringify({
-      services: b.services,
-      professionals: b.professionals,
-      proMode: b.proMode
-    }));
-    // também já persistimos seleção mínima usada no fluxo atual
-    sessionStorage.setItem('svc.selected', JSON.stringify(b.services || []));
-    sessionStorage.setItem('selectedPros', JSON.stringify(b.professionals || []));
-    sessionStorage.setItem('proMode', b.proMode || 'any');
-    window.location.href = 'agendamentos.html';
-    return;
-  }
-
-  if(act==='cancel'){
-    if(!confirm('Deseja cancelar esta reserva?')) return;
-    b.status = 'cancelled';
-    arr[ix] = b;
-    saveBookings(arr);
-    render(document.querySelector('.chip.is-on')?.dataset.filter || 'all');
-    return;
-  }
-});
-
-/* fechar dialog */
-document.querySelector('[data-close]').addEventListener('click', ()=> dlg.close());
-
-/* ==== integração com confirmacao.html (opcional)
-   Se a página de confirmação gravar a nova reserva em localStorage.newBooking,
-   aqui a gente captura, joga para bookings e limpa. ==== */
-(function consumeNewBooking(){
-  const raw = localStorage.getItem('newBooking');
-  if(!raw) return;
-  try {
-    const n = JSON.parse(raw);
-    const arr = loadBookings();
-    if(!n.id){ n.id = 'b' + Date.now(); }
-    if(!n.status){ n.status = 'upcoming'; }
-    arr.push(n);
-    saveBookings(arr);
-    localStorage.removeItem('newBooking');
-    // re-render para aparecer imediatamente
-    render(document.querySelector('.chip.is-on')?.dataset.filter || 'all');
-  } catch(_) { /* noop */ }
-})();
+}
+boot();
 </script>
 </body>
 </html>
