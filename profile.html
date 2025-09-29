@@ -7,6 +7,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+
   <style>
     .wrap{max-width:428px;margin:0 auto;padding:14px 14px 96px}
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
@@ -27,15 +28,17 @@
     .switch:first-of-type{border-top:0}
     .switch input{accent-color:var(--gold);width:22px;height:22px}
     .danger{border-color:#4c1f20;background:#1a1112;color:#ffcccc}
+    .btn-full{width:100%}
     .msg{margin-top:8px;font-size:14px}
     .msg.ok{color:#c6f7d0}
     .msg.err{color:#ffc9c9}
-    .hint{font-size:12px;color:#aab}
-    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf .6s ease-out forwards}
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;animation:ripple-kf 600ms ease-out forwards}
     @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
   </style>
 </head>
 <body>
+
 <main class="app">
   <header class="topbar">
     <a class="back ripple" href="clientpage.html" aria-label="Voltar">
@@ -45,22 +48,23 @@
   </header>
 
   <div class="wrap">
-    <section class="panel reveal">
+    <!-- Cabeçalho do perfil -->
+    <section class="panel reveal" id="cardHeader">
       <div class="ph">
         <div class="avatar" id="avatarBox" aria-label="Foto do perfil"></div>
         <div>
-          <div id="phName" style="font:600 16px/1.1 Poppins">—</div>
+          <div id="phName" style="font:600 16px/1.1 Poppins">Cliente</div>
           <div id="phEmail" class="muted" style="font-size:13px">—</div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
         <label class="edit-photo ripple" for="avatarInput">Trocar foto</label>
         <button class="edit-photo ripple" id="removeAvatar" type="button">Remover foto</button>
       </div>
       <input id="avatarInput" type="file" accept="image/*" hidden>
-      <div class="hint">Formatos aceitos: jpg, png, webp.</div>
     </section>
 
+    <!-- Dados pessoais -->
     <form class="panel reveal" id="formProfile" novalidate>
       <h2>Dados pessoais</h2>
       <div class="field">
@@ -70,16 +74,16 @@
       <div class="field">
         <label class="label" for="email">E-mail</label>
         <input class="input" id="email" name="email" type="email" required>
-        <div class="hint">Ao alterar o e-mail, o Auth pode exigir confirmação.</div>
       </div>
       <div class="field">
         <label class="label" for="phone">Telefone</label>
-        <input class="input" id="phone" name="phone" type="tel" inputmode="tel" placeholder="+55 31999999999">
+        <input class="input" id="phone" name="phone" type="tel" inputmode="tel" placeholder="(00) 90000-0000">
       </div>
       <button class="btn btn-primary ripple" type="submit">Salvar alterações</button>
       <div id="msgProfile" class="msg"></div>
     </form>
 
+    <!-- Segurança -->
     <form class="panel reveal" id="formPwd" novalidate>
       <h2>Segurança</h2>
       <div class="grid-2">
@@ -100,7 +104,23 @@
       <div id="msgPwd" class="msg"></div>
     </form>
 
-    <section class="panel reveal">
+    <!-- Preferências -->
+    <section class="panel reveal" id="cardPrefs">
+      <h2>Preferências</h2>
+      <div class="switch">
+        <label for="prefNotify">Notificações gerais</label>
+        <input id="prefNotify" type="checkbox">
+      </div>
+      <div class="switch">
+        <label for="prefRemind">Lembretes de agendamento</label>
+        <input id="prefRemind" type="checkbox">
+      </div>
+      <button class="btn ripple" id="savePrefs" type="button">Salvar preferências</button>
+      <div id="msgPrefs" class="msg"></div>
+    </section>
+
+    <!-- Zona de perigo -->
+    <section class="panel reveal" id="cardDanger">
       <h2>Conta</h2>
       <div class="grid-2">
         <button class="btn ripple" id="logout" type="button">Sair da conta</button>
@@ -112,24 +132,37 @@
 
 <nav class="navbar" role="navigation" aria-label="Principal">
   <a href="index.html" class="active ripple" aria-current="page">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M3 10l9-7 9 7"></path><path d="M9 22V12h6v10"></path>
-    </svg> Início
+    </svg>
+    Início
   </a>
   <a href="#" class="ripple">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line>
-    </svg> Explorar
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12" y2="8"></line>
+    </svg>
+    Explorar
   </a>
   <a href="reservas.html" class="ripple">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path>
-    </svg> Minhas reservas
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18"></path>
+    </svg>
+    Minhas reservas
   </a>
   <a href="profile.html" class="ripple">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path><path d="M4 21v-2a4 4 0 0 1 3-3.87"></path><circle cx="12" cy="7" r="4"></circle>
-    </svg> Perfil
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M4 21v-2a4 4 0 0 1 3-3.87"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    Perfil
   </a>
 </nav>
 
@@ -139,186 +172,200 @@ const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 const STORAGE_BUCKET = 'avatars';
 
-/* (Opcional) n8n webhooks com Service Key por trás (deixe [] para ignorar) */
-const N8N_CHECK_EMAIL_URLS = [];   // ex: ['https://.../webhook/check-email?email=...&exclude=USER_ID']
-const N8N_CHECK_PHONE_URLS = [];   // ex: ['https://.../webhook/check-phone?phone=...&exclude=USER_ID']
+/* ========= HELPERS ========= */
+const qs = s => document.querySelector(s);
+const initials = n => (n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
+document.addEventListener('click',(e)=>{const t=e.target.closest('.ripple'); if(!t) return; const r=document.createElement('span'); r.className='r'; const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px'; t.appendChild(r); r.addEventListener('animationend',()=>r.remove());},{passive:true});
+const io = new IntersectionObserver(ents=>{ents.forEach(en=>{if(en.isIntersecting){en.target.classList.add('is-in');io.unobserve(en.target);}});},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* ========= sessão ========= */
-function getSbSession(){
-  try{
-    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
-    const key = `sb-${ref}-auth-token`;
-    const raw = localStorage.getItem(key);
-    if (raw){ const p = JSON.parse(raw); const s = p?.currentSession || p;
-      if (s?.access_token) return { access_token:s.access_token, user:s.user, user_id:s.user?.id||'', user_email:s.user?.email||'' };
-    }
-  }catch{}
-  try{
+/* ========= SESSION (tolerante) ========= */
+function getSbSession() {
+  try {
     const custom = localStorage.getItem('sb.session');
-    if (custom){ const s = JSON.parse(custom);
-      if (s?.access_token) return { access_token:s.access_token||s.token, user:s.user, user_id:s.user_id||s.user?.id||'', user_email:s.user_email||s.user?.email||'' };
+    if (custom) {
+      const s = JSON.parse(custom);
+      return {
+        access_token: s.access_token || s.token || '',
+        user: s.user || null,
+        user_id: s.user_id || s.user?.id || '',
+        user_email: s.user_email || s.user?.email || ''
+      };
     }
-  }catch{}
+  } catch {}
+  try {
+    const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+    const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+    if (raw) {
+      const p = JSON.parse(raw); const sess = p?.currentSession || p;
+      return {
+        access_token: sess?.access_token || '',
+        user: sess?.user || null,
+        user_id: sess?.user?.id || '',
+        user_email: sess?.user?.email || ''
+      };
+    }
+  } catch {}
   return null;
 }
 const sb = getSbSession();
-if (!sb?.access_token){ sessionStorage.setItem('postLoginRedirect','profile.html'); location.href='login.html'; }
+if (!sb?.access_token) { sessionStorage.setItem('postLoginRedirect','profile.html'); location.href='login.html'; }
 
-/* ========= helpers/UI ========= */
-const qs = s => document.querySelector(s);
-document.addEventListener('click',(e)=>{const t=e.target.closest('.ripple'); if(!t)return; const r=document.createElement('span'); r.className='r'; const b=t.getBoundingClientRect(); r.style.left=(e.clientX-b.left)+'px'; r.style.top=(e.clientY-b.top)+'px'; t.appendChild(r); r.addEventListener('animationend',()=>r.remove(),{once:true});},{passive:true});
-const initials = n => (n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('');
-const state = { id:'', email:'', name:'Cliente', phone:'', avatar_url:'', avatar_path:'' };
+/* ========= STATE ========= */
+let activeUser = { id:'', email:'', name:'Cliente', phone:'', avatar_url:'', avatar_path:'' };
 
 function renderHeader(){
-  const box = qs('#avatarBox'); box.innerHTML='';
-  if (state.avatar_url){ const img=new Image(); img.src=state.avatar_url; img.alt='Foto do perfil'; img.onerror=()=>{box.textContent=initials(state.name)}; box.appendChild(img); }
-  else { box.textContent = initials(state.name); }
-  qs('#phName').textContent = state.name || '—';
-  qs('#phEmail').textContent = state.email || '—';
+  const box = qs('#avatarBox'); box.innerHTML = '';
+  if (activeUser.avatar_url) {
+    const img = new Image(); img.src = activeUser.avatar_url; img.alt='Foto do perfil';
+    img.onerror = ()=>{ box.textContent = initials(activeUser.name); };
+    box.appendChild(img);
+  } else {
+    box.textContent = initials(activeUser.name);
+  }
+  qs('#phName').textContent  = activeUser.name || 'Cliente';
+  qs('#phEmail').textContent = activeUser.email || '—';
 }
 function fillForm(){
-  qs('#name').value  = state.name  || '';
-  qs('#email').value = state.email || '';
-  qs('#phone').value = state.phone || '';
+  qs('#name').value  = activeUser.name  || '';
+  qs('#email').value = activeUser.email || '';
+  qs('#phone').value = activeUser.phone || '';
 }
 
-/* ========= n8n helper ========= */
-async function tryFetch(urls, opts){
-  let last=null;
-  for(const u of urls){
-    try{ const res = await fetch(u, opts); if(res.ok) return await res.json().catch(()=> ({})); last = await res.text(); }
-    catch(e){ last = e.message; }
-  }
-  throw new Error(last||'request failed');
-}
-
-/* ========= load user ========= */
-async function loadUser(){
+/* ========= LOAD AUTH USER ========= */
+(async function loadUser(){
   try{
-    // Auth user
     const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+      method:'GET', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     });
-    if (r.ok){
+    if (r.ok) {
       const u = await r.json();
-      state.id = u.id; state.email = u.email || ''; 
-      const m = u.user_metadata || {};
-      state.name = m.full_name || state.name;
-      state.phone = m.phone || '';
-      state.avatar_url = m.avatar_url || '';
-      state.avatar_path = m.avatar_path || '';
+      activeUser.id          = u.id || sb.user_id || '';
+      activeUser.email       = u.email || sb.user_email || '';
+      activeUser.name        = (u.user_metadata?.full_name || '').trim() || 'Cliente';
+      activeUser.phone       = u.user_metadata?.phone || '';
+      activeUser.avatar_url  = u.user_metadata?.avatar_url || '';
+      activeUser.avatar_path = u.user_metadata?.avatar_path || '';
+    } else {
+      // fallback leve caso a chamada falhe
+      const meta = sb?.user?.user_metadata || {};
+      activeUser = {
+        id: sb?.user_id || sb?.user?.id || '',
+        email: sb?.user_email || sb?.user?.email || '',
+        name: (meta.full_name || '').trim() || 'Cliente',
+        phone: meta.phone || '',
+        avatar_url: meta.avatar_url || '',
+        avatar_path: meta.avatar_path || ''
+      };
     }
-    // complementa com profiles
-    if (state.id){
-      const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-      url.searchParams.set('id', `eq.${state.id}`);
-      url.searchParams.set('select','full_name,phone,avatar_url');
-      const p = await fetch(url, { headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }});
-      if (p.ok){
-        const [row] = await p.json();
-        if (row){
-          state.name = row.full_name || state.name;
-          state.phone = row.phone || state.phone;
-          state.avatar_url = row.avatar_url || state.avatar_url;
-        }
-      }
-    }
-  } finally { renderHeader(); fillForm(); }
-}
-loadUser();
-
-/* ========= unicidade ========= */
-async function isPhoneTaken(phone){
-  if (!phone) return false;
-  // n8n com service key (se existir)
-  if (N8N_CHECK_PHONE_URLS.length){
-    const urlList = N8N_CHECK_PHONE_URLS.map(u => `${u}${u.includes('?')?'&':'?'}phone=${encodeURIComponent(phone)}&exclude=${encodeURIComponent(state.id)}`);
-    try{ const j = await tryFetch(urlList, {headers:{Authorization:`Bearer ${sb.access_token}`}}); return !!j?.taken; }catch{}
+  } catch(e) {
+    console.warn('Auth fetch falhou, usando sessão local:', e);
+    const meta = sb?.user?.user_metadata || {};
+    activeUser = {
+      id: sb?.user_id || sb?.user?.id || '',
+      email: sb?.user_email || sb?.user?.email || '',
+      name: (meta.full_name || '').trim() || 'Cliente',
+      phone: meta.phone || '',
+      avatar_url: meta.avatar_url || '',
+      avatar_path: meta.avatar_path || ''
+    };
+  } finally {
+    renderHeader(); fillForm();
   }
-  // direto no profiles
-  const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-  url.searchParams.set('select','id');
-  url.searchParams.set('phone', `eq.${phone}`);
-  url.searchParams.set('id', `neq.${state.id}`);
-  const r = await fetch(url, { headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }});
-  if (!r.ok) return false;
-  const rows = await r.json();
-  return Array.isArray(rows) && rows.length>0;
-}
+})();
 
-/* ========= avatar upload/remove ========= */
+/* ========= AVATAR ========= */
 async function uploadAvatar(file){
-  const ext = (file.name.split('.').pop()||'jpg').toLowerCase().replace('jpeg','jpg');
-  const path = `${state.id}/${Date.now()}.${ext}`;
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const safeExt = ({jpeg:'jpg'}[ext] || ext);
+  const path = `${activeUser.id}/${Date.now()}.${safeExt}`;
 
-  // remove anterior
-  if (state.avatar_path){
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(state.avatar_path)}`, {
-      method:'DELETE', headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+  // remove o anterior (best-effort)
+  if (activeUser.avatar_path) {
+    fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(activeUser.avatar_path)}`, {
+      method:'DELETE',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     }).catch(()=>{});
   }
-  // upload novo
+
+  // upload
   const up = await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(path)}`, {
     method:'POST',
-    headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'x-upsert':'true', 'Content-Type': file.type || 'application/octet-stream' },
-    body:file
+    headers:{
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${sb.access_token}`,
+      'x-upsert':'true',
+      'Content-Type': file.type || 'application/octet-stream'
+    },
+    body: file
   });
   if(!up.ok) throw new Error(await up.text());
 
   const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${encodeURIComponent(path)}`;
 
-  // Auth metadata
+  // salva metadata no auth
   await fetch(`${SUPABASE_URL}/auth/v1/user`, {
     method:'PUT',
-    headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ data:{ full_name: state.name, phone: state.phone, avatar_url: publicUrl, avatar_path: path } })
+    headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ data: { ...((sb.user?.user_metadata)||{}), full_name: activeUser.name, phone: activeUser.phone, avatar_url: publicUrl, avatar_path: path } })
   });
 
-  // profiles
-  const prof = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-  prof.searchParams.set('id', `eq.${state.id}`);
-  await fetch(prof, {
-    method:'PATCH',
-    headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
-    body: JSON.stringify({ avatar_url: publicUrl })
-  }).catch(()=>{});
+  // espelha em profiles (se existir)
+  try{
+    const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+    url.searchParams.set('id', `eq.${activeUser.id}`);
+    await fetch(url, {
+      method:'PATCH',
+      headers:{
+        apikey: SUPABASE_ANON_KEY,
+        Authorization:`Bearer ${sb.access_token}`,
+        'Content-Type':'application/json',
+        Prefer:'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ avatar_url: publicUrl })
+    });
+  }catch{}
 
-  state.avatar_url = publicUrl;
-  state.avatar_path = path;
+  activeUser.avatar_url = publicUrl;
+  activeUser.avatar_path = path;
   renderHeader();
 }
-async function removeAvatar(){
-  if (state.avatar_path){
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(state.avatar_path)}`, {
-      method:'DELETE', headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
+async function deleteAvatar(){
+  if (activeUser.avatar_path) {
+    fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(activeUser.avatar_path)}`, {
+      method:'DELETE',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` }
     }).catch(()=>{});
   }
   await fetch(`${SUPABASE_URL}/auth/v1/user`, {
     method:'PUT',
-    headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ data:{ ...{full_name: state.name, phone: state.phone}, avatar_url:'', avatar_path:'' } })
+    headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+    body: JSON.stringify({ data: { ...((sb.user?.user_metadata)||{}), avatar_url:'', avatar_path:'' } })
   }).catch(()=>{});
-  const prof = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-  prof.searchParams.set('id', `eq.${state.id}`);
-  await fetch(prof, {
-    method:'PATCH', headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ avatar_url: null })
-  }).catch(()=>{});
-  state.avatar_url=''; state.avatar_path=''; renderHeader();
+  try{
+    const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+    url.searchParams.set('id', `eq.${activeUser.id}`);
+    await fetch(url, {
+      method:'PATCH',
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
+      body: JSON.stringify({ avatar_url: null })
+    });
+  }catch{}
+  activeUser.avatar_url=''; activeUser.avatar_path='';
+  renderHeader();
 }
-qs('#avatarInput').addEventListener('change', async ev=>{
-  const f = ev.target.files?.[0]; if(!f) return;
-  try{ await uploadAvatar(f); }catch(e){ alert('Falha ao enviar a imagem.'); }
+qs('#avatarInput').addEventListener('change', async (ev)=>{
+  const file = ev.target.files?.[0]; if(!file) return;
+  try{ await uploadAvatar(file); }catch(err){ alert('Falha ao enviar a imagem.'); console.error(err); }
   finally { ev.target.value=''; }
 });
 qs('#removeAvatar').addEventListener('click', async ()=>{
-  if (!state.avatar_url && !state.avatar_path) return;
+  if (!activeUser.avatar_url && !activeUser.avatar_path) return;
   if (!confirm('Remover foto de perfil?')) return;
-  try{ await removeAvatar(); }catch(e){ alert('Não foi possível remover agora.'); }
+  try{ await deleteAvatar(); }catch{ alert('Não foi possível remover agora.'); }
 });
 
-/* ========= salvar perfil ========= */
+/* ========= SALVAR PERFIL ========= */
 qs('#formProfile').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = qs('#msgProfile');
@@ -326,48 +373,35 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
   const email = qs('#email').value.trim().toLowerCase();
   const phone = qs('#phone').value.trim();
 
-  if(!name || !/^\S+@\S+\.\S+$/.test(email)){ msg.className='msg err'; msg.textContent='Verifique nome e e-mail.'; return; }
-
-  // telefone único
+  if(!name || !/^\S+@\S+\.\S+$/.test(email)){
+    msg.className='msg err'; msg.textContent='Verifique nome e e-mail.'; return;
+  }
   try{
-    if (await isPhoneTaken(phone)){
-      msg.className='msg err'; msg.textContent='Telefone já cadastrado.'; return;
-    }
-  }catch{ /* segue em frente se checagem falhar */ }
-
-  try{
-    // tenta atualizar email + metadata (se e-mail já existir, Supabase retorna 422)
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       method:'PUT',
-      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-      body: JSON.stringify({ email, data:{ full_name:name, phone, avatar_url: state.avatar_url, avatar_path: state.avatar_path } })
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({ email, data:{ full_name:name, phone, avatar_url:activeUser.avatar_url, avatar_path:activeUser.avatar_path } })
     });
-
-    if (!res.ok){
-      const text = await res.text();
-      // 422 "User already registered" (e-mail em uso)
-      if (/422/.test(text) || /already/i.test(text)){
-        msg.className='msg err'; msg.textContent='E-mail já está em uso.'; return;
-      }
-      // tenta ao menos salvar metadata
-      await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    if(!r.ok){
+      // tenta salvar só metadata se trocar email não for permitido
+      const metaOnly = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
         method:'PUT',
-        headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
-        body: JSON.stringify({ data:{ full_name:name, phone, avatar_url: state.avatar_url, avatar_path: state.avatar_path } })
+        headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ data:{ full_name:name, phone, avatar_url:activeUser.avatar_url, avatar_path:activeUser.avatar_path } })
       });
+      if(!metaOnly.ok) throw new Error(await metaOnly.text());
     }
-
-    // upsert em profiles
-    const prof = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
-    prof.searchParams.set('id', `eq.${state.id}`);
-    await fetch(prof, {
-      method:'PATCH',
-      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
-      body: JSON.stringify({ full_name:name, phone, avatar_url: state.avatar_url })
-    }).catch(()=>{});
-
-    // ok
-    state.name=name; state.email=email; state.phone=phone;
+    // espelha no profiles (se existir)
+    try{
+      const url = new URL(`${SUPABASE_URL}/rest/v1/profiles`);
+      url.searchParams.set('id', `eq.${activeUser.id}`);
+      await fetch(url, {
+        method:'PATCH',
+        headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates' },
+        body: JSON.stringify({ full_name:name, phone, avatar_url:activeUser.avatar_url })
+      });
+    }catch{}
+    activeUser.name=name; activeUser.email=email; activeUser.phone=phone;
     renderHeader(); fillForm();
     msg.className='msg ok'; msg.textContent='Dados atualizados!';
     setTimeout(()=>msg.textContent='', 1400);
@@ -377,38 +411,44 @@ qs('#formProfile').addEventListener('submit', async (e)=>{
   }
 });
 
-/* ========= trocar senha ========= */
+/* ========= TROCAR SENHA ========= */
 qs('#formPwd').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = qs('#msgPwd');
-  const cur = qs('#cur').value;
   const nw  = qs('#new').value;
   const nw2 = qs('#new2').value;
-
-  if(nw.length<6){ msg.className='msg err'; msg.textContent='Nova senha deve ter 6+ caracteres.'; return; }
-  if(nw!==nw2){ msg.className='msg err'; msg.textContent='Confirmação não confere.'; return; }
-
-  // Supabase valida token; "senha atual" aqui é apenas UX — se quiser, valide via n8n com reautenticação.
-  if (!cur){ msg.className='msg err'; msg.textContent='Informe a senha atual.'; return; }
-
+  if(nw.length < 6){ msg.className='msg err'; msg.textContent='Nova senha deve ter 6+ caracteres.'; return; }
+  if(nw !== nw2){ msg.className='msg err'; msg.textContent='Confirmação não confere.'; return; }
   try{
     const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       method:'PUT',
-      headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}`, 'Content-Type':'application/json' },
       body: JSON.stringify({ password: nw })
     });
     if(!res.ok) throw new Error(await res.text());
     qs('#cur').value = qs('#new').value = qs('#new2').value = '';
-    msg.className='msg ok'; msg.textContent='Senha atualizada!';
+    msg.className='msg ok'; msg.textContent='Senha atualizada com sucesso!';
     setTimeout(()=>msg.textContent='', 1400);
   }catch(err){
     console.error(err);
-    msg.className='msg err'; msg.textContent='Não foi possível atualizar a senha.';
+    msg.className='msg err'; msg.textContent='Falha ao atualizar a senha.';
   }
 });
 
-/* ========= logout / delete ========= */
-function cleanSbKeys(){
+/* ========= PREFS LOCAIS ========= */
+const prefs = JSON.parse(localStorage.getItem('prefs') || '{"notify":true,"remind":true}');
+qs('#prefNotify').checked = !!prefs.notify;
+qs('#prefRemind').checked = !!prefs.remind;
+qs('#savePrefs').addEventListener('click', ()=>{
+  const msg = qs('#msgPrefs');
+  const out = { notify: qs('#prefNotify').checked, remind: qs('#prefRemind').checked };
+  localStorage.setItem('prefs', JSON.stringify(out));
+  msg.className='msg ok'; msg.textContent='Preferências salvas!';
+  setTimeout(()=>msg.textContent='', 1400);
+});
+
+/* ========= LOGOUT / DELETE ========= */
+function cleanSessionKeys(){
   try{
     const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
     localStorage.removeItem(`sb-${ref}-auth-token`);
@@ -416,16 +456,22 @@ function cleanSbKeys(){
   }catch{}
 }
 qs('#logout').addEventListener('click', async ()=>{
-  try{ await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } }); }
-  catch{}
-  finally { cleanSbKeys(); location.href='login.html'; }
+  try{
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } }).catch(()=>{});
+  } finally {
+    cleanSessionKeys();
+    location.href='login.html';
+  }
 });
 qs('#deleteAcc').addEventListener('click', async ()=>{
-  if(!confirm('Tem certeza que deseja excluir sua conta?')) return;
-  try{ await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } }); }
-  catch{} finally { cleanSbKeys(); location.href='login.html'; }
+  if(!confirm('Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.')) return;
+  try{
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey: SUPABASE_ANON_KEY, Authorization:`Bearer ${sb.access_token}` } }).catch(()=>{});
+  } finally {
+    cleanSessionKeys();
+    location.href='login.html';
+  }
 });
 </script>
 </body>
 </html>
-
