@@ -6,6 +6,15 @@
   <title>Profissionais — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* mini estilos para avatar sem imagem */
+    .thumb.no-img {
+      display:grid; place-items:center; background:#111214; border:1px solid var(--line);
+      color:#d8dae2; font:700 16px/1 Poppins; border-radius:12px; min-height:92px;
+    }
+    .thumb.no-img span{opacity:.9}
+    .item.is-disabled { opacity:.55; pointer-events:none }
+  </style>
 </head>
 <body>
 
@@ -41,26 +50,25 @@ const N8N_PROS_URLS = [
 /* ================== Utils ================== */
 const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
+const initials = (n) => (String(n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('') || 'MB');
 
 /* ================== Estado vindo de Serviços ================== */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ids dos serviços escolhidos
+const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ids/keys dos serviços escolhidos
 const total   = Number(getStore('svc.total')   || 0);
 const minutes = Number(getStore('svc.minutes') || 0);
 const count   = Number(getStore('svc.count')   || 0);
 document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
 
 /* ================== Ripple ================== */
-(() => {
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('.ripple'); if(!el) return;
-    const r  = document.createElement('span'); r.className = 'r';
-    const b  = el.getBoundingClientRect();
-    r.style.left = (e.clientX - b.left) + 'px';
-    r.style.top  = (e.clientY - b.top)  + 'px';
-    el.appendChild(r);
-    r.addEventListener('animationend', () => r.remove(), { once:true });
-  }, { passive:true });
-})();
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('.ripple'); if(!el) return;
+  const r  = document.createElement('span'); r.className = 'r';
+  const b  = el.getBoundingClientRect();
+  r.style.left = (e.clientX - b.left) + 'px';
+  r.style.top  = (e.clientY - b.top)  + 'px';
+  el.appendChild(r);
+  r.addEventListener('animationend', () => r.remove(), { once:true });
+}, { passive:true });
 
 /* ================== Reveal ================== */
 function applyReveal() {
@@ -82,7 +90,7 @@ async function fetchProfessionals() {
       if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
       const body = await res.json().catch(()=> ({}));
 
-      // normaliza formatos (igual fizemos no services admin)
+      // normaliza formatos (iguais aos usados no admin)
       let items = [];
       if (Array.isArray(body)) items = body.map(x => x?.json ?? x);
       else if (body?.data && Array.isArray(body.data)) items = body.data;
@@ -102,6 +110,20 @@ async function fetchProfessionals() {
 }
 
 /* ================== Render lista ================== */
+function proCoversRequired(pro, required) {
+  // Tenta cobrir com qualquer shape que venha do n8n:
+  // - pro.skills: array de slugs/ids dos serviços
+  // - pro.service_ids: array de ids uuid
+  // - pro.tags: array de strings
+  const pool = new Set();
+  (pro.skills || pro.tags || []).forEach(x => pool.add(String(x)));
+  (pro.service_ids || []).forEach(x => pool.add(String(x)));
+  if (!required || !required.size) return true;
+  // Pelo menos um serviço requerido deve estar no conjunto do profissional
+  for (const r of required) if (pool.has(String(r))) return true;
+  return false;
+}
+
 function renderPros(pros) {
   const wrap = document.getElementById('proList');
   if (!pros.length) {
@@ -117,16 +139,20 @@ function renderPros(pros) {
     const bio   = p.bio || p.description || '';
     const phone = p.phone || '';
     const desc  = bio || `${role}${phone ? ' • ' + phone : ''}`;
-    const img   = p.avatar_url || p.image_url || '';
+    // avatar (tabela professionals ou view v_professionals), com fallback
+    const imgUrl = p.avatar_url || p.image_url || '';
+    const disabled = !proCoversRequired(p, REQUIRED);
 
     return `
-    <article class="item reveal" data-id="${id}">
-      <figure class="thumb">${img ? `<img src="${img}" alt="${name}">` : ''}</figure>
+    <article class="item reveal ${disabled ? 'is-disabled':''}" data-id="${id}">
+      <figure class="thumb ${imgUrl ? '' : 'no-img'}">
+        ${imgUrl ? `<img src="${imgUrl}" alt="${name}">` : `<span>${initials(name)}</span>`}
+      </figure>
       <div class="meta">
         <h3 class="name">${name}${rate ? ` <span class="rate">★ ${rate}</span>` : ''}</h3>
         <p class="desc">${desc}</p>
       </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
+      <button class="choose ripple" type="button" aria-pressed="false" ${disabled ? 'disabled':''}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
@@ -135,9 +161,14 @@ function renderPros(pros) {
     </article>`;
   }).join('');
 
-  // fallback de imagem
+  // fallback de imagem quando URL quebra
   document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+    img.addEventListener('error', ()=>{
+      const box=img.parentElement; img.remove(); box.classList.add('no-img');
+      const who = img.getAttribute('alt') || 'Profissional';
+      const sp = document.createElement('span'); sp.textContent = initials(who);
+      box.appendChild(sp);
+    });
   });
 
   applyReveal();
@@ -163,6 +194,7 @@ function bindSelection() {
 
   items.forEach(c => {
     c.btn.addEventListener('click', () => {
+      if (c.el.classList.contains('is-disabled') || c.btn.hasAttribute('disabled')) return;
       selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
       syncUI();
     });
@@ -171,10 +203,7 @@ function bindSelection() {
   btnNext.addEventListener('click', () => {
     if (selected.size === 0) return;
 
-    // (Opcional) Validação de cobertura de serviços
-    // → se no futuro você devolver "skills" do profissional pelo n8n,
-    //   dá pra checar se cobrem todos os REQUIRED antes de seguir.
-
+    // Persistimos a seleção e avançamos
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
     localStorage.setItem('proMode', 'per'); // multi por serviço
     window.location.href = 'agendamentos.html';
