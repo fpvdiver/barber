@@ -6,6 +6,62 @@
   <title>Profissionais — Mineiro Barbershop</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ====== ajustes de layout do card ====== */
+    .list { display: grid; gap: 12px; padding: 12px; }
+    .item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .card-row {
+      display: grid;
+      grid-template-columns: 64px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 64px;
+    }
+    .thumb {
+      width: 64px; height: 64px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--line); background: #0f1012;
+      display: grid; place-items: center;
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb.no-img span { color:#d8dae2; font:700 16px/1 Poppins; }
+
+    .meta h3 {
+      margin: 0 0 4px;
+      font: 600 16px/1.2 Poppins;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sub { color: var(--muted); font-size: 13px; line-height: 1.2; }
+    .sub .sep { margin: 0 6px; opacity: .35; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font: 700 12px/1 Poppins; color: #1b1c20;
+      background: #d3a85b; border-radius: 999px; padding: 6px 10px;
+    }
+    .badge svg { width: 12px; height: 12px; }
+
+    .choose {
+      height: 40px; padding: 0 16px; border-radius: 999px;
+      border: 1px solid var(--line); background: #15161a; color: #e9eaef;
+      font: 600 14px/1 Poppins; cursor: pointer;
+    }
+    .choose.is-on {
+      background: var(--gold); color: #111; border-color: transparent;
+    }
+    .item.is-disabled { opacity: .55; }
+    .item.is-disabled .choose { pointer-events: none; }
+
+    /* ripple span */
+    .r{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+      background:rgba(211,168,91,.25);width:24px;height:24px;pointer-events:none;opacity:.9;
+      animation:ripple-kf 600ms ease-out forwards}
+    @keyframes ripple-kf{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+  </style>
 </head>
 <body>
 
@@ -35,32 +91,31 @@
 /* ================== Config ================== */
 const N8N_PROS_URLS = [
   'https://primary-jow9-barber.up.railway.app/webhook/professionals',
-  'https://primary-jow9-barber.up.railway.app/webhook/profissionals', // fallback se seu fluxo usa esse path
+  'https://primary-jow9-barber.up.railway.app/webhook/profissionals'
 ];
 
 /* ================== Utils ================== */
 const moneyBR = v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ',');
 const getStore = k => localStorage.getItem(k) ?? sessionStorage.getItem(k);
+const initials = (n) => (String(n||' ').trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()||'').join('') || 'MB');
 
 /* ================== Estado vindo de Serviços ================== */
-const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]')); // ids dos serviços escolhidos
+const REQUIRED = new Set(JSON.parse(getStore('svc.selected') || '[]'));
 const total   = Number(getStore('svc.total')   || 0);
 const minutes = Number(getStore('svc.minutes') || 0);
 const count   = Number(getStore('svc.count')   || 0);
 document.getElementById('sum').textContent = `${moneyBR(total)} • ${count} serviço${count>1?'s':''} • ${minutes} min`;
 
 /* ================== Ripple ================== */
-(() => {
-  document.addEventListener('click', (e) => {
-    const el = e.target.closest('.ripple'); if(!el) return;
-    const r  = document.createElement('span'); r.className = 'r';
-    const b  = el.getBoundingClientRect();
-    r.style.left = (e.clientX - b.left) + 'px';
-    r.style.top  = (e.clientY - b.top)  + 'px';
-    el.appendChild(r);
-    r.addEventListener('animationend', () => r.remove(), { once:true });
-  }, { passive:true });
-})();
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('.ripple'); if(!el) return;
+  const r  = document.createElement('span'); r.className = 'r';
+  const b  = el.getBoundingClientRect();
+  r.style.left = (e.clientX - b.left) + 'px';
+  r.style.top  = (e.clientY - b.top)  + 'px';
+  el.appendChild(r);
+  r.addEventListener('animationend', () => r.remove(), { once:true });
+}, { passive:true });
 
 /* ================== Reveal ================== */
 function applyReveal() {
@@ -82,7 +137,6 @@ async function fetchProfessionals() {
       if (!res.ok) { lastErr = new Error(`${res.status}`); continue; }
       const body = await res.json().catch(()=> ({}));
 
-      // normaliza formatos (igual fizemos no services admin)
       let items = [];
       if (Array.isArray(body)) items = body.map(x => x?.json ?? x);
       else if (body?.data && Array.isArray(body.data)) items = body.data;
@@ -91,7 +145,6 @@ async function fetchProfessionals() {
         if (vals.length && typeof vals[0] === 'object') items = vals.map(v => v?.json ?? v);
       }
 
-      // Só ativos e ordena por nome
       items = (items || []).filter(p => (p.is_active ?? true));
       items.sort((a,b)=> String(a.full_name||a.name||'').localeCompare(String(b.full_name||b.name||'')));
 
@@ -101,7 +154,17 @@ async function fetchProfessionals() {
   throw lastErr || new Error('Falha ao obter profissionais');
 }
 
-/* ================== Render lista ================== */
+/* ================== Cobre serviços requeridos? ================== */
+function proCoversRequired(pro, required) {
+  const pool = new Set();
+  (pro.skills || pro.tags || []).forEach(x => pool.add(String(x)));
+  (pro.service_ids || []).forEach(x => pool.add(String(x)));
+  if (!required || !required.size) return true;
+  for (const r of required) if (pool.has(String(r))) return true;
+  return false;
+}
+
+/* ================== Render ================== */
 function renderPros(pros) {
   const wrap = document.getElementById('proList');
   if (!pros.length) {
@@ -112,32 +175,49 @@ function renderPros(pros) {
   wrap.innerHTML = pros.map(p => {
     const id    = p.id || p.profile_id || p.slug || p.email || crypto.randomUUID();
     const name  = p.full_name || p.name || 'Profissional';
-    const rate  = (p.rating_avg != null) ? Number(p.rating_avg).toFixed(1) : null;
-    const role  = p.role || 'Barbeiro';
-    const bio   = p.bio || p.description || '';
+    const rate  = (p.rating_avg != null) ? Number(p.rating_avg||0).toFixed(1) : '0.0';
+    const role  = p.role || 'professional';
     const phone = p.phone || '';
-    const desc  = bio || `${role}${phone ? ' • ' + phone : ''}`;
-    const img   = p.avatar_url || p.image_url || '';
+    const imgUrl = p.avatar_url || p.image_url || '';
+    const disabled = !proCoversRequired(p, REQUIRED);
 
     return `
-    <article class="item reveal" data-id="${id}">
-      <figure class="thumb">${img ? `<img src="${img}" alt="${name}">` : ''}</figure>
-      <div class="meta">
-        <h3 class="name">${name}${rate ? ` <span class="rate">★ ${rate}</span>` : ''}</h3>
-        <p class="desc">${desc}</p>
-      </div>
-      <button class="choose ripple" type="button" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        <span>Escolher</span>
-      </button>
-    </article>`;
+      <article class="item reveal ${disabled ? 'is-disabled':''}" data-id="${id}">
+        <div class="card-row">
+          <figure class="thumb ${imgUrl ? '' : 'no-img'}">
+            ${imgUrl ? `<img src="${imgUrl}" alt="${name}">` : `<span>${initials(name)}</span>`}
+          </figure>
+
+          <div class="meta">
+            <h3 class="name">${name}
+              <span class="badge" title="Avaliação ${rate}">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                ${rate}
+              </span>
+            </h3>
+            <div class="sub">
+              ${role}
+              ${phone ? `<span class="sep">•</span><span class="phone">${phone}</span>` : ''}
+            </div>
+          </div>
+
+          <button class="choose ripple" type="button" aria-pressed="false" ${disabled ? 'disabled':''}>
+            Escolher
+          </button>
+        </div>
+      </article>`;
   }).join('');
 
   // fallback de imagem
   document.querySelectorAll('.thumb img').forEach(img=>{
-    img.addEventListener('error', ()=>{ const box=img.parentElement; img.remove(); box.classList.add('no-img'); });
+    img.addEventListener('error', ()=>{
+      const box=img.parentElement; img.remove(); box.classList.add('no-img');
+      const who = img.getAttribute('alt') || 'Profissional';
+      const sp = document.createElement('span'); sp.textContent = initials(who);
+      box.appendChild(sp);
+    });
   });
 
   applyReveal();
@@ -161,22 +241,29 @@ function bindSelection() {
   }
   syncUI();
 
+  // clique no botão
   items.forEach(c => {
-    c.btn.addEventListener('click', () => {
+    c.btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (c.el.classList.contains('is-disabled') || c.btn.hasAttribute('disabled')) return;
       selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
+      c.btn.setAttribute('aria-pressed', selected.has(c.id) ? 'true' : 'false');
+      syncUI();
+    });
+    // clique no card inteiro também seleciona
+    c.el.addEventListener('click', () => {
+      if (c.el.classList.contains('is-disabled')) return;
+      selected.has(c.id) ? selected.delete(c.id) : selected.add(c.id);
+      c.btn.classList.toggle('is-on', selected.has(c.id));
+      c.btn.setAttribute('aria-pressed', selected.has(c.id) ? 'true' : 'false');
       syncUI();
     });
   });
 
   btnNext.addEventListener('click', () => {
     if (selected.size === 0) return;
-
-    // (Opcional) Validação de cobertura de serviços
-    // → se no futuro você devolver "skills" do profissional pelo n8n,
-    //   dá pra checar se cobrem todos os REQUIRED antes de seguir.
-
     localStorage.setItem('selectedPros', JSON.stringify([...selected]));
-    localStorage.setItem('proMode', 'per'); // multi por serviço
+    localStorage.setItem('proMode', 'per');
     window.location.href = 'agendamentos.html';
   });
 
