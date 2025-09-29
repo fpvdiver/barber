@@ -187,7 +187,7 @@ button{-webkit-tap-highlight-color:transparent}
 .thumb.no-img{background:#0d0e11 url("../img/placeholder-service.svg") center/28px no-repeat}
 
 /* textos */
-.meta{display:grid;align-content:center;gap:6px;min-width:0;position:relative;z-index:1}
+.meta{display:grid;align-content:center;left:12px;gap:6px;min-width:0;position:relative;z-index:1}
 .meta .name{margin:0;font:600 14px/1.2 Poppins}
 .meta .desc{margin:0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -712,6 +712,7 @@ top: -2px;
 
 /* se antes você tinha esta linha, pode remover/ignorar: */
 /* .card .wa-fab svg{ width:24px; height:24px } */
+
 
 
 
