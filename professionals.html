@@ -116,9 +116,9 @@ function renderPros(pros) {
 
   wrap.innerHTML = pros.map((p, idx) => {
     const id    = p.id || p.profile_id || p.slug || p.email || `pro_${idx}`;
-    const name  = p.full_name || p.name || 'Profissional';
-    const role  = (p.role || 'professional').toLowerCase();
-    const phone = p.phone || '';
+    const name  = (p.full_name || p.name || 'Profissional').trim();
+    const role  = (p.role || 'professional').trim();
+    const phone = (p.phone || '').trim();
     const img   = p.avatar_url || p.image_url || '';
     const rate  = Number(p.rating_avg ?? 0).toFixed(1);
 
@@ -126,7 +126,9 @@ function renderPros(pros) {
       <article class="pro-card" data-id="${id}" tabindex="0" aria-label="${name}">
         <div class="pro-row">
           <figure class="pro-thumb">
-            ${img ? `<img src="${img}" alt="${name}" onerror="this.remove()">` : initials(name)}
+            ${img 
+              ? `<img src="${img}" alt="${name}" onerror="this.remove()">` 
+              : initials(name)}
           </figure>
           <div class="pro-meta">
             <h3>${name}
@@ -136,7 +138,7 @@ function renderPros(pros) {
                 </svg>${rate}
               </span>
             </h3>
-            <div class="pro-sub">${role}<br>${phone ? phone : ''}</div>
+            <div class="pro-sub">${role}${phone ? '<br>'+phone : ''}</div>
           </div>
           <button class="pro-choose ripple" type="button">Escolher</button>
         </div>
@@ -199,3 +201,4 @@ function bindSelection() {
 </script>
 </body>
 </html>
+
