@@ -83,7 +83,8 @@ a:hover,.btn:hover{transform:translateY(-1px)}
 </style>
 </head>
 <body>
-  <div class="app">
+
+<div class="app">
   <aside class="sidebar">
     <div class="brand"><div class="brand-logo">MB</div><strong>Mineiro Barbershop</strong></div>
     <div class="balance"><small>Saldo</small><div class="money" id="balance">R$ 0</div></div>
@@ -113,10 +114,16 @@ a:hover,.btn:hover{transform:translateY(-1px)}
       <img class="avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&q=80" alt="Usuária">
     </div>
   </header>
+
   <main class="main">
     <div class="card">
-       </div>
-        <div class="sep"></div>
+      <div class="toolbar">
+        <button id="btnNew" class="btn btn-primary">+ Novo serviço</button>
+        <div style="flex:1"></div>
+        <span id="count" class="badge">0 resultados</span>
+      </div>
+
+      <div class="sep"></div>
 
       <div id="rows"></div>
 
@@ -169,8 +176,9 @@ a:hover,.btn:hover{transform:translateY(-1px)}
             <div class="help" style="font-size:12px;color:#a5abb3">Armazenado no bucket <b>services</b></div>
           </div>
         </div>
-         </div>
-          <div class="full">
+      </div>
+
+      <div class="full">
         <label>Descrição</label>
         <textarea id="f-desc" placeholder="Detalhes do serviço…"></textarea>
       </div>
@@ -181,12 +189,12 @@ a:hover,.btn:hover{transform:translateY(-1px)}
       <button id="btnSave" class="btn btn-primary">Salvar</button>
     </div>
   </div>
-  </div>
+</div>
 
 <div id="toast" class="toast"></div>
 
 <script>
-  /* ---------- N8N (CRUD) ---------- */
+/* ---------- N8N (CRUD) ---------- */
 const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/services';
 const PUBLIC_API_KEY = '78c212eafa48e2528d81c5937af5c8ba0825d9895ebe9da4';
 
@@ -195,10 +203,10 @@ const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 const STORAGE_BUCKET = 'services';
 
-  /* sessão (mesma lógica do profile) */
+/* sessão (mesma lógica do profile) */
 function getSbSession() {
   const custom = localStorage.getItem('sb.session');
-   if (custom) {
+  if (custom) {
     try {
       const s = JSON.parse(custom);
       return { access_token: s.access_token||s.token||'', user_id: s.user_id||s.user?.id||'', user: s.user||null };
@@ -206,7 +214,7 @@ function getSbSession() {
   }
   const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
   const raw = localStorage.getItem(`sb-${ref}-auth-token`);
-   if (raw) {
+  if (raw) {
     try {
       const p = JSON.parse(raw); const sess = p?.currentSession || p;
       return { access_token: sess?.access_token||'', user_id: sess?.user?.id||'', user: sess?.user||null };
@@ -215,7 +223,8 @@ function getSbSession() {
   return null;
 }
 const sb = getSbSession();
-  /* ---------- helpers UI ---------- */
+
+/* ---------- helpers UI ---------- */
 const els = {
   q: () => document.getElementById('q'),
   activeFilter: () => document.getElementById('activeFilter'),
@@ -248,7 +257,8 @@ function toast(msg, ok=true){
   setTimeout(()=> t.style.display='none', 2400);
 }
 const fmtBRL = cents => (Number(cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  let page = 1;
+
+let page = 1;
 const PAGE_SIZE = 10;
 let allRows = [];
 let editingId = null;
@@ -274,7 +284,7 @@ async function fetchServicesFromApi(){
     const t = await res.text().catch(()=> '');
     throw new Error(`GET ${res.status}: ${t||'Falha ao listar serviços'}`);
   }
-   const body = await res.json().catch(()=> null);
+  const body = await res.json().catch(()=> null);
 
   let items = [];
   if(Array.isArray(body)) items = body.map(x=>x?.json ?? x);
@@ -294,7 +304,7 @@ async function createService(payload){
   if(!res.ok){ const t = await res.text().catch(()=> ''); throw new Error(`POST ${res.status}: ${t}`); }
   return res.json(); // deve retornar registro com id
 }
-  async function updateService(id, payload){
+async function updateService(id, payload){
   const res = await fetch(N8N_BASE_URL, {
     method:'PATCH',
     headers:{ 'Content-Type':'application/json', 'x-api-key': PUBLIC_API_KEY },
@@ -313,26 +323,26 @@ async function deleteService(id){
   return res.json();
 }
 
-  /* ---------- Storage upload ---------- */
+/* ---------- Storage upload ---------- */
 function fileExt(name){ const e=(name||'').split('.').pop()?.toLowerCase()||'jpg'; return ({jpeg:'jpg'}[e]||e); }
 async function uploadImageToStorage(serviceId, file){
-
-    if(!sb?.access_token){ throw new Error('Sem sessão do Supabase para subir imagem'); }
+  if(!sb?.access_token){ throw new Error('Sem sessão do Supabase para subir imagem'); }
   const path = `${serviceId}/${Date.now()}.${fileExt(file.name)}`;
   const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodeURIComponent(path)}`,{
     method:'POST',
     headers:{
       apikey: SUPABASE_ANON_KEY,
-        Authorization:`Bearer ${sb.access_token}`,
+      Authorization:`Bearer ${sb.access_token}`,
       'x-upsert':'true',
       'Content-Type': file.type || 'application/octet-stream'
     },
-      body:file
+    body:file
   });
-   if(!res.ok){ throw new Error(await res.text()); }
+  if(!res.ok){ throw new Error(await res.text()); }
   return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${encodeURIComponent(path)}`;
 }
-  /* ---------- render ---------- */
+
+/* ---------- render ---------- */
 function renderRows(){
   const wrap = els.rows();
   const total = allRows.length;
@@ -342,7 +352,8 @@ function renderRows(){
     els.pageInfo().textContent = `Página 1 / 1`;
     return;
   }
-   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   if(page > pages) page = pages;
   const from = (page-1)*PAGE_SIZE;
   const slice = allRows.slice(from, from + PAGE_SIZE);
@@ -414,7 +425,7 @@ window.onEdit = function(id){
 window.onDelete = async function(id){
   if(!confirm('Excluir este serviço?')) return;
   try{
-      await deleteService(id);
+    await deleteService(id);
     toast('Serviço excluído');
     await reload();
   }catch(e){ console.error(e); toast('Erro ao excluir', false); }
