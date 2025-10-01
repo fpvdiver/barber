@@ -3,332 +3,274 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Profissional • Mineiro Barbershop</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Perfil do Profissional • Mineiro Barbershop</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0b0c0e; --panel:#121316; --panel2:#15171a; --line:#212329;
-  --text:#f5f6f9; --muted:#b0b3bd; --gold:#d3a85b; --gold2:#b88f49; --accent:#efb366;
+  --text:#f5f6f9; --muted:#b3b7c2; --gold:#d3a85b; --gold2:#b88f49;
   --ok:#7ef7a0; --warn:#ffd166; --danger:#ff5d62;
+  --shadow:0 22px 45px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.app{min-height:100svh;display:grid;grid-template-rows:auto 1fr auto}
+body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:var(--text);font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.screen{
+  min-height:100svh; display:grid; place-items:center; padding:16px;
+}
+.phone{
+  width:min(420px,100%); background:linear-gradient(180deg,#0e1013 0%,#0c0d10 100%);
+  border:1px solid #1f2229; border-radius:28px; box-shadow:var(--shadow);
+  padding:16px; position:relative;
+}
+.header{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
+}
+.header .title{
+  display:grid; gap:2px; text-align:center; flex:1;
+}
+.h-btn{
+  width:38px;height:38px;border-radius:12px;border:1px solid #272a32;background:#121419;display:grid;place-items:center;color:#dfe2e9;font-weight:800;cursor:pointer
+}
+.brand-pill{
+  position:absolute; top:16px; right:-10px; background:linear-gradient(180deg,#1a1d23,#15181d);
+  color:#fff; border:1px solid #2a2e36; border-radius:12px 0 0 12px; padding:10px 8px; writing-mode:vertical-rl; text-orientation:mixed; font:700 11px/1 Poppins;
+}
 
-/* header */
-.header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:14px 16px;background:#0d0e11;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-logo{width:36px;height:36px;border-radius:10px;border:1px solid #2a2d34;display:grid;place-items:center;background:#101114}
-.brand strong{font:800 18px/1 Poppins}
+/* profile head */
+.card{
+  background:linear-gradient(180deg,#13161a,#101215); border:1px solid #23262e; border-radius:18px; padding:14px; box-shadow:0 14px 30px rgba(0,0,0,.25);
+}
+.profile{
+  display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center;
+}
+.p-row{display:flex;gap:10px;align-items:center}
+.avatar{
+  width:64px;height:64px;border-radius:14px;overflow:hidden;border:1px solid #2a2e36;background:#0f1114;display:grid;place-items:center;font:900 18px/1 Poppins;color:#cbd1dc
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.name{font:800 20px/1.2 Poppins}
+.role{color:var(--muted);font:600 12px}
+.rating{display:flex;gap:6px;align-items:center;margin-top:8px}
+.stars{color:#ffd166; letter-spacing:.5px}
+.score{font:800 14px}
+.reviews{color:var(--muted);font:600 12px}
 
-/* containers/cards */
-.container{padding:12px 12px 88px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.card + .card{margin-top:12px}
-.hscroll{display:flex;gap:10px;overflow:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
-.hscroll > *{scroll-snap-align:start}
+/* actions */
+.actions{display:flex; gap:10px; margin-top:12px}
+.a-btn{
+  flex:1; height:44px; border-radius:14px; border:1px solid #2a2e36; background:#15181d; display:grid; place-items:center; color:#e7e9ee; font:700 13px
+}
+.a-btn.whats{background:#1f2a22;border-color:#335a3f;color:#a4f2bd}
+.a-btn.call{background:#171c17;border-color:#2e4a30;color:#b7e2be}
+.a-btn.msg{background:#181a1f;border-color:#2a2f39}
 
-/* hero */
-.hero{display:grid;grid-template-columns:1fr auto;gap:10px;background:linear-gradient(180deg,#15171a,#121316);border-radius:18px;border:1px solid var(--line);padding:12px;min-height:130px;position:relative}
-.hero .txt h1{margin:0;font:900 22px/1.1 Poppins}
-.hero .txt small{color:var(--muted)}
-.hero .cta{align-self:end}
-.btn{height:38px;padding:0 14px;border-radius:10px;border:1px solid #2a2d34;background:#1a1c21;color:#e7e9ee;font:600 13px/1 Poppins}
-.btn-primary{background:linear-gradient(180deg,var(--gold),var(--gold2));border-color:#7b6335;color:#111}
+/* metrics grid (1:1 do mock) */
+.grid4{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
+}
+.metric{
+  background:linear-gradient(180deg,#14171b,#111316); border:1px solid #23262e; border-radius:18px; padding:14px; text-align:center;
+}
+.m-ico{
+  width:42px;height:42px;border-radius:12px; display:grid;place-items:center; margin:0 auto 8px;
+  background:#101216;border:1px solid #2a2e34; color:#e9ecf2; font:800 16px/1 Poppins;
+}
+.metric b{font:900 18px/1.1 Poppins}
+.metric small{display:block;margin-top:4px;color:#aeb2bb;font:600 12px/1}
 
-/* chips */
-.chips .chip{display:grid;place-items:center;min-width:78px;height:74px;border:1px solid var(--line);background:var(--panel2);border-radius:14px;color:#d7d9e0}
-.chip img{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);object-fit:cover;margin-bottom:4px}
+/* CTA bottom */
+.cta{
+  position:sticky; bottom:0; margin-top:14px; padding-top:10px;
+}
+.btn{
+  width:100%; height:50px; border-radius:14px; border:1px solid #7b6335; cursor:pointer;
+  background:linear-gradient(180deg,var(--gold),var(--gold2)); color:#111; font:900 14px/1 Poppins;
+}
 
-/* profile header */
-.profile{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
-.pavatar{width:72px;height:72px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#101114;display:grid;place-items:center}
-.pavatar img{width:100%;height:100%;object-fit:cover}
-.pname{font:700 18px/1.2 Poppins}
-.pmeta{color:var(--muted);font:600 12px/1}
-.rating{display:flex;align-items:center;gap:6px}
-.rating .star{color:#ffd166}
-.badge{display:inline-grid;place-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:#101114;font:700 11px/1 Poppins}
-
-/* service list */
-.service{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px}
-.price{font:700 14px/1 Poppins}
-.meta{color:var(--muted);font:600 12px/1}
-.service .actions{display:flex;gap:8px}
-
-/* schedule weekly compact */
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.day{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:8px;text-align:center}
-.day b{display:block;font:700 12px/1 Poppins;color:#cfd2da}
-.day small{color:#9ea3ae}
-
-/* reviews */
-.review{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px}
-.reviewer{display:flex;align-items:center;gap:8px}
-.reviewer .av{width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid var(--line);display:grid;place-items:center;background:#101114;color:#cbd5e1;font:700 11px/1}
-.reviewer img{width:100%;height:100%;object-fit:cover}
-.rev-stars{margin-left:auto;color:#ffd166}
-.rev-text{margin-top:6px}
-
-/* bottom tab */
-.tabbar{position:fixed;inset:auto 0 0 0;height:66px;background:#0d0e11;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:10}
-.tabbar a{display:grid;place-items:center;color:#c7cad4;text-decoration:none;font:600 11px/1 Poppins}
-.tabbar a.active{color:var(--gold)}
-.tabbar .dot{width:6px;height:6px;border-radius:999px;background:var(--gold);margin-top:3px}
+/* soft labels */
+.soft{
+  color:#86e0a7; font:700 11px/1; letter-spacing:.02em; margin-top:2px
+}
+.subtle{color:#9fa4ad;font:600 12px}
 
 /* helpers */
-.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.muted{color:var(--muted)}
-.empty{opacity:.8}
+.center{text-align:center}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="screen">
+  <div class="phone">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="brand">
-      <div class="brand-logo"><img src="https://dummyimage.com/36x36/111/fff&text=MB" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></div>
-      <strong id="brandName">Mineiro Barbershop</strong>
+    <div class="header">
+      <div class="h-btn" onclick="history.back()">‹</div>
+      <div class="title">
+        <div style="font:800 14px/1 Poppins">Perfil do Profissional</div>
+        <div class="soft" id="slotInfo">Hoje • 08:00–20:00</div>
+      </div>
+      <div class="h-btn">⋯</div>
+      <div class="brand-pill">Mineiro</div>
     </div>
-  </header>
 
-  <!-- MAIN -->
-  <main class="container" id="root">
-    <!-- hero -->
-    <section class="hero card" id="hero">
-      <div class="txt">
-        <h1 id="heroTitle">Encontre seu novo visual</h1>
-        <small>Barba • Corte • Coloração • Tratamento</small>
-      </div>
-      <div class="cta">
-        <a id="heroCTA" class="btn btn-primary">Agende</a>
-      </div>
-    </section>
-
-    <!-- chips categorias do profissional -->
-    <section class="card">
-      <div class="section-title"><b>Categorias</b><a href="#" class="muted" id="seeAll">Ver todos</a></div>
-      <div class="hscroll chips" id="chips"></div>
-    </section>
-
-    <!-- bloco do perfil -->
-    <section class="card" id="proCard">
+    <div class="card">
       <div class="profile">
-        <div class="pavatar" id="proAvatar">—</div>
         <div>
-          <div class="pname" id="proName">Profissional</div>
-          <div class="pmeta" id="proBranch">Unidade —</div>
-          <div class="rating"><span class="star">★</span><b id="proScore">0,0</b><span class="pmeta" id="proVotes">(0)</span></div>
+          <div class="p-row">
+            <div class="avatar" id="proAvatar">MB</div>
+            <div>
+              <div class="name" id="proName">—</div>
+              <div class="role" id="proRole">Barbeiro(a)</div>
+            </div>
+          </div>
+          <div class="rating">
+            <div class="stars" id="stars">★★★★★</div>
+            <div class="score" id="score">0,0</div>
+            <div class="reviews" id="reviewsCount">0 avaliações</div>
+          </div>
         </div>
-        <a id="btnWhats" class="btn">WhatsApp</a>
+        <div class="avatar" style="width:52px;height:52px;border-radius:999px" id="badgePic">✂️</div>
       </div>
-      <p class="muted" id="proBio" style="margin:8px 0 0">—</p>
-    </section>
 
-    <!-- serviços -->
-    <section class="card">
-      <div class="section-title"><b>Serviços</b><span class="badge" id="svcCount">0</span></div>
-      <div id="services"></div>
-    </section>
+      <div class="actions">
+        <a class="a-btn whats" id="btnWhats">WhatsApp</a>
+        <a class="a-btn call" id="btnCall">Ligar</a>
+        <a class="a-btn msg"  id="btnMsg">Mensagem</a>
+      </div>
 
-    <!-- agenda -->
-    <section class="card">
-      <div class="section-title"><b>Agenda semanal</b></div>
-      <div class="week" id="week"></div>
-    </section>
+      <div class="grid4">
+        <div class="metric">
+          <div class="m-ico">👥</div>
+          <b id="mClients">—</b>
+          <small>Clientes atendidos</small>
+        </div>
+        <div class="metric">
+          <div class="m-ico">⏳</div>
+          <b id="mYears">—</b>
+          <small>Anos de experiência</small>
+        </div>
+        <div class="metric">
+          <div class="m-ico">💈</div>
+          <b id="mServices">—</b>
+          <small>Serviços realizados</small>
+        </div>
+        <div class="metric">
+          <div class="m-ico">🏅</div>
+          <b id="mCerts">—</b>
+          <small>Certificados</small>
+        </div>
+      </div>
+    </div>
 
-    <!-- avaliações -->
-    <section class="card">
-      <div class="section-title"><b>Avaliações</b></div>
-      <div id="reviews"></div>
-    </section>
-
-    <!-- quando não vier id, mostra grade -->
-    <section class="card" id="chooser" style="display:none">
-      <div class="section-title"><b>Profissionais</b></div>
-      <div id="prosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"></div>
-    </section>
-  </main>
-
-  <!-- TAB BAR -->
-  <nav class="tabbar">
-    <a href="#" class="active">Início<div class="dot"></div></a>
-    <a href="#">Explorar</a>
-    <a href="#">Minhas reservas</a>
-    <a href="#">Perfil</a>
-  </nav>
+    <div class="cta">
+      <a class="btn" id="btnBook">Agendar horário</a>
+    </div>
+  </div>
 </div>
 
 <script>
-/* ===== Config Supabase ===== */
+/* ===== Supabase (REST) ===== */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
 function getSbSession(){
-  const custom = localStorage.getItem('sb.session');
-  if (custom) { try{ const s = JSON.parse(custom); return { access_token:s.access_token||s.token||'', user_id:s.user_id||s.user?.id||'', user:s.user||null }; }catch{} }
   const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+  const custom = localStorage.getItem('sb.session');
+  if (custom){ try{ const s=JSON.parse(custom); return { token:s.access_token||s.token||SUPABASE_ANON_KEY }; }catch{} }
   const raw = localStorage.getItem(`sb-${ref}-auth-token`);
-  if (raw) { try{ const p = JSON.parse(raw); const sess = p?.currentSession||p; return { access_token:sess?.access_token||'', user_id:sess?.user?.id||'', user:sess?.user||null }; }catch{} }
-  return null;
+  if (raw){ try{ const p=JSON.parse(raw); const sess=p?.currentSession||p; return { token:sess?.access_token||SUPABASE_ANON_KEY }; }catch{} }
+  return { token: SUPABASE_ANON_KEY };
 }
-const fmtBRL = v => (Number(v||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const initials = (s='') => { s=String(s||'').trim(); if(!s) return '?'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); };
-
-async function sGet(path,bearer){
-  const res = await fetch(`${SUPABASE_URL}${path}`,{ headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${bearer||SUPABASE_ANON_KEY}` }});
+async function sGet(path){
+  const { token } = getSbSession();
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${token}` }});
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
-/* ===== Params ===== */
 const params = new URLSearchParams(location.search);
 const professionalId = params.get('id');
 
-/* ===== Hydrate brand ===== */
-(async()=>{
-  try{
-    const b = await sGet(`/rest/v1/branches?select=name&is_active=eq.true&limit=1`);
-    document.getElementById('brandName').textContent = b?.[0]?.name || 'Mineiro Barbershop';
-  }catch{}
-})();
+const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
+const initials = (s='') => { s = String(s||'').trim(); if(!s) return 'MB'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); };
+function paintStars(x=0){ const n=Math.round(x); return '★★★★★☆☆☆☆☆'.slice(5-n,10-n); }
 
-/* ===== Chips (categorias) helper ===== */
-function renderChips(list){
-  const wrap = document.getElementById('chips');
-  if(!list.length){ wrap.innerHTML = `<div class="muted">Sem categorias</div>`; return; }
-  wrap.innerHTML = list.slice(0,10).map(c=>`
-    <div class="chip">
-      <img src="${c.image_url || 'https://dummyimage.com/84x84/111/fff&text=+'}" alt="">
-      <div style="font:600 12px/1 Poppins">${c.name}</div>
-    </div>
-  `).join('');
-}
-
-/* ===== Profile Page ===== */
-async function renderProfile(id){
-  const sb = getSbSession();
-
-  const [pro] = await sGet(
-    `/rest/v1/professionals?id=eq.${id}&select=id,full_name,bio,phone,branch_id,rating_avg,rating_count,profile_id,`+
-    encodeURIComponent('profiles!inner(avatar_url)'), sb?.access_token);
-
-  if(!pro){ document.getElementById('root').innerHTML = `<section class="card empty">Profissional não encontrado.</section>`; return; }
-
-  const branch = pro.branch_id ? (await sGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`))?.[0]?.name : null;
-
-  // categorias a partir dos serviços dele (category -> service_categories)
-  const svcLinks = await sGet(`/rest/v1/service_professionals?professional_id=eq.${id}&select=service:services(id,name,slug,category:service_categories(name,slug))`);
-  const categories = [];
-  svcLinks.forEach(s=>{ if(s.service?.category?.name){ categories.push({ name:s.service.category.name }); }});
-  const uniqCats = Array.from(new Map(categories.map(c=>[c.name,c])).values());
-  renderChips(uniqCats);
-
-  // preencher cabeçalho do profissional
-  const av = document.getElementById('proAvatar');
-  if (pro.profiles?.avatar_url) av.innerHTML = `<img src="${pro.profiles.avatar_url}" alt="${pro.full_name}">`;
-  else av.innerHTML = `<div style="font:900 20px/1 Poppins;color:#cbd5e1">${initials(pro.full_name)}</div>`;
-  document.getElementById('proName').textContent = pro.full_name;
-  document.getElementById('proBranch').textContent = branch ? `Unidade ${branch}` : '—';
-  document.getElementById('proScore').textContent = (pro.rating_avg||0).toFixed(1);
-  document.getElementById('proVotes').textContent = `(${pro.rating_count||0})`;
-  document.getElementById('proBio').textContent = pro.bio || '—';
-  const whats = document.getElementById('btnWhats');
-  if (pro.phone) whats.href = `https://wa.me/${pro.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Quero agendar um horário.')}`;
-  else whats.style.display='none';
-
-  // hero CTA → booking dessa pessoa
-  document.getElementById('heroCTA').href = `booking.html?professional_id=${id}`;
-
-  // serviços com preço/duração (override do vínculo se existir)
-  const sp = await sGet(`/rest/v1/service_professionals?professional_id=eq.${id}&select=price_cents,duration_min,service:services(id,name,price_cents,duration_min,is_active)&order=service(name).asc`);
-  const services = sp.filter(x=>x.service?.is_active!==false).map(x=>({
-    id:x.service.id,
-    name:x.service.name,
-    price_cents: x.price_cents ?? x.service.price_cents,
-    duration_min: x.duration_min ?? x.service.duration_min
-  }));
-  document.getElementById('svcCount').textContent = services.length;
-  const svcWrap = document.getElementById('services');
-  svcWrap.innerHTML = services.length ? services.map(s=>`
-    <div class="service">
-      <div>
-        <div style="font:700 14px/1.2 Poppins">${s.name}</div>
-        <div class="meta">${s.duration_min||'-'} min</div>
-      </div>
-      <div class="actions">
-        <div class="price">${fmtBRL(s.price_cents||0)}</div>
-        <a class="btn btn-primary" href="booking.html?professional_id=${id}&service_id=${s.id}">Agendar</a>
-      </div>
-    </div>
-  `).join('') : `<div class="empty">Nenhum serviço vinculado.</div>`;
-
-  // agenda semanal compacta
-  const hours = await sGet(`/rest/v1/working_hours?professional_id=eq.${id}&select=weekday,start_time,end_time&order=weekday.asc`);
-  const by = new Map(); hours.forEach(h=>{ (by.get(h.weekday)||by.set(h.weekday,[]).get(h.weekday)).push(h); });
-  const wk = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  document.getElementById('week').innerHTML = Array.from({length:7}).map((_,i)=>{
-    const arr = by.get(i)||[];
-    const txt = arr.length ? arr.map(h=>`${h.start_time?.slice(0,5)}–${h.end_time?.slice(0,5)}`).join('<br>') : '<small>Fechado</small>';
-    return `<div class="day"><b>${wk[i]}</b><small>${txt}</small></div>`;
-  }).join('');
-
-  // avaliações recentes
-  const revs = await sGet(`/rest/v1/reviews?professional_id=eq.${id}&select=rating,comment,created_at,customer:profiles(full_name,avatar_url)&order=created_at.desc&limit=5`);
-  document.getElementById('reviews').innerHTML = revs.length ? revs.map(r=>{
-    const star = '★'.repeat(r.rating) + '☆'.repeat(5-r.rating);
-    const avc = r.customer?.avatar_url ? `<img src="${r.customer.avatar_url}" alt="">` : initials(r.customer?.full_name||'');
-    const when = new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-    return `
-      <div class="review">
-        <div class="reviewer">
-          <div class="av">${r.customer?.avatar_url?avc:`${avc}`}</div>
-          <div><b>${r.customer?.full_name||'Cliente'}</b><div class="muted">${when}</div></div>
-          <div class="rev-stars">${star}</div>
-        </div>
-        <div class="rev-text">${r.comment||'<span class="muted">Sem comentário.</span>'}</div>
-      </div>
-    `;
-  }).join('') : `<div class="empty">Sem avaliações.</div>`;
-}
-
-/* ===== Chooser (sem id) ===== */
-async function renderChooser(){
-  document.getElementById('chooser').style.display='block';
-  const pros = await sGet(`/rest/v1/professionals?is_active=eq.true&select=id,full_name,rating_avg,rating_count,${encodeURIComponent('profiles!inner(avatar_url)')}`);
-  const wrap = document.getElementById('prosGrid');
-  wrap.innerHTML = pros.map(p=>{
-    const img = p.profiles?.avatar_url
-      ? `<img src="${p.profiles.avatar_url}" style="width:100%;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">`
-      : `<div style="width:100%;height:110px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;background:#101114;color:#cbd5e1;font:800 20px/1 Poppins">${initials(p.full_name)}</div>`;
-    return `
-      <a href="profiles.html?id=${p.id}" class="card" style="display:block;text-decoration:none;color:inherit">
-        ${img}
-        <div style="margin-top:6px"><b>${p.full_name}</b><br><span class="muted">${(p.rating_avg||0).toFixed(1)} ★ (${p.rating_count||0})</span></div>
-      </a>
-    `;
-  }).join('');
-}
-
-/* ===== Boot ===== */
-(async function boot(){
-  // chips placeholder até carregar (melhor UX visual)
-  document.getElementById('chips').innerHTML = `<div class="chip"><div style="width:42px;height:42px;border-radius:10px;background:#101114;border:1px solid var(--line)"></div><div style="height:12px;width:44px;background:#14161a;border-radius:6px;margin-top:6px"></div></div>`.repeat(4);
-
-  if (professionalId) {
-    await renderProfile(professionalId);
-  } else {
-    // sem id: comportamento tipo "Explorar"
-    document.getElementById('proCard').style.display='none';
-    document.getElementById('services').innerHTML='';
-    document.getElementById('week').innerHTML='';
-    document.getElementById('reviews').innerHTML='';
-    document.getElementById('svcCount').textContent='0';
-    await renderChooser();
+async function load(){
+  if(!professionalId){
+    setText('proName','Profissional'); return;
   }
-})();
+
+  // profissional + avatar
+  const [pro] = await sGet(`/rest/v1/professionals?id=eq.${professionalId}&select=id,full_name,phone,bio,branch_id,rating_avg,rating_count,experience_years,cert_count,${encodeURIComponent('profiles!inner(avatar_url)')}`);
+  if(!pro){ setText('proName','Profissional não encontrado'); return; }
+
+  // branch (nome)
+  let branch = '—';
+  if (pro.branch_id){
+    const b = await sGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
+    branch = b?.[0]?.name || '—';
+  }
+
+  // métricas de serviços vinculados
+  const svc = await sGet(`/rest/v1/service_professionals?professional_id=eq.${professionalId}&select=service(id)&limit=1000`);
+  const servicesCount = (svc||[]).length;
+
+  // clientes atendidos (appointments do pro com status done/completed)
+  let clients = '—';
+  try{
+    const done = await sGet(`/rest/v1/appointments?select=id&professional_id=eq.${professionalId}&status=in.(completed,done)&limit=1`);
+    // Se RLS não permitir 'in', usa duas chamadas e soma. Ou conte no seu RPC.
+    const all = await sGet(`/rest/v1/appointments?select=count&professional_id=eq.${professionalId}&status=in.(completed,done)`);
+    clients = Array.isArray(done) ? (all?.length || done.length) : '—';
+  }catch{ clients = '—'; }
+
+  // anos de experiência
+  let years = Number(pro.experience_years ?? 0);
+  if(!years){
+    try{
+      const oldest = await sGet(`/rest/v1/working_hours?professional_id=eq.${professionalId}&select=created_at&order=created_at.asc&limit=1`);
+      if (oldest?.[0]?.created_at){
+        const d1 = new Date(oldest[0].created_at); const d2 = new Date();
+        years = Math.max(1, Math.floor((d2-d1)/(365*24*3600*1000)));
+      } else { years = 1; }
+    }catch{ years = 1; }
+  }
+
+  const certs = Number(pro.cert_count ?? 0);
+
+  // pintar UI
+  setText('proName', pro.full_name || '—');
+  setText('proRole', 'Barbeiro(a)');
+  setText('score', (pro.rating_avg||0).toFixed(1));
+  setText('reviewsCount', `${pro.rating_count||0} avaliações`);
+  document.getElementById('stars').textContent = paintStars(Number(pro.rating_avg||0));
+
+  const av = document.getElementById('proAvatar');
+  if (pro.profiles?.avatar_url){
+    av.innerHTML = `<img src="${pro.profiles.avatar_url}" alt="${pro.full_name}">`;
+  }else{
+    av.textContent = initials(pro.full_name);
+  }
+  document.getElementById('badgePic').textContent = '💈';
+
+  setText('mClients', clients=== '—' ? '—' : `${clients}+`);
+  setText('mYears', `${years} Years`.replace('Years','Anos'));
+  setText('mServices', `${servicesCount}+`);
+  setText('mCerts', certs ? `${certs}+` : '0');
+
+  // ações
+  const tel = (pro.phone||'').replace(/\D/g,'');
+  const whats = document.getElementById('btnWhats');
+  const call  = document.getElementById('btnCall');
+  const msg   = document.getElementById('btnMsg');
+  if (tel){
+    whats.href = `https://wa.me/${tel}?text=${encodeURIComponent('Olá! Quero agendar um horário.')}`;
+    call.href  = `tel:${tel}`;
+    msg.href   = `sms:${tel}`;
+  } else { whats.remove(); call.remove(); msg.remove(); }
+
+  // CTA
+  document.getElementById('btnBook').href = `booking.html?professional_id=${professionalId}`;
+}
+load().catch(console.error);
 </script>
 </body>
 </html>
