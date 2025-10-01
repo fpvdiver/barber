@@ -239,9 +239,10 @@ canvas{width:100%;height:100%}
     </div>
 
     <div class="uinfo">
-      <span class="name">Cláudia Alves</span>
-      <img class="avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&q=80" alt="Usuária">
-    </div>
+  <span class="name" id="userName">—</span>
+  <span class="uinfo tag">Admin</span>
+  <img class="avatar" id="userAvatar" src="" alt="Usuário" />
+</div>
   </header>
 
   <!-- MAIN -->
@@ -634,6 +635,76 @@ async function init(){
   });
 }
 document.addEventListener('DOMContentLoaded', init);
+
+  /* ===== Header data from DB ===== */
+const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+
+function initialsOf(s=''){ s=String(s||'').trim(); if(!s) return '?'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); }
+
+async function supaGet(path, { bearer } = {}) {
+  const headers = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${bearer || SUPABASE_ANON_KEY}`,
+  };
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function hydrateHeaderFromDB() {
+  try {
+    const sb = getSbSession?.();
+    const userId = sb?.user_id || sb?.user?.id || null;
+
+    // 1) Perfil do usuário
+    if (userId) {
+      const [profile] = await supaGet(`/rest/v1/profiles?id=eq.${userId}&select=full_name,avatar_url,role`, { bearer: sb.access_token });
+      const name = profile?.full_name || 'Usuário';
+      const avatarUrl = profile?.avatar_url || '';
+
+      const elName = document.getElementById('userName');
+      const elAvatar = document.getElementById('userAvatar');
+      if (elName) elName.textContent = name;
+
+      if (elAvatar) {
+        if (avatarUrl) {
+          elAvatar.src = avatarUrl;
+          elAvatar.alt = name;
+          elAvatar.onerror = () => {
+            elAvatar.removeAttribute('src');
+            elAvatar.replaceWith(Object.assign(document.createElement('div'), {
+              className: 'avatar',
+              textContent: initialsOf(name),
+              style: 'width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#1b1c20;border:1px solid rgba(255,255,255,.12);font:700 12px/1 Poppins'
+            }));
+          };
+        } else {
+          elAvatar.removeAttribute('src');
+          elAvatar.replaceWith(Object.assign(document.createElement('div'), {
+            className: 'avatar',
+            textContent: initialsOf(name),
+            style: 'width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#1b1c20;border:1px solid rgba(255,255,255,.12);font:700 12px/1 Poppins'
+          }));
+        }
+      }
+    }
+
+    // 2) Nome da barbearia (primeira branch ativa)
+    const elBrand = document.getElementById('brandName');
+    if (elBrand) {
+      const branches = await supaGet(`/rest/v1/branches?is_active=eq.true&select=name&limit=1`);
+      const brand = branches?.[0]?.name || 'Mineiro Barbershop';
+      elBrand.textContent = brand;
+    }
+  } catch (e) {
+    console.warn('hydrateHeaderFromDB:', e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', hydrateHeaderFromDB);
+
 </script>
+  
 </body>
 </html>
