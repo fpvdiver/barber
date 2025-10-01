@@ -182,7 +182,7 @@ function getSbSession(){
 }
 async function sGet(path){
   const { token } = getSbSession();
-  const res = await fetch(`${SUPABASE_URL}${path}`, { headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${token}` }});
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers:{ apikey:SUPABASE_ANON_KEY, Authorization:`Bearer ${SUPABASE_ANON_KEY}` }});
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
