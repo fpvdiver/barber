@@ -73,6 +73,10 @@ a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s}
 }
 .client-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .client-name{font:600 14px/1.1 Poppins;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* preview circular no modal */
+.img-preview{width:92px;height:92px;border-radius:999px;border:1px solid var(--line);overflow:hidden;background:#0f1013;display:grid;place-items:center;color:#cbd5e1;font:600 12px}
+.img-preview img{width:100%;height:100%;object-fit:cover}
 </style>
 </head>
 <body>
@@ -221,6 +225,18 @@ a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s}
         <label>auth_user_id</label>
         <input id="f-auth-id" type="text" placeholder="—" disabled />
       </div>
+
+      <!-- Avatar -->
+      <div class="full">
+        <label>Foto (avatar)</label>
+        <div class="img-picker" style="display:flex;gap:12px;align-items:center">
+          <div class="img-preview" id="cliImgPrev">Prévia</div>
+          <div>
+            <input type="file" id="cliImgFile" accept="image/*">
+            <div class="help" style="font-size:12px;color:#a5abb3">Armazenado no bucket <b>clients</b></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="sep"></div>
     <div class="toolbar" style="justify-content:flex-end">
@@ -237,7 +253,33 @@ a,.btn{transition:transform .12s ease,border-color .2s,background .2s,color .2s}
 const N8N_BASE_URL = 'https://primary-jow9-barber.up.railway.app/webhook/clients';
 const PUBLIC_API_KEY = '78c212eafa48e2528d81c5937af5c8ba0825d9895ebe9da4'; // se exigir, mantém
 
-/* ================== UI HELPERS ================== */
+/* === Supabase Storage (upload avatar cliente) === */
+const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+const CLIENTS_BUCKET = 'clients';
+
+/* sessão (mesma lógica do profile) */
+function getSbSession() {
+  const custom = localStorage.getItem('sb.session');
+  if (custom) {
+    try {
+      const s = JSON.parse(custom);
+      return { access_token: s.access_token||s.token||'', user_id: s.user_id||s.user?.id||'', user: s.user||null };
+    } catch {}
+  }
+  const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
+  const raw = localStorage.getItem(`sb-${ref}-auth-token`);
+  if (raw) {
+    try {
+      const p = JSON.parse(raw); const sess = p?.currentSession || p;
+      return { access_token: sess?.access_token||'', user_id: sess?.user?.id||'', user: sess?.user||null };
+    } catch {}
+  }
+  return null;
+}
+const sb = getSbSession();
+
+/* helpers */
 const els = {
   q: () => document.getElementById('q'),
   activeFilter: () => document.getElementById('activeFilter'),
@@ -249,6 +291,9 @@ const els = {
   modal: () => document.getElementById('modal'),
   modalTitle: () => document.getElementById('modalTitle'),
   toast: () => document.getElementById('toast'),
+  btnSave: () => document.getElementById('btnSave'),
+  btnCancel: () => document.getElementById('btnCancel'),
+  btnNew: () => document.getElementById('btnNew'),
   // form
   fName: () => document.getElementById('f-name'),
   fPhone: () => document.getElementById('f-phone'),
@@ -256,15 +301,14 @@ const els = {
   fLast: () => document.getElementById('f-last'),
   fNotes: () => document.getElementById('f-notes'),
   fActive: () => document.getElementById('f-active'),
-  btnSave: () => document.getElementById('btnSave'),
-  btnCancel: () => document.getElementById('btnCancel'),
-  btnNew: () => document.getElementById('btnNew'),
   // acesso
   fCreateLogin: () => document.getElementById('f-create-login'),
   fSendInvite:  () => document.getElementById('f-send-invite'),
   fAuthId:      () => document.getElementById('f-auth-id'),
+  // avatar
+  cliImgFile: () => document.getElementById('cliImgFile'),
+  cliImgPrev: () => document.getElementById('cliImgPrev'),
 };
-
 function toast(msg, ok=true){
   const t = els.toast(); t.textContent = msg;
   t.style.display = 'block';
@@ -277,22 +321,38 @@ function maskPhone(v){
     .replace(/^(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d{4}).*/, '$1-$2');
 }
-
-/* ==== iniciais para fallback do avatar ==== */
 function initialsOf(nameOrEmail=''){
   const s = (nameOrEmail || '').trim();
   if(!s) return '?';
-  if(s.includes('@')) return s[0]; // email -> primeira letra
+  if(s.includes('@')) return s[0];
   const parts = s.split(/\s+/).filter(Boolean);
   if(parts.length === 1) return parts[0].slice(0,2);
   return (parts[0][0] + parts[parts.length-1][0]);
 }
-
-/* ================== STATE ================== */
 let page = 1;
 const PAGE_SIZE = 10;
 let allRows = [];
 let editingId = null;
+
+/* upload helpers */
+let cliCurrentImageBlob = null;
+function fileExt(name){ const e=(name||'').split('.').pop()?.toLowerCase()||'jpg'; return ({jpeg:'jpg'}[e]||e); }
+async function uploadClientAvatarToStorage(clientId, file){
+  if(!sb?.access_token) throw new Error('Sem sessão do Supabase para subir avatar');
+  const path = `${clientId}/${Date.now()}.${fileExt(file.name)}`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${CLIENTS_BUCKET}/${encodeURIComponent(path)}`,{
+    method:'POST',
+    headers:{
+      apikey: SUPABASE_ANON_KEY,
+      Authorization:`Bearer ${sb.access_token}`,
+      'x-upsert':'true',
+      'Content-Type': file.type || 'application/octet-stream'
+    },
+    body:file
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return `${SUPABASE_URL}/storage/v1/object/public/${CLIENTS_BUCKET}/${encodeURIComponent(path)}`;
+}
 
 /* ================== DATA LAYER (n8n) ================== */
 async function fetchClientsFromApi(){
@@ -323,10 +383,8 @@ async function fetchClientsFromApi(){
     const vals = Object.values(body);
     if(vals.length && typeof vals[0] === 'object') items = vals.map(v=>v?.json ?? v);
   }
-
   return items;
 }
-
 async function createClient(payload){
   const res = await fetch(N8N_BASE_URL, {
     method:'POST',
@@ -385,9 +443,9 @@ function renderRows(){
       const nm = r.full_name || r.name || '';
       const em = (r.email || '').toLowerCase();
       const displayName = nm || '—';
-      const avatar = r.avatar_url ? 
-        `<div class="client-avatar"><img src="${r.avatar_url}" alt="${displayName}" onerror="this.closest('.client-avatar').textContent='${initialsOf(nm||em)}';this.remove()"></div>` :
-        `<div class="client-avatar">${initialsOf(nm||em)}</div>`;
+      const avatar = r.avatar_url 
+        ? `<div class="client-avatar"><img src="${r.avatar_url}" alt="${displayName}" onerror="this.closest('.client-avatar').textContent='${initialsOf(nm||em)}';this.remove()"></div>`
+        : `<div class="client-avatar">${initialsOf(nm||em)}</div>`;
 
       return `
         <div class="tr" data-id="${r.id}">
@@ -430,6 +488,15 @@ function fillForm(row){
   els.fCreateLogin().value = 'false';
   els.fSendInvite().value  = 'false';
   if (els.fAuthId()) els.fAuthId().value = row?.auth_user_id || row?.id || '';
+
+  // avatar existente
+  cliCurrentImageBlob = null;
+  if (row?.avatar_url) {
+    els.cliImgPrev().innerHTML = `<img src="${row.avatar_url}" alt="" />`;
+  } else {
+    els.cliImgPrev().textContent = 'Prévia';
+  }
+  if (els.cliImgFile()) els.cliImgFile().value = '';
 }
 function clearForm(){ fillForm({}) }
 
@@ -465,25 +532,53 @@ function bind(){
   els.btnNew().addEventListener('click', ()=>{ clearForm(); openModal('Novo cliente'); });
   els.btnCancel().addEventListener('click', closeModal);
   els.fPhone().addEventListener('input', e=> e.target.value = maskPhone(e.target.value));
+
+  // preview avatar
+  els.cliImgFile().addEventListener('change', (e)=>{
+    const f = e.target.files?.[0];
+    if(!f){ cliCurrentImageBlob=null; els.cliImgPrev().textContent='Prévia'; return; }
+    cliCurrentImageBlob = f;
+    const url = URL.createObjectURL(f);
+    els.cliImgPrev().innerHTML = `<img src="${url}" alt="" />`;
+  });
+
+  // salvar
   els.btnSave().addEventListener('click', async ()=>{
     const payload = {
-      // profile
       full_name: els.fName().value.trim(),
-      name:      els.fName().value.trim(), // compat
+      name:      els.fName().value.trim(),
       phone:     els.fPhone().value.trim(),
       email:     (els.fEmail().value || '').trim().toLowerCase() || null,
       last_visit_at: els.fLast().value ? new Date(els.fLast().value).toISOString() : null,
       notes:     els.fNotes().value.trim() || null,
       is_active: els.fActive().value === 'true',
-      // auth flags
       create_login: els.fCreateLogin().value === 'true',
       send_invite:  els.fSendInvite().value === 'true'
     };
     if(!payload.full_name){ toast('Informe o nome', false); return; }
 
     try{
-      if(editingId){ await updateClient(editingId, payload); toast('Cliente atualizado'); }
-      else{ await createClient(payload); toast('Cliente criado'); }
+      if(editingId){
+        await updateClient(editingId, payload);
+
+        // se trocou a foto, upload e PATCH
+        if(cliCurrentImageBlob){
+          const publicUrl = await uploadClientAvatarToStorage(editingId, cliCurrentImageBlob);
+          await updateClient(editingId, { avatar_url: publicUrl });
+        }
+        toast('Cliente atualizado');
+      } else {
+        const created = await createClient(payload);
+        const newId = created?.id || created?.data?.id || created?.json?.id;
+        if(!newId) throw new Error('Falha ao obter ID do cliente recém-criado');
+
+        if(cliCurrentImageBlob){
+          const publicUrl = await uploadClientAvatarToStorage(newId, cliCurrentImageBlob);
+          await updateClient(newId, { avatar_url: publicUrl });
+        }
+        toast('Cliente criado');
+      }
+
       closeModal();
       await reload();
     }catch(e){ console.error(e); toast('Erro ao salvar', false); }
