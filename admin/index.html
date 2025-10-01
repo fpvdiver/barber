@@ -18,6 +18,38 @@
 body{margin:0;background:#0b0c0e;color:var(--text);font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 body.body--no-scroll{overflow:hidden}
 
+  /* permite rolar a sidebar inteira quando o conteúdo passa da viewport */
+.sidebar{
+  height: 100svh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* em layouts flex, sem isso o filho não pode encolher p/ habilitar scroll */
+.app, .sidebar, .main { min-height: 0; }
+
+/* dá um respiro no fim para não “cortar” o último item */
+.sidebar::after{
+  content:"";
+  display:block;
+  height: 16px;
+}
+
+/* mobile: quando vira barra fixa, ainda precisa permitir scroll vertical do menu longo */
+@media (max-width:720px){
+  .sidebar{
+    position: fixed;
+    inset: auto 0 0 0;
+    height: auto;
+    max-height: 70vh;        /* limita a abertura e ativa rolagem */
+    overflow: auto;
+    z-index: 99;
+  }
+  body{ padding-bottom: 86px; }
+}
+
+
 /* ---------- Layout base (desktop/tablet) ---------- */
 .app{min-height:100svh;display:grid;grid-template-columns:280px 1fr;grid-template-rows:auto 1fr;grid-template-areas:"sidebar header" "sidebar main";background:var(--bg)}
 .sidebar{grid-area:sidebar;background:linear-gradient(180deg,#0f1012,#0e0f11);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100svh;display:flex;flex-direction:column;gap:14px;transition:width .2s ease}
