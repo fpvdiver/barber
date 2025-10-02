@@ -116,7 +116,7 @@
 </div>
 
 <script>
-/* ===== Config Supabase (RPC) ===== */
+/* ===== Supabase (RPC) ===== */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
@@ -155,31 +155,33 @@ async function load(){
   const pro = await rpcGetProfessional(professionalId).catch(()=>null);
   if(!pro){ setText('proName','Profissional não encontrado'); return; }
 
-  // Unidade (opcional)
+  // (Opcional) Nome da unidade
   if (pro.branch_id){
     try{
       const b = await sbGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
-      // você pode usar 'b?.[0]?.name' se quiser exibir na UI
+      const unit = b?.[0]?.name;
+      if(unit) document.getElementById('slotInfo').textContent = unit;
     }catch{}
   }
 
   // Cabeçalho
+  const rating = Number(pro.rating_avg || 0);
   setText('proName', pro.full_name || '—');
   setText('proRole', 'Barbeiro(a)');
-  setText('score', (pro.rating_avg||0).toFixed(1));
+  setText('score', rating.toFixed(1).replace('.', ','));
   setText('reviewsCount', `${pro.rating_count||0} avaliações`);
-  document.getElementById('stars').textContent = paintStars(Number(pro.rating_avg||0));
+  document.getElementById('stars').textContent = paintStars(rating);
 
   // Avatar
   const av = document.getElementById('proAvatar');
   if (pro.avatar_url) av.innerHTML = `<img src="${pro.avatar_url}" alt="${pro.full_name}">`;
   else av.textContent = initials(pro.full_name);
 
-  // Métricas (todas vindas da RPC)
+  // Métricas
   setText('mClients', pro.clients_done ? `${pro.clients_done}+` : '—');
   setText('mYears', `${pro.experience_years ?? 0}`);
   setText('mServices', pro.services_count ? `${pro.services_count}+` : '—');
-  setText('mCerts', '0'); // não há coluna de certificados no schema atual
+  setText('mCerts', '0'); // sem coluna no schema atual
 
   // Ações
   const tel = (pro.phone||'').replace(/\D/g,'');
