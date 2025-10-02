@@ -116,31 +116,78 @@
 </div>
 
 <script>
-/* ===== Supabase (RPC) ===== */
+/* ===== Supabase (RPC + Fallback) ===== */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
 const params = new URLSearchParams(location.search);
-const professionalId = params.get('id');
+const professionalId = params.get('id'); // deve ser o professionals.id
 
-function apiHeaders(){
+function apiHeaders(extra={}){
   return {
     'Content-Type':'application/json',
     apikey: SUPABASE_ANON_KEY,
-    Authorization:`Bearer ${SUPABASE_ANON_KEY}`
+    Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+    ...extra
   };
 }
+
+/* ---------- RPC ---------- */
 async function rpcGetProfessional(p_any){
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_professional_profile`, {
     method:'POST', headers: apiHeaders(), body: JSON.stringify({ p_any })
   });
-  if(!res.ok) throw new Error(await res.text());
+  if(!res.ok) throw new Error(`RPC ${res.status}: ${await res.text()}`);
   return res.json();
 }
-async function sbGet(path){
-  const res = await fetch(`${SUPABASE_URL}${path}`, { headers: apiHeaders() });
-  if(!res.ok) throw new Error(await res.text());
+
+/* ---------- Fallback direto nas tabelas ---------- */
+async function getJSON(path, extraHeaders={}) {
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers: apiHeaders(extraHeaders) });
+  if(!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
   return res.json();
+}
+async function getProfessionalDirect(id){
+  // pega professional + avatar do profile via FK
+  const rows = await getJSON(
+    `/rest/v1/professionals?id=eq.${encodeURIComponent(id)}&select=id,full_name,phone,branch_id,rating_avg,rating_count,profile_id,profiles:profiles!professionals_profile_id_fkey(avatar_url)&limit=1`
+  );
+  const p = rows?.[0];
+  if(!p) return null;
+
+  const avatar_url = p.profiles?.[0]?.avatar_url ?? null;
+
+  // serviços vinculados
+  const svc = await getJSON(`/rest/v1/service_professionals?professional_id=eq.${encodeURIComponent(id)}&select=id`);
+  const services_count = Array.isArray(svc) ? svc.length : 0;
+
+  // atendimentos finalizados
+  const ap = await getJSON(`/rest/v1/appointments?professional_id=eq.${encodeURIComponent(id)}&status=in.(done,completed,finished)&select=id`);
+  const clients_done = Array.isArray(ap) ? ap.length : 0;
+
+  // 1º atendimento -> anos de experiência
+  let experience_years = 0;
+  try{
+    const first = await getJSON(`/rest/v1/appointments?professional_id=eq.${encodeURIComponent(id)}&select=created_at&order=created_at.asc&limit=1`);
+    if(first?.[0]?.created_at){
+      const start = new Date(first[0].created_at).getTime();
+      const now = Date.now();
+      experience_years = Math.max(0, Math.floor((now - start) / (365.25*24*60*60*1000)));
+    }
+  }catch{}
+
+  return {
+    id: p.id,
+    full_name: p.full_name,
+    phone: p.phone,
+    branch_id: p.branch_id,
+    rating_avg: Number(p.rating_avg || 0),
+    rating_count: Number(p.rating_count || 0),
+    avatar_url,
+    services_count,
+    clients_done,
+    experience_years
+  };
 }
 
 /* ===== Helpers ===== */
@@ -152,13 +199,30 @@ function paintStars(x=0){ const n=Math.round(x); return '★★★★★☆☆�
 async function load(){
   if(!professionalId){ setText('proName','Profissional não encontrado'); return; }
 
-  const pro = await rpcGetProfessional(professionalId).catch(()=>null);
+  let pro = null;
+
+  // 1) tenta RPC
+  try {
+    pro = await rpcGetProfessional(professionalId);
+  } catch (e) {
+    console.warn('RPC falhou, usando fallback:', e.message);
+  }
+
+  // 2) fallback direto
+  if(!pro){
+    try {
+      pro = await getProfessionalDirect(professionalId);
+    } catch (e) {
+      console.error('Fallback falhou:', e.message);
+    }
+  }
+
   if(!pro){ setText('proName','Profissional não encontrado'); return; }
 
   // (Opcional) Nome da unidade
   if (pro.branch_id){
     try{
-      const b = await sbGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
+      const b = await getJSON(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
       const unit = b?.[0]?.name;
       if(unit) document.getElementById('slotInfo').textContent = unit;
     }catch{}
@@ -197,6 +261,7 @@ async function load(){
   // CTA
   document.getElementById('btnBook').href = `booking.html?professional_id=${encodeURIComponent(pro.id)}`;
 }
+
 load().catch(err => {
   console.error(err);
   setText('proName','Profissional não encontrado');
