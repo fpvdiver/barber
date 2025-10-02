@@ -1,107 +1,55 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Perfil do Profissional • Mineiro Barbershop</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#0b0c0e; --panel:#121316; --panel2:#15171a; --line:#212329;
-  --text:#f5f6f9; --muted:#b3b7c2; --gold:#d3a85b; --gold2:#b88f49;
-  --ok:#7ef7a0; --warn:#ffd166; --danger:#ff5d62;
-  --shadow:0 22px 45px rgba(0,0,0,.35);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:var(--text);font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.screen{
-  min-height:100svh; display:grid; place-items:center; padding:16px;
-}
-.phone{
-  width:min(420px,100%); background:linear-gradient(180deg,#0e1013 0%,#0c0d10 100%);
-  border:1px solid #1f2229; border-radius:28px; box-shadow:var(--shadow);
-  padding:16px; position:relative;
-}
-.header{
-  display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
-}
-.header .title{
-  display:grid; gap:2px; text-align:center; flex:1;
-}
-.h-btn{
-  width:38px;height:38px;border-radius:12px;border:1px solid #272a32;background:#121419;display:grid;place-items:center;color:#dfe2e9;font-weight:800;cursor:pointer
-}
-.brand-pill{
-  position:absolute; top:16px; right:-10px; background:linear-gradient(180deg,#1a1d23,#15181d);
-  color:#fff; border:1px solid #2a2e36; border-radius:12px 0 0 12px; padding:10px 8px; writing-mode:vertical-rl; text-orientation:mixed; font:700 11px/1 Poppins;
-}
-
-/* profile head */
-.card{
-  background:linear-gradient(180deg,#13161a,#101215); border:1px solid #23262e; border-radius:18px; padding:14px; box-shadow:0 14px 30px rgba(0,0,0,.25);
-}
-.profile{
-  display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center;
-}
-.p-row{display:flex;gap:10px;align-items:center}
-.avatar{
-  width:64px;height:64px;border-radius:14px;overflow:hidden;border:1px solid #2a2e36;background:#0f1114;display:grid;place-items:center;font:900 18px/1 Poppins;color:#cbd1dc
-}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.name{font:800 20px/1.2 Poppins}
-.role{color:var(--muted);font:600 12px}
-.rating{display:flex;gap:6px;align-items:center;margin-top:8px}
-.stars{color:#ffd166; letter-spacing:.5px}
-.score{font:800 14px}
-.reviews{color:var(--muted);font:600 12px}
-
-/* actions */
-.actions{display:flex; gap:10px; margin-top:12px}
-.a-btn{
-  flex:1; height:44px; border-radius:14px; border:1px solid #2a2e36; background:#15181d; display:grid; place-items:center; color:#e7e9ee; font:700 13px
-}
-.a-btn.whats{background:#1f2a22;border-color:#335a3f;color:#a4f2bd}
-.a-btn.call{background:#171c17;border-color:#2e4a30;color:#b7e2be}
-.a-btn.msg{background:#181a1f;border-color:#2a2f39}
-
-/* metrics grid (1:1 do mock) */
-.grid4{
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
-}
-.metric{
-  background:linear-gradient(180deg,#14171b,#111316); border:1px solid #23262e; border-radius:18px; padding:14px; text-align:center;
-}
-.m-ico{
-  width:42px;height:42px;border-radius:12px; display:grid;place-items:center; margin:0 auto 8px;
-  background:#101216;border:1px solid #2a2e34; color:#e9ecf2; font:800 16px/1 Poppins;
-}
-.metric b{font:900 18px/1.1 Poppins}
-.metric small{display:block;margin-top:4px;color:#aeb2bb;font:600 12px/1}
-
-/* CTA bottom */
-.cta{
-  position:sticky; bottom:0; margin-top:14px; padding-top:10px;
-}
-.btn{
-  width:100%; height:50px; border-radius:14px; border:1px solid #7b6335; cursor:pointer;
-  background:linear-gradient(180deg,var(--gold),var(--gold2)); color:#111; font:900 14px/1 Poppins;
-}
-
-/* soft labels */
-.soft{
-  color:#86e0a7; font:700 11px/1; letter-spacing:.02em; margin-top:2px
-}
-.subtle{color:#9fa4ad;font:600 12px}
-
-/* helpers */
-.center{text-align:center}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Perfil do Profissional • Mineiro Barbershop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0c0e; --panel:#121316; --panel2:#15171a; --line:#212329;
+      --text:#f5f6f9; --muted:#b3b7c2; --gold:#d3a85b; --gold2:#b88f49;
+      --ok:#7ef7a0; --warn:#ffd166; --danger:#ff5d62;
+      --shadow:0 22px 45px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:var(--text);font:15px/1.6 Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+    .screen{min-height:100svh;display:grid;place-items:center;padding:16px}
+    .phone{width:min(420px,100%);background:linear-gradient(180deg,#0e1013 0%,#0c0d10 100%);border:1px solid #1f2229;border-radius:28px;box-shadow:var(--shadow);padding:16px;position:relative}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .h-btn{width:38px;height:38px;border-radius:12px;border:1px solid #272a32;background:#121419;display:grid;place-items:center;color:#dfe2e9;font-weight:800;cursor:pointer}
+    .title{display:grid;gap:2px;text-align:center;flex:1}
+    .soft{color:#86e0a7;font:700 11px/1;letter-spacing:.02em;margin-top:2px}
+    .brand-pill{position:absolute;top:16px;right:-10px;background:linear-gradient(180deg,#1a1d23,#15181d);color:#fff;border:1px solid #2a2e36;border-radius:12px 0 0 12px;padding:10px 8px;writing-mode:vertical-rl;text-orientation:mixed;font:700 11px/1 Poppins}
+    .card{background:linear-gradient(180deg,#13161a,#101215);border:1px solid #23262e;border-radius:18px;padding:14px;box-shadow:0 14px 30px rgba(0,0,0,.25)}
+    .profile{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+    .p-row{display:flex;gap:10px;align-items:center}
+    .avatar{width:64px;height:64px;border-radius:14px;overflow:hidden;border:1px solid #2a2e36;background:#0f1114;display:grid;place-items:center;font:900 18px/1 Poppins;color:#cbd1dc}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .name{font:800 20px/1.2 Poppins}
+    .role{color:var(--muted);font:600 12px}
+    .rating{display:flex;gap:6px;align-items:center;margin-top:8px}
+    .stars{color:#ffd166}
+    .score{font:800 14px}
+    .reviews{color:var(--muted);font:600 12px}
+    .actions{display:flex;gap:10px;margin-top:12px}
+    .a-btn{flex:1;height:44px;border-radius:14px;border:1px solid #2a2e36;background:#15181d;display:grid;place-items:center;color:#e7e9ee;font:700 13px;text-decoration:none}
+    .a-btn.whats{background:#1f2a22;border-color:#335a3f;color:#a4f2bd}
+    .a-btn.call{background:#171c17;border-color:#2e4a30;color:#b7e2be}
+    .a-btn.msg{background:#181a1f;border-color:#2a2f39}
+    .grid4{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .metric{background:linear-gradient(180deg,#14171b,#111316);border:1px solid #23262e;border-radius:18px;padding:14px;text-align:center}
+    .m-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin:0 auto 8px;background:#101216;border:1px solid #2a2e34;color:#e9ecf2;font:800 16px/1 Poppins}
+    .metric b{font:900 18px/1.1 Poppins}
+    .metric small{display:block;margin-top:4px;color:#aeb2bb;font:600 12px/1}
+    .cta{position:sticky;bottom:0;margin-top:14px;padding-top:10px}
+    .btn{width:100%;height:50px;border-radius:14px;border:1px solid #7b6335;cursor:pointer;background:linear-gradient(180deg,var(--gold),var(--gold2));color:#111;font:900 14px/1 Poppins;text-align:center;display:grid;place-items:center;text-decoration:none}
+  </style>
 </head>
 <body>
 <div class="screen">
   <div class="phone">
-
     <div class="header">
       <div class="h-btn" onclick="history.back()">‹</div>
       <div class="title">
@@ -128,13 +76,13 @@ body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:v
             <div class="reviews" id="reviewsCount">0 avaliações</div>
           </div>
         </div>
-        <div class="avatar" style="width:52px;height:52px;border-radius:999px" id="badgePic">✂️</div>
+        <div class="avatar" style="width:52px;height:52px;border-radius:999px">💈</div>
       </div>
 
       <div class="actions">
-        <a class="a-btn whats" id="btnWhats">WhatsApp</a>
-        <a class="a-btn call" id="btnCall">Ligar</a>
-        <a class="a-btn msg"  id="btnMsg">Mensagem</a>
+        <a class="a-btn whats" id="btnWhats" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="a-btn call" id="btnCall" href="#">Ligar</a>
+        <a class="a-btn msg"  id="btnMsg"  href="#">Mensagem</a>
       </div>
 
       <div class="grid4">
@@ -155,120 +103,85 @@ body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:v
         </div>
         <div class="metric">
           <div class="m-ico">🏅</div>
-          <b id="mCerts">—</b>
+          <b id="mCerts">0</b>
           <small>Certificados</small>
         </div>
       </div>
     </div>
 
     <div class="cta">
-      <a class="btn" id="btnBook">Agendar horário</a>
+      <a class="btn" id="btnBook" href="#">Agendar horário</a>
     </div>
   </div>
 </div>
 
 <script>
-/* ===== Supabase (REST) ===== */
+/* ===== Config Supabase (RPC) ===== */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
 const params = new URLSearchParams(location.search);
-const professionalId = params.get('id'); // <<< use SEMPRE essa var
+const professionalId = params.get('id');
 
-function headers() {
-  return { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
+function apiHeaders(){
+  return {
+    'Content-Type':'application/json',
+    apikey: SUPABASE_ANON_KEY,
+    Authorization:`Bearer ${SUPABASE_ANON_KEY}`
+  };
 }
-async function sGet(path){
-  const res = await fetch(`${SUPABASE_URL}${path}`, { headers: headers() });
+async function rpcGetProfessional(p_any){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_professional_profile`, {
+    method:'POST', headers: apiHeaders(), body: JSON.stringify({ p_any })
+  });
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
-const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
-const initials = (s='') => { s = String(s||'').trim(); if(!s) return 'MB'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); };
-function paintStars(x=0){ const n=Math.round(x); return '★★★★★☆☆☆☆☆'.slice(5-n,10-n); }
-
-/* tenta buscar por professionals.id e, se não vier, por professionals.profile_id */
-async function fetchProfessional(anyId){
-  const select =
-    'id,full_name,phone,bio,branch_id,rating_avg,rating_count,experience_years,cert_count,' +
-    encodeURIComponent('profiles!inner(avatar_url)');
-  const tries = [
-    `/rest/v1/professionals?id=eq.${encodeURIComponent(anyId)}&select=${select}`,
-    `/rest/v1/professionals?profile_id=eq.${encodeURIComponent(anyId)}&select=${select}`,
-  ];
-  for (const path of tries){
-    const r = await fetch(SUPABASE_URL + path, { headers: headers() });
-    if (r.ok){
-      const data = await r.json();
-      if (Array.isArray(data) && data[0]) return data[0];
-    }
-  }
-  return null;
+async function sbGet(path){
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers: apiHeaders() });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
+/* ===== Helpers ===== */
+const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
+const initials = (s='') => { s=String(s||'').trim(); if(!s) return 'MB'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); };
+function paintStars(x=0){ const n=Math.round(x); return '★★★★★☆☆☆☆☆'.slice(5-n,10-n); }
+
+/* ===== Load ===== */
 async function load(){
-  // sem id na URL
-  if(!professionalId){
-    setText('proName','Profissional não encontrado');
-    return;
-  }
+  if(!professionalId){ setText('proName','Profissional não encontrado'); return; }
 
-  const pro = await fetchProfessional(professionalId);
-  if(!pro){
-    setText('proName','Profissional não encontrado');
-    return;
-  }
+  const pro = await rpcGetProfessional(professionalId).catch(()=>null);
+  if(!pro){ setText('proName','Profissional não encontrado'); return; }
 
-  // branch (nome)
-  let branch = '—';
+  // Unidade (opcional)
   if (pro.branch_id){
-    const b = await sGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
-    branch = b?.[0]?.name || '—';
-  }
-
-  // serviços vinculados para contagem
-  const svc = await sGet(`/rest/v1/service_professionals?professional_id=eq.${pro.id}&select=service(id)&limit=1000`);
-  const servicesCount = (svc||[]).length;
-
-  // clientes atendidos (se sua RLS permitir; senão, mantenha “—”)
-  let clients = '—';
-  try {
-    const arr = await sGet(`/rest/v1/appointments?professional_id=eq.${pro.id}&status=in.(completed,done)&select=id`);
-    clients = Array.isArray(arr) ? arr.length : '—';
-  } catch {}
-
-  // anos de experiência
-  let years = Number(pro.experience_years ?? 0);
-  if(!years){
     try{
-      const oldest = await sGet(`/rest/v1/working_hours?professional_id=eq.${pro.id}&select=created_at&order=created_at.asc&limit=1`);
-      if (oldest?.[0]?.created_at){
-        const d1 = new Date(oldest[0].created_at); const d2 = new Date();
-        years = Math.max(1, Math.floor((d2-d1)/(365*24*3600*1000)));
-      } else { years = 1; }
-    }catch{ years = 1; }
+      const b = await sbGet(`/rest/v1/branches?id=eq.${pro.branch_id}&select=name&limit=1`);
+      // você pode usar 'b?.[0]?.name' se quiser exibir na UI
+    }catch{}
   }
 
-  const certs = Number(pro.cert_count ?? 0);
-
-  // UI
+  // Cabeçalho
   setText('proName', pro.full_name || '—');
   setText('proRole', 'Barbeiro(a)');
   setText('score', (pro.rating_avg||0).toFixed(1));
   setText('reviewsCount', `${pro.rating_count||0} avaliações`);
   document.getElementById('stars').textContent = paintStars(Number(pro.rating_avg||0));
-  setText('mClients', clients==='—' ? '—' : `${clients}+`);
-  setText('mYears', `${years}`);         // texto “Anos de experiência” já está no card
-  setText('mServices', `${servicesCount}+`);
-  setText('mCerts', certs ? `${certs}+` : '0');
 
+  // Avatar
   const av = document.getElementById('proAvatar');
-  if (pro.profiles?.avatar_url){
-    av.innerHTML = `<img src="${pro.profiles.avatar_url}" alt="${pro.full_name}">`;
-  }else{
-    av.textContent = initials(pro.full_name);
-  }
+  if (pro.avatar_url) av.innerHTML = `<img src="${pro.avatar_url}" alt="${pro.full_name}">`;
+  else av.textContent = initials(pro.full_name);
 
+  // Métricas (todas vindas da RPC)
+  setText('mClients', pro.clients_done ? `${pro.clients_done}+` : '—');
+  setText('mYears', `${pro.experience_years ?? 0}`);
+  setText('mServices', pro.services_count ? `${pro.services_count}+` : '—');
+  setText('mCerts', '0'); // não há coluna de certificados no schema atual
+
+  // Ações
   const tel = (pro.phone||'').replace(/\D/g,'');
   const whats = document.getElementById('btnWhats');
   const call  = document.getElementById('btnCall');
@@ -282,9 +195,10 @@ async function load(){
   // CTA
   document.getElementById('btnBook').href = `booking.html?professional_id=${encodeURIComponent(pro.id)}`;
 }
-
-load().catch(console.error);
+load().catch(err => {
+  console.error(err);
+  setText('proName','Profissional não encontrado');
+});
 </script>
-
 </body>
 </html>
