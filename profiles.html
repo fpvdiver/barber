@@ -170,43 +170,54 @@ body{margin:0;background:linear-gradient(180deg,#0c0d10 0%,#090a0c 100%);color:v
 <script>
 /* ===== Supabase (REST) ===== */
 const SUPABASE_URL = 'https://rlhrnmzlfiyyycrhggjv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaHJubXpsZml5eXljcmhnZ2p2Iiwicm9sZSI6InNlcnZpY2Vfcm9zZSIsImlhdCI6MTc1ODM2OTQ5MSwiZXhwIjoyMDczOTQ1NDkxfQ.tF5FGlO9vzK72LF0lUz5nZgevstzmQTePZEudrYM61Y';
 
-function getSbSession(){
-  const ref = SUPABASE_URL.split('https://')[1].split('.')[0];
-  const custom = localStorage.getItem('sb.session');
-  if (custom){ try{ const s=JSON.parse(custom); return { token:s.access_token||s.token||SUPABASE_ANON_KEY }; }catch{} }
-  const raw = localStorage.getItem(`sb-${ref}-auth-token`);
-  if (raw){ try{ const p=JSON.parse(raw); const sess=p?.currentSession||p; return { token:sess?.access_token||SUPABASE_ANON_KEY }; }catch{} }
-  return { token: SUPABASE_ANON_KEY };
+const params = new URLSearchParams(location.search);
+const professionalId = params.get('id'); // <<< use SEMPRE essa var
+
+function headers() {
+  return { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
 }
 async function sGet(path){
-  const { token } = getSbSession();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/professionals?profile_id=eq.${id}`, {
-  headers: {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-  }
-});
-
+  const res = await fetch(`${SUPABASE_URL}${path}`, { headers: headers() });
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
-const params = new URLSearchParams(location.search);
-const professionalId = params.get('id');
-
 const setText = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
 const initials = (s='') => { s = String(s||'').trim(); if(!s) return 'MB'; const p=s.split(/\s+/); return (p.length>1?(p[0][0]+p[p.length-1][0]):p[0].slice(0,2)).toUpperCase(); };
 function paintStars(x=0){ const n=Math.round(x); return '★★★★★☆☆☆☆☆'.slice(5-n,10-n); }
 
+/* tenta buscar por professionals.id e, se não vier, por professionals.profile_id */
+async function fetchProfessional(anyId){
+  const select =
+    'id,full_name,phone,bio,branch_id,rating_avg,rating_count,experience_years,cert_count,' +
+    encodeURIComponent('profiles!inner(avatar_url)');
+  const tries = [
+    `/rest/v1/professionals?id=eq.${encodeURIComponent(anyId)}&select=${select}`,
+    `/rest/v1/professionals?profile_id=eq.${encodeURIComponent(anyId)}&select=${select}`,
+  ];
+  for (const path of tries){
+    const r = await fetch(SUPABASE_URL + path, { headers: headers() });
+    if (r.ok){
+      const data = await r.json();
+      if (Array.isArray(data) && data[0]) return data[0];
+    }
+  }
+  return null;
+}
+
 async function load(){
+  // sem id na URL
   if(!professionalId){
-    setText('proName','Profissional'); return;
+    setText('proName','Profissional não encontrado');
+    return;
   }
 
-  // profissional + avatar
-  const [pro] = await sGet(`/rest/v1/professionals?id=eq.${professionalId}&select=id,full_name,phone,bio,branch_id,rating_avg,rating_count,experience_years,cert_count,${encodeURIComponent('profiles!inner(avatar_url)')}`);
-  if(!pro){ setText('proName','Profissional não encontrado'); return; }
+  const pro = await fetchProfessional(professionalId);
+  if(!pro){
+    setText('proName','Profissional não encontrado');
+    return;
+  }
 
   // branch (nome)
   let branch = '—';
@@ -215,24 +226,22 @@ async function load(){
     branch = b?.[0]?.name || '—';
   }
 
-  // métricas de serviços vinculados
-  const svc = await sGet(`/rest/v1/service_professionals?professional_id=eq.${professionalId}&select=service(id)&limit=1000`);
+  // serviços vinculados para contagem
+  const svc = await sGet(`/rest/v1/service_professionals?professional_id=eq.${pro.id}&select=service(id)&limit=1000`);
   const servicesCount = (svc||[]).length;
 
-  // clientes atendidos (appointments do pro com status done/completed)
+  // clientes atendidos (se sua RLS permitir; senão, mantenha “—”)
   let clients = '—';
-  try{
-    const done = await sGet(`/rest/v1/appointments?select=id&professional_id=eq.${professionalId}&status=in.(completed,done)&limit=1`);
-    // Se RLS não permitir 'in', usa duas chamadas e soma. Ou conte no seu RPC.
-    const all = await sGet(`/rest/v1/appointments?select=count&professional_id=eq.${professionalId}&status=in.(completed,done)`);
-    clients = Array.isArray(done) ? (all?.length || done.length) : '—';
-  }catch{ clients = '—'; }
+  try {
+    const arr = await sGet(`/rest/v1/appointments?professional_id=eq.${pro.id}&status=in.(completed,done)&select=id`);
+    clients = Array.isArray(arr) ? arr.length : '—';
+  } catch {}
 
   // anos de experiência
   let years = Number(pro.experience_years ?? 0);
   if(!years){
     try{
-      const oldest = await sGet(`/rest/v1/working_hours?professional_id=eq.${professionalId}&select=created_at&order=created_at.asc&limit=1`);
+      const oldest = await sGet(`/rest/v1/working_hours?professional_id=eq.${pro.id}&select=created_at&order=created_at.asc&limit=1`);
       if (oldest?.[0]?.created_at){
         const d1 = new Date(oldest[0].created_at); const d2 = new Date();
         years = Math.max(1, Math.floor((d2-d1)/(365*24*3600*1000)));
@@ -242,12 +251,16 @@ async function load(){
 
   const certs = Number(pro.cert_count ?? 0);
 
-  // pintar UI
+  // UI
   setText('proName', pro.full_name || '—');
   setText('proRole', 'Barbeiro(a)');
   setText('score', (pro.rating_avg||0).toFixed(1));
   setText('reviewsCount', `${pro.rating_count||0} avaliações`);
   document.getElementById('stars').textContent = paintStars(Number(pro.rating_avg||0));
+  setText('mClients', clients==='—' ? '—' : `${clients}+`);
+  setText('mYears', `${years}`);         // texto “Anos de experiência” já está no card
+  setText('mServices', `${servicesCount}+`);
+  setText('mCerts', certs ? `${certs}+` : '0');
 
   const av = document.getElementById('proAvatar');
   if (pro.profiles?.avatar_url){
@@ -255,14 +268,7 @@ async function load(){
   }else{
     av.textContent = initials(pro.full_name);
   }
-  document.getElementById('badgePic').textContent = '💈';
 
-  setText('mClients', clients=== '—' ? '—' : `${clients}+`);
-  setText('mYears', `${years} Years`.replace('Years','Anos'));
-  setText('mServices', `${servicesCount}+`);
-  setText('mCerts', certs ? `${certs}+` : '0');
-
-  // ações
   const tel = (pro.phone||'').replace(/\D/g,'');
   const whats = document.getElementById('btnWhats');
   const call  = document.getElementById('btnCall');
@@ -274,9 +280,11 @@ async function load(){
   } else { whats.remove(); call.remove(); msg.remove(); }
 
   // CTA
-  document.getElementById('btnBook').href = `booking.html?professional_id=${professionalId}`;
+  document.getElementById('btnBook').href = `booking.html?professional_id=${encodeURIComponent(pro.id)}`;
 }
+
 load().catch(console.error);
 </script>
+
 </body>
 </html>
